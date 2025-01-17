@@ -91,3 +91,107 @@ bool engine::keepPlaying(engine::Board board)
         return true;
     }
 }
+
+void engine::cpuVsCpu(std::function<std::uint8_t(Board)> strategyX, std::function<std::uint8_t(Board)> strategyO)
+{
+    Board board = util::makeBoard();
+    while (true)
+    {
+        interface::show(board);
+        board = engine::cpuTurn(board, "X", strategyX);
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+        interface::show(board);
+        board = engine::cpuTurn(board, "O", strategyO);
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+    }
+    interface::show(board);
+}
+
+void engine::cpuVsHuman(std::function<std::uint8_t(Board)> strategy)
+{
+    Board board = util::makeBoard();
+    while (true)
+    {
+        interface::show(board);
+        board = engine::cpuTurn(board, "X", strategy);
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+        interface::show(board);
+        std::optional<Board> optBoard = engine::humanTurn(board, "O");
+        if (!optBoard)
+        {
+            break;
+        }
+        board = optBoard.value();
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+    }
+    interface::show(board);
+}
+
+void humanVsHuman();
+{
+    Board board = util::makeBoard();
+    while (true)
+    {
+        interface::show(board);
+        std::optional<Board> optBoard = engine::humanTurn(board, "X");
+        if (!optBoard)
+        {
+            break;
+        }
+        board = optBoard.value();
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+        interface::show(board);
+        optBoard = engine::humanTurn(board, "O");
+        if (!optBoard)
+        {
+            break;
+        }
+        board = optBoard.value();
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+    }
+    interface::show(board);
+}
+
+void humanVsCpu(std::function<std::uint8_t(Board)> strategy);
+{
+    Board board = util::makeBoard();
+    while (true)
+    {
+        interface::show(board);
+        std::optional<Board> optBoard = engine::humanTurn(board, "X");
+        if (!optBoard)
+        {
+            break;
+        }
+        board = optBoard.value();
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+        interface::show(board);
+        board = engine::cpuTurn(board, "O", strategy);
+        if (!engine::keepPlaying(board))
+        {
+            break;
+        }
+    }
+    interface::show(board);
+}

@@ -14,4 +14,8 @@ namespace engine
     Board cpuTurn(Board board, std::string letter, std::function<std::uint8_t(Board)> strategy);
 
     bool keepPlaying(Board board);
+    void cpuVsCpu(std::function<std::uint8_t(Board)> strategyX, std::function<std::uint8_t(Board)> strategyO);
+    void cpuVsHuman(std::function<std::uint8_t(Board)> strategy);
+    void humanVsHuman();
+    void humanVsCpu(std::function<std::uint8_t(Board)> strategy);
 } // namespace engine
