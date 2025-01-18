@@ -139,7 +139,7 @@ void engine::cpuVsHuman(std::function<std::uint8_t(Board)> strategy)
     interface::show(board);
 }
 
-void humanVsHuman();
+void engine::humanVsHuman()
 {
     Board board = util::makeBoard();
     while (true)
@@ -170,7 +170,7 @@ void humanVsHuman();
     interface::show(board);
 }
 
-void humanVsCpu(std::function<std::uint8_t(Board)> strategy);
+void engine::humanVsCpu(std::function<std::uint8_t(Board)> strategy)
 {
     Board board = util::makeBoard();
     while (true)

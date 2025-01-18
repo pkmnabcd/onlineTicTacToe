@@ -1,18 +1,12 @@
 #include "ttt.hpp"
 #include "interface.hpp"
-
-// Temp
 #include "engine.hpp"
-#include "util.hpp"
+#include "ai.hpp"
 
 #include <print>
 
 void runGame()
 {
-    // Temp code
-    {
-        engine::humanTurn(util::makeBoard(), "X");
-    }
     bool keepPlaying = true;
     while (keepPlaying)
     {
@@ -21,16 +15,16 @@ void runGame()
         switch (mode)
         {
             case 0:
-                // cpu vs cpu
+                engine::cpuVsCpu(ai::strategyDumb, ai::strategyDumb);
                 break;
             case 1:
-                // human vs cpu
+                engine::humanVsCpu(ai::strategyDumb);
                 break;
             case 2:
-                // cpu vs human
+                engine::cpuVsHuman(ai::strategyDumb);
                 break;
             case 3:
-                // human vs human
+                engine::humanVsHuman();
                 break;
             case 'q':
                 keepPlaying = false;

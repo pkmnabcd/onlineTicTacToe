@@ -20,6 +20,7 @@ include_directories(
 # Manually specifying all the source files.
 #
 set(GAME_HEADER_FILES
+    game/ai.hpp
     game/engine.hpp
     game/interface.hpp
     game/ttt.hpp
@@ -40,6 +41,7 @@ set(ALL_HEADER_FILES
 )
 
 set(GAME_SOURCE_FILES
+    game/ai.cpp
     game/engine.cpp
     game/interface.cpp
     game/ttt.cpp
