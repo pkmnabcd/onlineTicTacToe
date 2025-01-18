@@ -10,35 +10,35 @@
 
 std::string interface::black(std::string input)
 {
-    return std::format("\033[30m{}\033[0m", input);
+    return std::format("\033[1;30m{}\033[0m", input);
 }
 std::string interface::red(std::string input)
 {
-    return std::format("\033[31m{}\033[0m", input);
+    return std::format("\033[1;31m{}\033[0m", input);
 }
 std::string interface::green(std::string input)
 {
-    return std::format("\033[32m{}\033[0m", input);
+    return std::format("\033[1;32m{}\033[0m", input);
 }
 std::string interface::yellow(std::string input)
 {
-    return std::format("\033[33m{}\033[0m", input);
+    return std::format("\033[1;33m{}\033[0m", input);
 }
 std::string interface::blue(std::string input)
 {
-    return std::format("\033[34m{}\033[0m", input);
+    return std::format("\033[1;34m{}\033[0m", input);
 }
 std::string interface::magenta(std::string input)
 {
-    return std::format("\033[35m{}\033[0m", input);
+    return std::format("\033[1;35m{}\033[0m", input);
 }
 std::string interface::cyan(std::string input)
 {
-    return std::format("\033[36m{}\033[0m", input);
+    return std::format("\033[1;36m{}\033[0m", input);
 }
 std::string interface::white(std::string input)
 {
-    return std::format("\033[37m{}\033[0m", input);
+    return std::format("\033[1;37m{}\033[0m", input);
 }
 
 std::string color(std::string s)

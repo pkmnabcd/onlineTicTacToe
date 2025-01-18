@@ -66,17 +66,17 @@ engine::Board engine::cpuTurn(engine::Board board, std::string letter, std::func
 
 bool engine::keepPlaying(engine::Board board)
 {
-    std::string winner;
-    winner[0] = util::winner(board);
-    if (winner == "X")
+    std::uint8_t winner = util::winner(board);
+
+    if (winner == 'X')
     {
-        std::string msg = interface::red(std::format("\n{} is the winner!\n", winner));
+        std::string msg = interface::red(std::format("\n{} is the winner!\n", static_cast<char>(winner)));
         std::print("{}\n", msg);
         return false;
     }
-    else if (winner == "O")
+    else if (winner == 'O')
     {
-        std::string msg = interface::cyan(std::format("\n{} is the winner!\n", winner));
+        std::string msg = interface::cyan(std::format("\n{} is the winner!\n", static_cast<char>(winner)));
         std::print("{}\n", msg);
         return false;
     }
@@ -124,7 +124,6 @@ void engine::cpuVsHuman(std::function<std::uint8_t(Board)> strategy)
         {
             break;
         }
-        interface::show(board);
         std::optional<Board> optBoard = engine::humanTurn(board, "O");
         if (!optBoard)
         {
@@ -144,7 +143,6 @@ void engine::humanVsHuman()
     Board board = util::makeBoard();
     while (true)
     {
-        interface::show(board);
         std::optional<Board> optBoard = engine::humanTurn(board, "X");
         if (!optBoard)
         {
@@ -155,7 +153,6 @@ void engine::humanVsHuman()
         {
             break;
         }
-        interface::show(board);
         optBoard = engine::humanTurn(board, "O");
         if (!optBoard)
         {
@@ -175,7 +172,6 @@ void engine::humanVsCpu(std::function<std::uint8_t(Board)> strategy)
     Board board = util::makeBoard();
     while (true)
     {
-        interface::show(board);
         std::optional<Board> optBoard = engine::humanTurn(board, "X");
         if (!optBoard)
         {
