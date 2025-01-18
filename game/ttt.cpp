@@ -15,13 +15,13 @@ void runGame()
         switch (mode)
         {
             case 0:
-                engine::cpuVsCpu(ai::strategyDumb, ai::strategyDumb);
+                engine::cpuVsCpu(ai::strategyOracle, ai::strategyOracle);
                 break;
             case 1:
-                engine::humanVsCpu(ai::strategyDumb);
+                engine::humanVsCpu(ai::strategyOracle);
                 break;
             case 2:
-                engine::cpuVsHuman(ai::strategyDumb);
+                engine::cpuVsHuman(ai::strategyOracle);
                 break;
             case 3:
                 engine::humanVsHuman();
