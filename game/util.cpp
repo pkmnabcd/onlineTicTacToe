@@ -206,7 +206,7 @@ std::array<std::string, 9> util::get1dFrom2dBoard(util::Board board)
 
 bool util::isDigit(std::uint8_t ch)
 {
-    return ch >= 97 && ch <= 122;
+    return ch >= 48 && ch <= 57;
 }
 
 bool util::isLowerAlpha(std::uint8_t ch)

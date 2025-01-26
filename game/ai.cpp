@@ -4561,11 +4561,6 @@ bool xInBoard(std::array<std::string, 9> board)
     return false;
 }
 
-bool itIsDigit(std::uint8_t ch)
-{
-    return ch >= 48 && ch <= 57;
-}
-
 std::uint8_t ai::strategyDumb(ai::Board board)
 {
     return util::firstOpenCell(board);
@@ -4595,7 +4590,7 @@ std::uint8_t ai::strategyOracle(ai::Board board)
     {
         for (std::string& place : board1D)
         {
-            if (itIsDigit(place[0]))
+            if (util::isDigit(place[0]))
             {
                 for (std::uint16_t j = 0; j < MODEL[i].size(); j++)
                 {
