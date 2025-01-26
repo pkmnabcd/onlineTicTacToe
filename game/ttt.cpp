@@ -11,7 +11,7 @@ void runGame()
     while (keepPlaying)
     {
         interface::logo();
-        std::int8_t mode = interface::player_select();
+        std::uint8_t mode = interface::player_select();
         switch (mode)
         {
             case 0:

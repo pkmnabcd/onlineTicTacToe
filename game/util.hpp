@@ -20,4 +20,12 @@ namespace util
     bool full(Board board);
     std::array<std::string, 9> get1dFrom2dBoard(Board board);
 
+    bool isDigit(std::uint8_t ch);
+    bool isLowerAlpha(std::uint8_t ch);
+    bool isUpperAlpha(std::uint8_t ch);
+    bool isAlpha(std::uint8_t ch);
+
+    std::uint8_t toLower(std::uint8_t ch);
+    std::uint8_t toIntVal(std::uint8_t ch);
+
 } // namespace util

@@ -1,4 +1,5 @@
 #include "interface.hpp"
+#include "util.hpp"
 #include "rlutil.h"
 
 #include <array>
@@ -62,50 +63,6 @@ bool boardEmpty(interface::Board board)
     return board[0].empty() && board[1].empty() && board[2].empty();
 }
 
-bool isDigit(std::uint8_t ch)
-{
-    return ch >= 48 && ch <= 57;
-}
-
-bool isLowerAlpha(std::uint8_t ch)
-{
-    return ch >= 97 && ch <= 122;
-}
-
-bool isUpperAlpha(std::uint8_t ch)
-{
-    return ch >= 65 && ch <= 90;
-}
-
-bool isAlpha(std::uint8_t ch)
-{
-    return isLowerAlpha(ch) || isUpperAlpha(ch);
-}
-
-std::uint8_t toLower(std::uint8_t ch)
-{
-    if (isLowerAlpha(ch))
-    {
-        return ch;
-    }
-    else
-    {
-        return ch + 32;
-    }
-}
-
-std::uint8_t toIntVal(std::uint8_t ch)
-{
-    if (isDigit(ch))
-    {
-        return ch - 48;
-    }
-    else 
-    {
-        return 0;
-    }
-}
-
 void interface::logo()
 {
     std::print("\n");
@@ -149,9 +106,9 @@ std::int8_t interface::getHumanMove(interface::Board board, std::string letter)
         else
         {
             choice = input[0];
-            if (!isDigit(choice))
+            if (!util::isDigit(choice))
             {
-                if (toLower(choice) == 'q')
+                if (util::toLower(choice) == 'q')
                 {
                     return -1;  // Sign to quit
                 }
@@ -162,13 +119,13 @@ std::int8_t interface::getHumanMove(interface::Board board, std::string letter)
             }
             else
             {
-                return toIntVal(choice);
+                return util::toIntVal(choice);
             }
         }
     }
 }
 
-std::int8_t interface::player_select()
+std::uint8_t interface::player_select()
 {
     while (true)
     {
@@ -189,9 +146,9 @@ std::int8_t interface::player_select()
             std::uint8_t choice = input[0];
             if (choice == '0' || choice == '1' || choice == '2' || choice == '3')
             {
-                return toIntVal(choice);
+                return util::toIntVal(choice);
             }
-            else if (toLower(choice) == 'q')
+            else if (util::toLower(choice) == 'q')
             {
                 return 'q';
             }
@@ -202,9 +159,39 @@ std::int8_t interface::player_select()
         }
     }
 
-
-
     return 0;  // Temp
+}
+
+std::uint8_t interface::selectGameMode()
+{
+    while (true)
+    {
+        std::print("0) {}\n1) {}\n", interface::green("Local Play"), interface::magenta("Online Play"));
+
+        std::string input;
+        std::cin >> input;
+        if (input.size() != 1)
+        {
+            std::print("\nInvalid selection! (Input one char)\n\n");
+        }
+        else
+        {
+            std::uint8_t choice = input[0];
+            if (choice == '0' || choice == '1')
+            {
+                return util::toIntVal(choice);
+            }
+            else if (util::toLower(choice) == 'q')
+            {
+                return 'q';
+            }
+            else
+            {
+                std::print("\nInvalid selection!\n\n");
+            }
+        }
+    }
+    return 0;
 }
 
 void interface::home()

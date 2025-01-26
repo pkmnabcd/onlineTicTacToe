@@ -153,7 +153,6 @@ std::uint8_t util::winner(util::Board board)
     }
 }
 
-// TODO: Finish the below functions
 std::vector<std::uint8_t> util::openCells(util::Board board)
 {
     std::vector<std::uint8_t> output;
@@ -203,4 +202,48 @@ std::array<std::string, 9> util::get1dFrom2dBoard(util::Board board)
         }
     }
     return output;
+}
+
+bool util::isDigit(std::uint8_t ch)
+{
+    return ch >= 97 && ch <= 122;
+}
+
+bool util::isLowerAlpha(std::uint8_t ch)
+{
+    return ch >= 97 && ch <= 122;
+}
+
+bool util::isUpperAlpha(std::uint8_t ch)
+{
+    return ch >= 65 && ch <= 90;
+}
+
+bool util::isAlpha(std::uint8_t ch)
+{
+    return isLowerAlpha(ch) || isUpperAlpha(ch);
+}
+
+std::uint8_t util::toLower(std::uint8_t ch)
+{
+    if (util::isLowerAlpha(ch))
+    {
+        return ch;
+    }
+    else
+    {
+        return ch + 32;
+    }
+}
+
+std::uint8_t util::toIntVal(std::uint8_t ch)
+{
+    if (util::isDigit(ch))
+    {
+        return ch - 48;
+    }
+    else
+    {
+        return 0;
+    }
 }

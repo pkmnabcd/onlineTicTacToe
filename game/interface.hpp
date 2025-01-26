@@ -11,7 +11,8 @@ namespace interface
     void logo();
     void show(Board board);
     std::int8_t getHumanMove(Board board, std::string letter);
-    std::int8_t player_select();
+    std::uint8_t player_select();
+    std::uint8_t selectGameMode();
 
     std::string black(std::string input);
     std::string red(std::string input);
