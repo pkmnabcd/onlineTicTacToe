@@ -10,7 +10,6 @@ void runGame()
     bool keepPlaying = true;
     while (keepPlaying)
     {
-        interface::logo();
         std::uint8_t mode = interface::player_select();
         switch (mode)
         {

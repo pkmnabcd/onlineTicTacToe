@@ -7,10 +7,17 @@ int main()
     while (keepPlaying)
     {
         interface::logo();
-        interface::selectGameMode();
-        keepPlaying = false;
+        std::uint8_t mode = interface::selectGameMode();
+        switch (mode)
+        {
+            case 0:
+                runGame();
+                break;
+            case 'q':
+                keepPlaying = false;
+                break;
+        }
     }
-    runGame();
 
     return 0;
 }

@@ -167,6 +167,7 @@ std::uint8_t interface::selectGameMode()
     while (true)
     {
         std::print("0) {}\n1) {}\n", interface::green("Local Play"), interface::magenta("Online Play"));
+        std::print("Choose game mode [0/1] or Q to quit > ");
 
         std::string input;
         std::cin >> input;
