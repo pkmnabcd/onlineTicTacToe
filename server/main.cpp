@@ -3,6 +3,7 @@
 #include <print>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 void reportErrno()
 {
@@ -32,6 +33,30 @@ int main()
     {
         std::print(stderr, "getaddrinfo: {}\n", gai_strerror(errCode));
         reportErrno();
+    }
+
+    int sockfd;
+    addrinfo* p;
+    for (p = servinfo; p != nullptr; p = p->ai_next)
+    {
+        sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (sockfd == -1)
+        {
+            perror("server: socket");
+            continue;
+        }
+
+        // TODO: setsockopt stuff here
+
+        errCode = bind(sockfd, p->ai_addr, p->ai_addrlen);
+        if (errCode == -1)
+        {
+            close(sockfd);
+            perror("server: bind");
+            continue;
+        }
+
+        break;
     }
 
     freeaddrinfo(servinfo);
