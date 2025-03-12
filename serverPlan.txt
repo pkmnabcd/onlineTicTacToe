@@ -1,0 +1,8 @@
+General Design:
+Server has a list of people who are connected (with names that someone can use to connect to someone else instead of an ip address)
+Server also has the gamestate of each game it's surveying.
+
+Two clients connect to the server, and can put in a name. If two people are connected and type each others name, then they are put in a match together.
+    Things the server needs to keep track of:
+        Board state, whose turn it is
+    Assume no cheating, so the board state comes from whoever's turn it is
