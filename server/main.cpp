@@ -36,6 +36,7 @@ int main()
     }
 
     int sockfd;
+    int yes = 1;
     addrinfo* p;
     for (p = servinfo; p != nullptr; p = p->ai_next)
     {
@@ -46,7 +47,12 @@ int main()
             continue;
         }
 
-        // TODO: setsockopt stuff here
+        errCode = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+        if (errCode == -1)
+        {
+            perror("setsockopt");
+            exit(1);
+        }
 
         errCode = bind(sockfd, p->ai_addr, p->ai_addrlen);
         if (errCode == -1)
@@ -60,6 +66,12 @@ int main()
     }
 
     freeaddrinfo(servinfo);
+
+    if (p == nullptr)
+    {
+        std::print("server: failed to bind\n");
+        exit(1);
+    }
 
     return 0;
 }
