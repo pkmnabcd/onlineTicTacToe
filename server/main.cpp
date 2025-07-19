@@ -14,6 +14,13 @@ void reportErrno()
     std::print(stderr, "Error: {}\n", strerror(errno));
 }
 
+void setupDatabase()  // NOTE: change return type to tuple or something once I figure out what
+{
+    // TODO: Make object that contains all the information about a player
+    // Like name, ID, ip, port, red/blue
+    // TODO: Make another object that contains game state, including who's turn it is, and the player IDs
+}
+
 int getLocalAddrInfo(const char*& port, addrinfo*& servinfo)
 {
     addrinfo hints;
