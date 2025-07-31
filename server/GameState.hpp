@@ -8,7 +8,7 @@ using Board = std::array<std::array<std::string, 3>, 3>;
 class GameState
 {
   public:
-    void GameState(Board board, std::uint8_t redID, std::uint8_t blueID, bool isRedTurn);
+    GameState(Board board, std::uint8_t redID, std::uint8_t blueID, bool isRedTurn);
 
     Board getBoard() { return m_board }
     std::uint8_t getRedID() { return m_redID }
