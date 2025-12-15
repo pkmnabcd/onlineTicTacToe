@@ -33,6 +33,8 @@ set(CLIENT_HEADER_FILES
 )
 set(SERVER_HEADER_FILES
     ${GAME_HEADER_FILES}
+    server/GameState.hpp
+    server/Player.hpp
 )
 set(ALL_HEADER_FILES
     ${GAME_HEADER_FILES}
@@ -52,6 +54,8 @@ set(CLIENT_SOURCE_FILES
 )
 set(SERVER_SOURCE_FILES
     ${GAME_SOURCE_FILES}
+    server/GameState.cpp
+    server/Player.cpp
 )
 set(ALL_CLIENT_FILES
     ${GAME_CLIENT_FILES}

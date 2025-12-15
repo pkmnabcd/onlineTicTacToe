@@ -1,4 +1,9 @@
+// Networking Libraries
+#include "GameState.hpp"
+#include "Player.hpp"
+
 #include <arpa/inet.h>
+#include <array>
 #include <cstring>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -14,10 +19,13 @@ void reportErrno()
     std::print(stderr, "Error: {}\n", strerror(errno));
 }
 
-void setupDatabase()  // NOTE: change return type to tuple or something once I figure out what
+void setupDatabase() // NOTE: change return type to tuple or something once I figure out what
 {
     // TODO: Make object that contains all the information about a player
     // Like name, ID, ip, port, red/blue
+    const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
+    std::array<Player, arraySize> players;
+    std::array<GameState, arraySize> gameStates;
     // TODO: Make another object that contains game state, including who's turn it is, and the player IDs
 }
 
@@ -34,6 +42,8 @@ int getLocalAddrInfo(const char*& port, addrinfo*& servinfo)
 
 void sigchld_handler(int s)
 {
+    (void)s; // this quiets unused parameter warning. Will remove later if still unused.
+
     int saved_errno = errno;
     while (waitpid(-1, nullptr, WNOHANG) > 0)
         ;
