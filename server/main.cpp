@@ -89,7 +89,7 @@ void mainAcceptLoop(int self_fd)
         }
         std::print("server: client port number: {}\n", clientPort);
 
-        if (!fork()) // This is the child process
+        if (!fork()) // This is the child process associated with this player
         {
             close(self_fd); // Child does not need this, will stay open in main process.
 
@@ -104,9 +104,24 @@ void mainAcceptLoop(int self_fd)
             }
             if (numbytes == 0)
             {
-                std::print("Server: The client disconnected correctly.\n");
+                std::print("Server: The client disconnected.\n");
                 break;
             }
+
+            // NOTE: At some point I need to move most code in this file to a networking-specific
+            // .cpp file so that I don't have to worry about all the networking stuff all the time
+
+            // TODO: Get from client info (first char?) whether the client is hosting a match or
+            // if they're joinging someone else. Also assign ID and add to player list
+
+            // TODO: If Hosting, create a 'lobby' in which they can play games.
+            // Lobby can only have the two players, but do this so games can be repeated and
+            // players can swap being the red and blue player
+
+            // TODO: If joining, give a list of lobbies that need a second player.
+
+            close(client_fd);
+            exit(0); // Kill the child process
         }
         close(client_fd); // Parent doesn't use this anymore, will stay open for child.
 
@@ -188,6 +203,8 @@ int main()
     std::print("server: waiting for connections...\n");
     // TODO: add code to set up the server and add to the main arguments
     mainAcceptLoop(sockfd);
+
+    close(sockfd);
 
     return 0;
 }
