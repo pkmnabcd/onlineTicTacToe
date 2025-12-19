@@ -1,7 +1,7 @@
-// Networking Libraries
 #include "GameState.hpp"
 #include "Player.hpp"
 
+// Networking Libraries
 #include <arpa/inet.h>
 #include <array>
 #include <cstring>
@@ -59,25 +59,56 @@ void* get_in_addr(struct sockaddr* sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void mainAcceptLoop(int sockfd)
+void mainAcceptLoop(int self_fd)
 {
     while (true)
     {
         socklen_t sin_size;
-        struct sockaddr_storage client_addr;
-        int new_fd;
+        sockaddr_storage client_addr;
+        int client_fd;
 
         sin_size = sizeof client_addr;
-        new_fd = accept(sockfd, (struct sockaddr*)&client_addr, &sin_size);
-        if (new_fd == -1)
+        client_fd = accept(self_fd, (sockaddr*)&client_addr, &sin_size);
+        if (client_fd == -1)
         {
             perror("accept");
             continue;
         }
 
         char s[INET6_ADDRSTRLEN];
-        inet_ntop(client_addr.ss_family, get_in_addr((struct sockaddr*)&client_addr), s, sizeof s);
+        inet_ntop(client_addr.ss_family, get_in_addr((sockaddr*)&client_addr), s, sizeof s);
         std::print("server: got connection from {}\n", s);
+        unsigned short int clientPort;
+        if (client_addr.ss_family == AF_INET)
+        {
+            clientPort = ((sockaddr_in*)&client_addr)->sin_port;
+        }
+        else // is IPv6
+        {
+            clientPort = ((sockaddr_in6*)&client_addr)->sin6_port;
+        }
+        std::print("server: client port number: {}\n", clientPort);
+
+        if (!fork()) // This is the child process
+        {
+            close(self_fd); // Child does not need this, will stay open in main process.
+
+            // Get initial info from client
+            const int clientInfoBufferLen = 20;
+            char clientInfoBuffer[clientInfoBufferLen];
+            int numbytes = recv(client_fd, clientInfoBuffer, clientInfoBufferLen, 0);
+            if (numbytes == -1)
+            {
+                perror("recv");
+                break;
+            }
+            if (numbytes == 0)
+            {
+                std::print("Server: The client disconnected correctly.\n");
+                break;
+            }
+        }
+        close(client_fd); // Parent doesn't use this anymore, will stay open for child.
 
         // TODO: add code to handle a connection and handle the gameplay
     }
