@@ -24,48 +24,22 @@ void setupDatabase() // NOTE: change return type to tuple or something once I fi
     // TODO: Make another object that contains game state, including who's turn it is, and the player IDs
 }
 
-void* get_in_addr(struct sockaddr* sa)
+int main()
 {
-    if (sa->sa_family == AF_INET)
-    {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
 
-void mainAcceptLoop(int self_fd)
-{
+    int serv_fd = networking::initServer();
+
     while (true)
     {
-        socklen_t sin_size;
-        sockaddr_storage client_addr;
-        int client_fd;
-
-        sin_size = sizeof client_addr;
-        client_fd = accept(self_fd, (sockaddr*)&client_addr, &sin_size);
+        int client_fd = networking::acceptConnection(serv_fd);
         if (client_fd == -1)
         {
-            perror("accept");
             continue;
         }
 
-        char s[INET6_ADDRSTRLEN];
-        inet_ntop(client_addr.ss_family, get_in_addr((sockaddr*)&client_addr), s, sizeof s);
-        std::print("server: got connection from {}\n", s);
-        unsigned short int clientPort;
-        if (client_addr.ss_family == AF_INET)
-        {
-            clientPort = ((sockaddr_in*)&client_addr)->sin_port;
-        }
-        else // is IPv6
-        {
-            clientPort = ((sockaddr_in6*)&client_addr)->sin6_port;
-        }
-        std::print("server: client port number: {}\n", clientPort);
-
         if (!fork()) // This is the child process associated with this player
         {
-            close(self_fd); // Child does not need this, will stay open in main process.
+            networking::closeFd(serv_fd); // Child does not need this, will stay open in main process.
 
             // Get initial info from client
             const int clientInfoBufferLen = 20;
@@ -94,24 +68,13 @@ void mainAcceptLoop(int self_fd)
 
             // TODO: If joining, give a list of lobbies that need a second player.
 
-            close(client_fd);
+            networking::closeFd(client_fd);
             exit(0); // Kill the child process
         }
-        close(client_fd); // Parent doesn't use this anymore, will stay open for child.
-
-        // TODO: add code to handle a connection and handle the gameplay
+        networking::closeFd(client_fd); // Parent doesn't use this anymore, will stay open for child.
     }
-}
 
-int main()
-{
-
-    int serv_fd = networking::initServer();
-
-    // TODO: add code to set up the server and add to the main arguments
-    mainAcceptLoop(serv_fd);
-
-    networking::cleanup(serv_fd);
+    networking::closeFd(serv_fd);
 
     return 0;
 }

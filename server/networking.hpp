@@ -2,6 +2,7 @@
 
 namespace networking
 {
-    void cleanup(int serv_fd);
+    void closeFd(int fd);
     int initServer();
+    int acceptConnection(int serv_fd);
 } // namespace networking
