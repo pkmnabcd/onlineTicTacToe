@@ -1,7 +1,7 @@
 #include "GameState.hpp"
 #include "Player.hpp"
+#include "networking.hpp"
 
-// Networking Libraries
 #include <arpa/inet.h>
 #include <array>
 #include <cstring>
@@ -14,11 +14,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-void reportErrno()
-{
-    std::print(stderr, "Error: {}\n", strerror(errno));
-}
-
 void setupDatabase() // NOTE: change return type to tuple or something once I figure out what
 {
     // TODO: Make object that contains all the information about a player
@@ -27,27 +22,6 @@ void setupDatabase() // NOTE: change return type to tuple or something once I fi
     std::array<Player, arraySize> players;
     std::array<GameState, arraySize> gameStates;
     // TODO: Make another object that contains game state, including who's turn it is, and the player IDs
-}
-
-int getLocalAddrInfo(const char*& port, addrinfo*& servinfo)
-{
-    addrinfo hints;
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-
-    return getaddrinfo(nullptr, port, &hints, &servinfo);
-}
-
-void sigchld_handler(int s)
-{
-    (void)s; // this quiets unused parameter warning. Will remove later if still unused.
-
-    int saved_errno = errno;
-    while (waitpid(-1, nullptr, WNOHANG) > 0)
-        ;
-    errno = saved_errno;
 }
 
 void* get_in_addr(struct sockaddr* sa)
@@ -131,80 +105,13 @@ void mainAcceptLoop(int self_fd)
 
 int main()
 {
-    const char* MYPORT = "3490";
-    const int BACKLOG = 10;
 
-    addrinfo* servinfo;
-    int errCode;
+    int serv_fd = networking::initServer();
 
-    if ((errCode = getLocalAddrInfo(MYPORT, servinfo)) != 0)
-    {
-        std::print(stderr, "getaddrinfo: {}\n", gai_strerror(errCode));
-        reportErrno();
-    }
-
-    int sockfd;
-    int yes = 1;
-    addrinfo* p;
-    for (p = servinfo; p != nullptr; p = p->ai_next)
-    {
-        sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (sockfd == -1)
-        {
-            perror("server: socket");
-            continue;
-        }
-
-        errCode = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-        if (errCode == -1)
-        {
-            perror("setsockopt");
-            exit(1);
-        }
-
-        errCode = bind(sockfd, p->ai_addr, p->ai_addrlen);
-        if (errCode == -1)
-        {
-            close(sockfd);
-            perror("server: bind");
-            continue;
-        }
-
-        break;
-    }
-
-    freeaddrinfo(servinfo);
-
-    if (p == nullptr)
-    {
-        std::print("server: failed to bind\n");
-        exit(1);
-    }
-
-    errCode = listen(sockfd, BACKLOG);
-    if (errCode == -1)
-    {
-        perror("listen");
-        exit(1);
-    }
-
-    // NOTE: This code works with sigaction() and reaps zombie processes.
-    struct sigaction sa;
-    sa.sa_handler = sigchld_handler; // reap all dead processes
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    errCode = sigaction(SIGCHLD, &sa, nullptr);
-    if (errCode == -1)
-    {
-        perror("sigaction");
-        exit(1);
-    }
-
-    std::print("server: waiting for connections...\n");
     // TODO: add code to set up the server and add to the main arguments
-    mainAcceptLoop(sockfd);
+    mainAcceptLoop(serv_fd);
 
-    close(sockfd);
+    networking::cleanup(serv_fd);
 
     return 0;
 }
