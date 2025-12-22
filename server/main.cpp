@@ -5,8 +5,17 @@
 
 #include <array>
 #include <print>
+#include <queue>
 #include <tuple>
 #include <unistd.h>
+
+void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCount)
+{
+    for (std::size_t i = 0; i < IDCount; i++)
+    {
+        freeIDsQueue.push(i);
+    }
+}
 
 int main()
 {
@@ -16,6 +25,9 @@ int main()
     const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
     std::array<Player, arraySize> players;
     std::array<GameState, arraySize> gameStates;
+
+    std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
+    initializeFreeIDs(freeIDs, arraySize);
 
     while (true)
     {
@@ -31,7 +43,10 @@ int main()
 
             bool client_disconnected = false;
 
-            std::uint8_t client_id = 20; // TODO: update/decide where/how ID is determined
+            // TODO: Check whether freeIDs is empty and close up if it is
+            std::uint8_t client_id = freeIDs.front();
+            freeIDs.pop();
+            // TODO: change this to structured binding syntax and add third item that checks if hosting
             std::tuple<Player, bool> infoResult = matchmaking::getClientInfo(client_fd, client_id);
 
             Player client_player = std::get<0>(infoResult);
