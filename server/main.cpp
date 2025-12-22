@@ -6,20 +6,14 @@
 #include <print>
 #include <unistd.h>
 
-void setupDatabase() // NOTE: change return type to tuple or something once I figure out what
-{
-    // TODO: Make object that contains all the information about a player
-    // Like name, ID, ip, port, red/blue
-    const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
-    std::array<Player, arraySize> players;
-    std::array<GameState, arraySize> gameStates;
-    // TODO: Make another object that contains game state, including who's turn it is, and the player IDs
-}
-
 int main()
 {
 
     int serv_fd = networking::initServer();
+
+    const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
+    std::array<Player, arraySize> players;
+    std::array<GameState, arraySize> gameStates;
 
     while (true)
     {
@@ -46,9 +40,6 @@ int main()
                 std::print("Server: The client disconnected.\n");
                 break;
             }
-
-            // NOTE: At some point I need to move most code in this file to a networking-specific
-            // .cpp file so that I don't have to worry about all the networking stuff all the time
 
             // TODO: Get from client info (first char?) whether the client is hosting a match or
             // if they're joinging someone else. Also assign ID and add to player list
