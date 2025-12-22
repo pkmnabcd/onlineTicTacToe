@@ -1,9 +1,11 @@
 #include "GameState.hpp"
 #include "Player.hpp"
+#include "matchmaking.hpp"
 #include "networking.hpp"
 
 #include <array>
 #include <print>
+#include <tuple>
 #include <unistd.h>
 
 int main()
@@ -27,18 +29,17 @@ int main()
         {
             networking::closeFd(serv_fd); // Child does not need this, will stay open in main process.
 
-            // Get initial info from client
-            const int clientInfoBufferLen = 20;
-            char clientInfoBuffer[clientInfoBufferLen];
-            int numbytes = networking::receiveAll(client_fd, clientInfoBuffer, clientInfoBufferLen);
-            if (numbytes == -1)
+            bool client_disconnected = false;
+
+            std::uint8_t client_id = 20; // TODO: update/decide where/how ID is determined
+            std::tuple<Player, bool> infoResult = matchmaking::getClientInfo(client_fd, client_id);
+
+            Player client_player = std::get<0>(infoResult);
+            client_disconnected = std::get<1>(infoResult);
+            if (client_disconnected)
             {
-                break;
-            }
-            if (numbytes == 0)
-            {
-                std::print("Server: The client disconnected.\n");
-                break;
+                networking::closeFd(client_fd);
+                exit(0); // Kill child process
             }
 
             // TODO: Get from client info (first char?) whether the client is hosting a match or

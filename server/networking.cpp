@@ -173,6 +173,7 @@ int networking::receiveAll(int fd, char buffer[], int len)
         }
         if (newBytes == 0)
         {
+            std::print("Server: The client disconnected.\n");
             bytesReceived = newBytes;
             break;
         }
