@@ -2,16 +2,8 @@
 #include "Player.hpp"
 #include "networking.hpp"
 
-#include <arpa/inet.h>
 #include <array>
-#include <cstring>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <print>
-#include <signal.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 void setupDatabase() // NOTE: change return type to tuple or something once I figure out what

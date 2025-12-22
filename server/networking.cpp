@@ -1,7 +1,6 @@
 #include "networking.hpp"
 
 #include <arpa/inet.h>
-#include <array>
 #include <cstring>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -10,7 +9,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
 const char* SERVER_PORT = "3490";
 const int BACKLOG = 10;
