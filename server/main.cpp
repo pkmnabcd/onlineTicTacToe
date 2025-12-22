@@ -44,6 +44,7 @@ int main()
             bool client_disconnected = false;
 
             // TODO: Check whether freeIDs is empty and close up if it is
+            // Also there is a race condition here that needs to be addressed (write a mutex)
             std::uint8_t client_id = freeIDs.front();
             freeIDs.pop();
             // TODO: change this to structured binding syntax and add third item that checks if hosting
