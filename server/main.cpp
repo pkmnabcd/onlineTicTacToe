@@ -44,10 +44,9 @@ int main()
             // Get initial info from client
             const int clientInfoBufferLen = 20;
             char clientInfoBuffer[clientInfoBufferLen];
-            int numbytes = recv(client_fd, clientInfoBuffer, clientInfoBufferLen, 0);
+            int numbytes = networking::receiveAll(client_fd, clientInfoBuffer, clientInfoBufferLen);
             if (numbytes == -1)
             {
-                perror("recv");
                 break;
             }
             if (numbytes == 0)

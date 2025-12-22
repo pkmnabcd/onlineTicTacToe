@@ -160,3 +160,26 @@ int networking::acceptConnection(int serv_fd)
     return client_fd;
 }
 
+int networking::receiveAll(int fd, char buffer[], int len)
+{
+    int bytesReceived = 0;
+    while (bytesReceived != len)
+    {
+        // NOTE: char is 1B so 'bytesReceived' is # chars received
+        const int newBytes = recv(fd, buffer+bytesReceived, len-bytesReceived, 0);
+        if (newBytes == -1)
+        {
+            perror("recv");
+            bytesReceived = newBytes;
+            break;
+        }
+        if (newBytes == 0)
+        {
+            bytesReceived = newBytes;
+            break;
+        }
+        bytesReceived += newBytes;
+    }
+    return bytesReceived;
+}
+
