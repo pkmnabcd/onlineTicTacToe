@@ -36,6 +36,7 @@ set(SERVER_HEADER_FILES
     server/GameState.hpp
     server/Player.hpp
 
+    server/critical.hpp
     server/matchmaking.hpp
     server/networking.hpp
 )
@@ -60,6 +61,7 @@ set(SERVER_SOURCE_FILES
     server/GameState.cpp
     server/Player.cpp
 
+    server/critical.cpp
     server/matchmaking.cpp
     server/networking.cpp
 )

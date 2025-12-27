@@ -1,5 +1,6 @@
 #include "GameState.hpp"
 #include "Player.hpp"
+#include "critical.hpp"
 #include "matchmaking.hpp"
 #include "networking.hpp"
 
