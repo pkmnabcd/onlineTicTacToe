@@ -16,10 +16,9 @@ auto critical::getAvailableID(std::queue<std::uint8_t>& freeIDs, bool* lock)
     while (testAndSet(lock))
     {
     }
-    std::size_t len = 0;  // TODO: Get the current length of the queue
     std::uint8_t client_id;
     bool success = true;
-    if (len == 0)
+    if (freeIDs.empty())
     {
         success = false;
     }
