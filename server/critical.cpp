@@ -11,7 +11,7 @@ bool testAndSet(bool* target)
     return returnVal;
 }
 
-auto critical::getAvailableID(std::queue<std::uint8_t>& freeIDs, bool* lock)
+std::tuple<std::uint8_t, bool> critical::getAvailableID(std::queue<std::uint8_t>& freeIDs, bool* lock)
 {
     while (testAndSet(lock))
     {

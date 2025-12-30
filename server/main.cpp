@@ -29,6 +29,8 @@ int main()
 
     std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
     initializeFreeIDs(freeIDs, arraySize);
+    bool lock = false; // Make sure lock is unlocked
+    bool* lockPtr = &lock;
 
     while (true)
     {
@@ -45,9 +47,7 @@ int main()
             bool client_disconnected = false;
 
             // TODO: Check whether freeIDs is empty and close up if it is
-            // Also there is a race condition here that needs to be addressed (write a mutex)
-            std::uint8_t client_id = freeIDs.front();
-            freeIDs.pop();
+            auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, lockPtr);
             // TODO: change this to structured binding syntax and add third item that checks if hosting
             std::tuple<Player, bool> infoResult = matchmaking::getClientInfo(client_fd, client_id);
 
