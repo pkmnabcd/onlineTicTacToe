@@ -18,6 +18,12 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
     }
 }
 
+void cleanupChildProcess(int client_fd)
+{
+    networking::closeFd(client_fd);
+    exit(0); // Kill child process
+}
+
 int main()
 {
 
@@ -49,8 +55,7 @@ int main()
             auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, lockPtr);
             if (noneAvailable)
             {
-                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
-                exit(0);
+                cleanupChildProcess(client_id); // TODO: Make sure that client knows why they got booted
             }
             // TODO: change this to structured binding syntax and add third item that checks if hosting
             std::tuple<Player, bool> infoResult = matchmaking::getClientInfo(client_fd, client_id);
@@ -59,8 +64,7 @@ int main()
             client_disconnected = std::get<1>(infoResult);
             if (client_disconnected)
             {
-                networking::closeFd(client_fd);
-                exit(0); // Kill child process
+                cleanupChildProcess(client_id);
             }
 
             // TODO: Get from client info (first char?) whether the client is hosting a match or
@@ -72,8 +76,7 @@ int main()
 
             // TODO: If joining, give a list of lobbies that need a second player.
 
-            networking::closeFd(client_fd);
-            exit(0); // Kill the child process
+            cleanupChildProcess(client_id);
         }
         networking::closeFd(client_fd); // Parent doesn't use this anymore, will stay open for child.
     }
