@@ -57,11 +57,9 @@ int main()
             {
                 cleanupChildProcess(client_id); // TODO: Make sure that client knows why they got booted
             }
-            // TODO: change this to structured binding syntax and add third item that checks if hosting
-            std::tuple<Player, bool> infoResult = matchmaking::getClientInfo(client_fd, client_id);
+            auto [client_player, disconnectedTmp0, isHosting] = matchmaking::getClientInfo(client_fd, client_id);
+            client_disconnected = disconnectedTmp0;
 
-            Player client_player = std::get<0>(infoResult);
-            client_disconnected = std::get<1>(infoResult);
             if (client_disconnected)
             {
                 cleanupChildProcess(client_id);

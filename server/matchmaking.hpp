@@ -7,5 +7,5 @@
 
 namespace matchmaking
 {
-    std::tuple<Player, bool> getClientInfo(int client_fd, std::uint8_t client_id);
+    std::tuple<Player, bool, bool> getClientInfo(int client_fd, std::uint8_t client_id);
 }

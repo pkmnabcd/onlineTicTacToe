@@ -6,9 +6,10 @@
 #include <tuple>
 
 // TODO: Update to decide where/how ID is determined
-std::tuple<Player, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t client_id)
+std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t client_id)
 {
     bool disconnected = false;
+    bool isHosting = true;  // TODO: determine this
     const int clientInfoBufferLen = 20;
     char clientInfoBuffer[clientInfoBufferLen];
     int numbytes = networking::receiveAll(client_fd, clientInfoBuffer, clientInfoBufferLen);
@@ -18,5 +19,5 @@ std::tuple<Player, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t 
     }
     // TODO: Update how to get player name
     Player player = Player("update me", client_id, client_fd);
-    return std::make_tuple(player, disconnected);
+    return std::make_tuple(player, disconnected, isHosting);
 }
