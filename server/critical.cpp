@@ -17,10 +17,10 @@ std::tuple<std::uint8_t, bool> critical::getAvailableID(std::queue<std::uint8_t>
     {
     }
     std::uint8_t client_id;
-    bool success = true;
+    bool noneAvailable = false;
     if (freeIDs.empty())
     {
-        success = false;
+        noneAvailable = true;
     }
     else
     {
@@ -29,5 +29,5 @@ std::tuple<std::uint8_t, bool> critical::getAvailableID(std::queue<std::uint8_t>
     }
 
     *lock = false;
-    return std::make_tuple(client_id, success);
+    return std::make_tuple(client_id, noneAvailable);
 }

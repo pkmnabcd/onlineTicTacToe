@@ -46,8 +46,12 @@ int main()
 
             bool client_disconnected = false;
 
-            // TODO: Check whether freeIDs is empty and close up if it is
             auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, lockPtr);
+            if (noneAvailable)
+            {
+                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                exit(0);
+            }
             // TODO: change this to structured binding syntax and add third item that checks if hosting
             std::tuple<Player, bool> infoResult = matchmaking::getClientInfo(client_fd, client_id);
 
