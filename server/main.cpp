@@ -35,8 +35,12 @@ int main()
 
     std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
     initializeFreeIDs(freeIDs, arraySize);
-    bool lock = false; // Make sure lock is unlocked
-    bool* lockPtr = &lock;
+
+    bool IDsLock = false; // Make sure lock is unlocked
+    bool* IDsLockPtr = &IDsLock;
+    // bool playersLock = false; // Make sure lock is unlocked
+    // bool* playersLockPtr = &playersLock;
+    //  TODO: uncomment above when it becomes relevant
 
     while (true)
     {
@@ -52,9 +56,10 @@ int main()
 
             bool client_disconnected = false;
 
-            auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, lockPtr);
+            auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, IDsLockPtr);
             if (noneAvailable)
             {
+                critical::addIDToQueue(freeIDs, client_id, IDsLockPtr);
                 cleanupChildProcess(client_id); // TODO: Make sure that client knows why they got booted
             }
             auto [client_player, disconnectedTmp0, isHosting] = matchmaking::getClientInfo(client_fd, client_id);
@@ -62,10 +67,13 @@ int main()
 
             if (client_disconnected)
             {
+                critical::addIDToQueue(freeIDs, client_id, IDsLockPtr);
                 cleanupChildProcess(client_id);
             }
 
             // TODO: Add code to atomically free the client ID if needed
+            // TODO: Possibly make the shared resources obtained from the heap and use shared pointer or something
+            // to pass it around so that it works properly with the different fork()s.
 
             // TODO: Add the new player to the list of clients atomically
 
@@ -75,6 +83,7 @@ int main()
 
             // TODO: If joining, give a list of lobbies that need a second player.
 
+            critical::addIDToQueue(freeIDs, client_id, IDsLockPtr);
             cleanupChildProcess(client_id);
         }
         networking::closeFd(client_fd); // Parent doesn't use this anymore, will stay open for child.

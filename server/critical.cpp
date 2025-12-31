@@ -31,3 +31,12 @@ std::tuple<std::uint8_t, bool> critical::getAvailableID(std::queue<std::uint8_t>
     *lock = false;
     return std::make_tuple(client_id, noneAvailable);
 }
+
+void critical::addIDToQueue(std::queue<std::uint8_t>& freeIDs, std::uint8_t id, bool* lock)
+{
+    while (testAndSet(lock))
+    {
+    }
+    freeIDs.push(id);
+    *lock = false;
+}
