@@ -65,8 +65,9 @@ int main()
                 cleanupChildProcess(client_id);
             }
 
-            // TODO: Get from client info (first char?) whether the client is hosting a match or
-            // if they're joinging someone else. Also assign ID and add to player list
+            // TODO: Add code to atomically free the client ID if needed
+
+            // TODO: Add the new player to the list of clients atomically
 
             // TODO: If Hosting, create a 'lobby' in which they can play games.
             // Lobby can only have the two players, but do this so games can be repeated and

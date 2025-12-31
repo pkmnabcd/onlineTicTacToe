@@ -22,7 +22,6 @@ std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::ui
     {
         disconnected = true;
     }
-    // TODO: Update how to get player name
     Player player = Player(client_name, client_id, client_fd);
     return std::make_tuple(player, disconnected, isHosting);
 }
