@@ -60,3 +60,12 @@ bool critical::addPlayerToPlayers(std::array<Player, arraySize>& players, Player
         return true;
     }
 }
+
+void critical::invalidatePlayer(std::array<Player, arraySize>& players, std::uint8_t playerID, bool* lock)
+{
+    while (testAndSet(lock))
+    {
+    }
+    players[playerID].m_isValidPlayer = false;
+    *lock = false;
+}
