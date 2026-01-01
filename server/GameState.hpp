@@ -14,7 +14,7 @@ class GameState
     GameState();
 
     Board m_board;
-    const Player m_redPlayer;
-    const Player m_bluePlayer;
-    const bool m_isValid;
+    Player m_redPlayer;
+    Player m_bluePlayer;
+    bool m_isValid;
 };

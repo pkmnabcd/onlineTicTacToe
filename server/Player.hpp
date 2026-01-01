@@ -10,8 +10,8 @@ class Player
     Player(std::string name, std::uint8_t id, int socket);
     Player();
 
-    const std::string m_name;
-    const std::uint8_t m_id;
-    const int m_socket;
-    const bool m_isValidPlayer;
+    std::string m_name;
+    std::uint8_t m_id;
+    int m_socket;
+    bool m_isValidPlayer;
 };

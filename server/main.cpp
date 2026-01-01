@@ -38,9 +38,8 @@ int main()
 
     bool IDsLock = false; // Make sure lock is unlocked
     bool* IDsLockPtr = &IDsLock;
-    // bool playersLock = false; // Make sure lock is unlocked
-    // bool* playersLockPtr = &playersLock;
-    //  TODO: uncomment above when it becomes relevant
+    bool playersLock = false; // Make sure lock is unlocked
+    bool* playersLockPtr = &playersLock;
 
     while (true)
     {
@@ -60,7 +59,7 @@ int main()
             if (noneAvailable)
             {
                 critical::addIDToQueue(freeIDs, client_id, IDsLockPtr);
-                cleanupChildProcess(client_id); // TODO: Make sure that client knows why they got booted
+                cleanupChildProcess(client_fd); // TODO: Make sure that client knows why they got booted
             }
             auto [client_player, disconnectedTmp0, isHosting] = matchmaking::getClientInfo(client_fd, client_id);
             client_disconnected = disconnectedTmp0;
@@ -68,10 +67,16 @@ int main()
             if (client_disconnected)
             {
                 critical::addIDToQueue(freeIDs, client_id, IDsLockPtr);
-                cleanupChildProcess(client_id);
+                cleanupChildProcess(client_fd);
+            }
+            bool playerAdded = critical::addPlayerToPlayers(players, client_player, playersLockPtr);
+            if (!playerAdded)
+            {
+                std::print(stderr, "Error: player attempted to be added to players while valid player was still there\n");
+                critical::addIDToQueue(freeIDs, client_id, IDsLockPtr);
+                cleanupChildProcess(client_fd); // TODO: Make sure that client knows why they got booted
             }
 
-            // TODO: Add code to atomically free the client ID if needed
             // TODO: Possibly make the shared resources obtained from the heap and use shared pointer or something
             // to pass it around so that it works properly with the different fork()s.
 
@@ -84,7 +89,7 @@ int main()
             // TODO: If joining, give a list of lobbies that need a second player.
 
             critical::addIDToQueue(freeIDs, client_id, IDsLockPtr);
-            cleanupChildProcess(client_id);
+            cleanupChildProcess(client_fd);
         }
         networking::closeFd(client_fd); // Parent doesn't use this anymore, will stay open for child.
     }

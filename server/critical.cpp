@@ -1,5 +1,6 @@
 #include "critical.hpp"
 
+#include <array>
 #include <cstdint>
 #include <queue>
 #include <tuple>
@@ -39,4 +40,23 @@ void critical::addIDToQueue(std::queue<std::uint8_t>& freeIDs, std::uint8_t id, 
     }
     freeIDs.push(id);
     *lock = false;
+}
+
+bool critical::addPlayerToPlayers(std::array<Player, arraySize>& players, Player player, bool* lock)
+{
+    while (testAndSet(lock))
+    {
+    }
+    std::uint8_t playerID = player.m_id;
+    if (player.m_isValidPlayer)
+    {
+        *lock = false;
+        return false; // Shouldn't be editing player if there's already one there
+    }
+    else
+    {
+        players[playerID] = player;
+        *lock = false;
+        return true;
+    }
 }
