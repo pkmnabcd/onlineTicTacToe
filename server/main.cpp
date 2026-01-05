@@ -1,4 +1,5 @@
 #include "GameState.hpp"
+#include "Lobby.hpp"
 #include "Player.hpp"
 #include "critical.hpp"
 #include "matchmaking.hpp"
@@ -26,10 +27,11 @@ void cleanupChildProcess(int client_fd)
     exit(0); // Kill child process
 }
 
-void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex)
+void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex)
 {
     bool client_disconnected = false;
     gameStates[0].m_isValid = false; // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
+    lobbies[0].m_isValid = false;    // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
 
     auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, dataMutex);
     if (noneAvailable)
@@ -45,7 +47,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
         cleanupChildProcess(client_fd);
     }
-    bool playerAdded = critical::addPlayerToPlayers(players, client_player, dataMutex);
+    const bool playerAdded = critical::addPlayerToPlayers(players, client_player, dataMutex);
     if (!playerAdded)
     {
         std::print(stderr, "Error: player attempted to be added to players while valid player was still there\n");
@@ -72,6 +74,7 @@ int main()
     const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
     std::array<Player, arraySize> players;
     std::array<GameState, arraySize> gameStates;
+    std::array<Lobby, arraySize> lobbies;
 
     std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
     initializeFreeIDs(freeIDs, arraySize);
@@ -83,7 +86,7 @@ int main()
         {
             continue;
         }
-        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(freeIDs), std::ref(dataMutex));
+        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(lobbies), std::ref(freeIDs), std::ref(dataMutex));
         clientThread.detach();
     }
 
