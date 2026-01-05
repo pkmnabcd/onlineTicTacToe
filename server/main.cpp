@@ -68,8 +68,15 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
             return;
         }
+        const bool lobbyAdded = critical::addLobbyToLobbies(lobbies, client_lobby, dataMutex);
+        if (!lobbyAdded)
+        {
+            std::print(stderr, "Error: lobby attempted to be added to lobbies while valid player was still there\n");
+            critical::addIDToQueue(freeIDs, client_id, dataMutex);
+            networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+            return;
+        }
         // TODO:
-        // add client's lobby to list of lobbies atomically
         // wait until the guest player's m_isValid is finally true (the thread for the guest player will have added their player to it)
         // send the guest name and do the logic to start the game (have host decide who is red, then start the exchange of inputs)
     }
