@@ -21,12 +21,6 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
     }
 }
 
-void cleanupChildProcess(int client_fd)
-{
-    networking::closeFd(client_fd);
-    exit(0); // Kill child process
-}
-
 void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex)
 {
     bool client_disconnected = false;
@@ -38,7 +32,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     if (noneAvailable)
     {
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
-        cleanupChildProcess(client_fd); // TODO: Make sure that client knows why they got booted
+        networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
     }
     auto [client_player, disconnectedTmp0, isHosting] = matchmaking::getClientInfo(client_fd, client_id);
     client_disconnected = disconnectedTmp0;
@@ -46,14 +40,14 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     if (client_disconnected)
     {
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
-        cleanupChildProcess(client_fd);
+        networking::closeFd(client_fd);
     }
     const bool playerAdded = critical::addPlayerToPlayers(players, client_player, dataMutex);
     if (!playerAdded)
     {
         std::print(stderr, "Error: player attempted to be added to players while valid player was still there\n");
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
-        cleanupChildProcess(client_fd); // TODO: Make sure that client knows why they got booted
+        networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
     }
 
     // TODO: If Hosting, create a 'lobby' in which they can play games.
@@ -68,8 +62,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         {
             std::print(stderr, "Error: message send unsucessful\n");
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
-            cleanupChildProcess(client_fd); // TODO: Make sure that client knows why they got booted
-            // TODO: get rid of above function since we're no longer using fork(). Instead just return from the thread
+            networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
         }
         // TODO:
         // add client's lobby to list of lobbies atomically
@@ -86,7 +79,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     // TODO: If joining, give a list of lobbies that need a second player.
 
     critical::addIDToQueue(freeIDs, client_id, dataMutex);
-    cleanupChildProcess(client_fd);
+    networking::closeFd(client_fd);
 }
 
 int main()
