@@ -12,8 +12,6 @@
 #include <tuple>
 #include <unistd.h>
 
-std::mutex dataMutex; // TODO: figure out why the main use gets deleted
-
 void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCount)
 {
     for (std::size_t i = 0; i < IDCount; i++)
@@ -28,7 +26,7 @@ void cleanupChildProcess(int client_fd)
     exit(0); // Kill child process
 }
 
-void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::queue<std::uint8_t>& freeIDs)
+void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex)
 {
     bool client_disconnected = false;
 
@@ -73,12 +71,13 @@ int main()
 {
 
     int serv_fd = networking::initServer();
+    std::mutex dataMutex;
 
     const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
-    volatile std::array<Player, arraySize> players;
-    volatile std::array<GameState, arraySize> gameStates;
+    std::array<Player, arraySize> players;
+    std::array<GameState, arraySize> gameStates;
 
-    volatile std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
+    std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
     initializeFreeIDs(freeIDs, arraySize); // TODO: Figure out why it doesn't like passing the volatile stuff to the function
 
     while (true)
@@ -88,7 +87,7 @@ int main()
         {
             continue;
         }
-        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(freeIDs));
+        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(freeIDs), std::ref(dataMutex));
         clientThread.detach();
     }
 
