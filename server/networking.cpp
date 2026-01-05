@@ -182,3 +182,27 @@ int networking::receiveAll(int fd, char buffer[], int len)
     return bytesReceived;
 }
 
+int networking::sendAll(int fd, char buffer[], int len)
+{
+    int bytesSent = 0;
+    while (bytesSent != len)
+    {
+        // NOTE: char is 1B so 'bytesSent' is # chars sent
+        const int newBytes = send(fd, buffer+bytesSent, len-bytesSent, 0);
+        if (newBytes == -1)
+        {
+            perror("send");
+            bytesSent = newBytes;
+            break;
+        }
+        if (newBytes == 0)
+        {
+            std::print("Server: Connection closed or unable to send.\n");
+            bytesSent = newBytes;
+            break;
+        }
+        bytesSent += newBytes;
+    }
+    return bytesSent;
+}
+
