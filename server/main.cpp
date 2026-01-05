@@ -52,11 +52,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         cleanupChildProcess(client_fd); // TODO: Make sure that client knows why they got booted
     }
 
-    // TODO: Possibly make the shared resources obtained from the heap and use shared pointer or something
-    // to pass it around so that it works properly with the different fork()s.
-
-    // TODO: Add the new player to the list of clients atomically
-
     // TODO: If Hosting, create a 'lobby' in which they can play games.
     // Lobby can only have the two players, but do this so games can be repeated and
     // players can swap being the red and blue player
@@ -78,7 +73,7 @@ int main()
     std::array<GameState, arraySize> gameStates;
 
     std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
-    initializeFreeIDs(freeIDs, arraySize); // TODO: Figure out why it doesn't like passing the volatile stuff to the function
+    initializeFreeIDs(freeIDs, arraySize);
 
     while (true)
     {
