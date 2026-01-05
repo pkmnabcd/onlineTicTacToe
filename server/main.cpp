@@ -29,6 +29,7 @@ void cleanupChildProcess(int client_fd)
 void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex)
 {
     bool client_disconnected = false;
+    gameStates[0].m_isValid = false; // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
 
     auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, dataMutex);
     if (noneAvailable)
