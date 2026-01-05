@@ -35,7 +35,7 @@ bool critical::addPlayerToPlayers(std::array<Player, arraySize>& players, Player
 {
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
     std::uint8_t playerID = player.m_id;
-    if (player.m_isValidPlayer)
+    if (players[playerID].m_isValidPlayer)
     {
         return false; // Shouldn't be editing player if there's already one there
     }
@@ -50,4 +50,19 @@ void critical::invalidatePlayer(std::array<Player, arraySize>& players, std::uin
 {
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
     players[playerID].m_isValidPlayer = false;
+}
+
+bool critical::addLobbyToLobbies(std::array<Lobby, arraySize>& lobbies, Lobby lobby, std::mutex& mut)
+{
+    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
+    std::uint8_t hostPlayerID = lobby.m_host.m_id;
+    if (lobbies[hostPlayerID].m_host.m_isValidPlayer)
+    {
+        return false; // Shouldn't be editing player if there's already one there
+    }
+    else
+    {
+        lobbies[hostPlayerID] = lobby;
+        return true;
+    }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Lobby.hpp"
 #include "Player.hpp"
 
 #include <array>
@@ -15,4 +16,5 @@ namespace critical
     void addIDToQueue(std::queue<std::uint8_t>& freeIDs, std::uint8_t id, std::mutex& mut);
     bool addPlayerToPlayers(std::array<Player, arraySize>& players, Player player, std::mutex& mut);
     void invalidatePlayer(std::array<Player, arraySize>& players, std::uint8_t playerID, std::mutex& mut);
+    bool addLobbyToLobbies(std::array<Lobby, arraySize>& lobbies, Lobby lobby, std::mutex& mut);
 } // namespace critical
