@@ -59,6 +59,21 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     // Lobby can only have the two players, but do this so games can be repeated and
     // players can swap being the red and blue player
 
+    if (isHosting)
+    {
+        Lobby client_lobby = Lobby(client_player);
+        // TODO:
+        // send to client that a lobby was successfully made
+        // wait until the guest player's m_isValid is finally true (the thread for the guest player will have added their player to it)
+        // send the guest name and do the logic to start the game (have host decide who is red, then start the exchange of inputs)
+    }
+    else // wants to join existing lobby
+    {
+        // TODO:
+        // Read list of lobbies and send to client.
+        // Expect client to either disconnect, try to join a lobby (which may or may not work if the lobby is now full or doesn't exist), or refresh the list.
+    }
+
     // TODO: If joining, give a list of lobbies that need a second player.
 
     critical::addIDToQueue(freeIDs, client_id, dataMutex);
