@@ -8,4 +8,5 @@
 namespace matchmaking
 {
     std::tuple<Player, bool, bool> getClientInfo(int client_fd, std::uint8_t client_id);
-}
+    bool reportSuccessfulLobbyCreation(int client_fd);
+} // namespace matchmaking

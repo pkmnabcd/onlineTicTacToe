@@ -25,3 +25,12 @@ std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::ui
     Player player = Player(client_name, client_id, client_fd);
     return std::make_tuple(player, disconnected, isHosting);
 }
+
+bool matchmaking::reportSuccessfulLobbyCreation(int client_fd)
+{
+    const int bufferLen = 8;
+    char buffer[bufferLen] = "Success";
+    int bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
+
+    return bytesSent == bufferLen;
+}

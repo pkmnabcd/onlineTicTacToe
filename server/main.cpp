@@ -30,6 +30,7 @@ void cleanupChildProcess(int client_fd)
 void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex)
 {
     bool client_disconnected = false;
+    bool message_sent_success;
     gameStates[0].m_isValid = false; // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
     lobbies[0].m_isValid = false;    // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
 
@@ -62,8 +63,16 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     if (isHosting)
     {
         Lobby client_lobby = Lobby(client_player);
+        message_sent_success = matchmaking::reportSuccessfulLobbyCreation(client_fd);
+        if (!message_sent_success)
+        {
+            std::print(stderr, "Error: message send unsucessful\n");
+            critical::addIDToQueue(freeIDs, client_id, dataMutex);
+            cleanupChildProcess(client_fd); // TODO: Make sure that client knows why they got booted
+            // TODO: get rid of above function since we're no longer using fork(). Instead just return from the thread
+        }
         // TODO:
-        // send to client that a lobby was successfully made
+        // add client's lobby to list of lobbies atomically
         // wait until the guest player's m_isValid is finally true (the thread for the guest player will have added their player to it)
         // send the guest name and do the logic to start the game (have host decide who is red, then start the exchange of inputs)
     }
