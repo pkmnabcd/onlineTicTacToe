@@ -33,6 +33,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     {
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
         networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+        return;
     }
     auto [client_player, disconnectedTmp0, isHosting] = matchmaking::getClientInfo(client_fd, client_id);
     client_disconnected = disconnectedTmp0;
@@ -41,6 +42,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     {
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
         networking::closeFd(client_fd);
+        return;
     }
     const bool playerAdded = critical::addPlayerToPlayers(players, client_player, dataMutex);
     if (!playerAdded)
@@ -48,6 +50,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         std::print(stderr, "Error: player attempted to be added to players while valid player was still there\n");
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
         networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+        return;
     }
 
     // TODO: If Hosting, create a 'lobby' in which they can play games.
@@ -63,6 +66,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             std::print(stderr, "Error: message send unsucessful\n");
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+            return;
         }
         // TODO:
         // add client's lobby to list of lobbies atomically
