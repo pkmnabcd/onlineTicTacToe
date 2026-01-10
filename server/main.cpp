@@ -26,7 +26,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     bool client_disconnected = false;
     bool message_sent_success;
     gameStates[0].m_isValid = false; // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
-    lobbies[0].m_isValid = false;    // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
 
     auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, dataMutex);
     if (noneAvailable)
@@ -76,15 +75,31 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
             return;
         }
+
+        // Wait until someone joins the lobby
+        while (true)
+        {
+            if (client_lobby.m_guest.m_isValidPlayer)
+            {
+                // Don't bother checking atomically until there's a sign that someone joined
+                break;
+            }
+        }
+        // TODO: it's possible that I'll need to check the m_isValidPlayer again just in case
+        Player guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
+
+        message_sent_success = matchmaking::sendHostTheGuestName(client_fd, guest.m_name);
         // TODO:
         // wait until the guest player's m_isValid is finally true (the thread for the guest player will have added their player to it)
         // send the guest name and do the logic to start the game (have host decide who is red, then start the exchange of inputs)
     }
-    else // wants to join existing lobby
+    else // client wants to join existing lobby
     {
         // TODO:
         // Read list of lobbies and send to client.
         // Expect client to either disconnect, try to join a lobby (which may or may not work if the lobby is now full or doesn't exist), or refresh the list.
+        // Send client their assigned color from the host
+        // Do the game logic
     }
 
     // TODO: If joining, give a list of lobbies that need a second player.

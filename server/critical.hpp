@@ -17,4 +17,5 @@ namespace critical
     bool addPlayerToPlayers(std::array<Player, arraySize>& players, Player player, std::mutex& mut);
     void invalidatePlayer(std::array<Player, arraySize>& players, std::uint8_t playerID, std::mutex& mut);
     bool addLobbyToLobbies(std::array<Lobby, arraySize>& lobbies, Lobby lobby, std::mutex& mut);
+    Player getGuestFromClientLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t client_id, std::mutex& mut);
 } // namespace critical

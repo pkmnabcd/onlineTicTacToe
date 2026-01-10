@@ -66,3 +66,9 @@ bool critical::addLobbyToLobbies(std::array<Lobby, arraySize>& lobbies, Lobby lo
         return true;
     }
 }
+
+Player critical::getGuestFromClientLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t client_id, std::mutex& mut)
+{
+    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
+    return lobbies[client_id].m_guest;
+}

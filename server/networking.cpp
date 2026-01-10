@@ -182,7 +182,7 @@ int networking::receiveAll(int fd, char buffer[], int len)
     return bytesReceived;
 }
 
-int networking::sendAll(int fd, char buffer[], int len)
+int networking::sendAll(int fd, const char buffer[], int len)
 {
     int bytesSent = 0;
     while (bytesSent != len)
