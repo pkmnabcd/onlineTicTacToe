@@ -13,4 +13,5 @@ class Lobby
     bool m_isValid;
     bool m_waitingForHost;
     bool m_waitingForGuest;
+    bool m_someoneDisconnected;
 };

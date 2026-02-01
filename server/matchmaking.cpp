@@ -2,14 +2,18 @@
 #include "networking.hpp"
 #include "Player.hpp"
 
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <tuple>
+
+using StraightBoard = std::array<std::string, 9>;
 
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
 
 // TODO: see if I need to add 1 to each buffer len for \0
+// TODO: I'll definitely need to add 1 to all the lens to account for \0.
 
 std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t client_id)
 {
@@ -81,5 +85,20 @@ bool matchmaking::sendGuestTheHostColor(int client_fd, bool hostChoseRed)
     {
         bytesSent = networking::sendAll(client_fd, "B", bufferLen);
     }
+    return bytesSent == bufferLen;
+}
+
+bool matchmaking::sendBoardState(int client_fd, StraightBoard board)
+{
+    const int bufferLen = 9;
+    char buffer[bufferLen];
+
+    for (std::uint8_t i = 0; i < board.size(); i++)
+    {
+        assert(board[i].length() == 1 && "Each board string has one char");
+        buffer[i] = board[i].at(0);
+    }
+    int bytesSent;
+    bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
 }

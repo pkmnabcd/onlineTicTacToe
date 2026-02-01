@@ -123,10 +123,21 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 // TODO: make sure lobby is closed
                 // TODO: also, make sure that the guest client knows the lobby was closed
             }
+
+            if (hostPickedRed)
+            {
+                // TODO: figure out a way for one thread to know that the other client has disconnected.
+                // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
+                // then you can either clean up the lobby or leave that to the other thread.
+
+                // For normal synchronization it should be good enough to just have one thread wait to receive the new state from the server
+                // while the other thread considers the input it will give to the server.
+                // Then they will just check each time if the other player is still there.
+            }
+            else
+            {
+            }
         }
-        // TODO:
-        // wait until the guest player's m_isValid is finally true (the thread for the guest player will have added their player to it)
-        // send the guest name and do the logic to start the game (have host decide who is red, then start the exchange of inputs)
     }
     else // client wants to join existing lobby
     {
