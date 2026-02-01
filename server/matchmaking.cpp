@@ -14,6 +14,7 @@ const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
 // TODO: see if I need to add 1 to each buffer len for \0
 // TODO: I'll definitely need to add 1 to all the lens to account for \0.
+// TODO: I might want to initialize the buffers with "" instead of nothing so that the memory is zeroed out. Or I need to check if disconnected before reading the buffer from a receiveAll
 
 std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t client_id)
 {
@@ -101,4 +102,39 @@ bool matchmaking::sendBoardState(int client_fd, StraightBoard board)
     int bytesSent;
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
+}
+
+bool isDigit(std::uint8_t ch)
+{
+    return ch >= 48 && ch <= 57;
+}
+
+std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
+{
+    bool disconnected = false;
+    const int chooseMoveBufferLen = 1;
+    char chooseMoveBuffer[chooseMoveBufferLen];
+    int numbytes = networking::receiveAll(client_fd, chooseMoveBuffer, chooseMoveBufferLen);
+
+    // First char signifies whether client wants to host a game.
+    // The other chars are the name the client picks
+    // TODO: someday add limits to the names and check the current names to make sure it's unique
+    std::uint8_t moveChoice;
+    if (isDigit(chooseMoveBuffer[0]))
+    {
+        moveChoice = chooseMoveBuffer[0] - 48;
+        if (moveChoice == 0)
+        {
+            disconnected = true;
+        }
+    }
+    else
+    {
+        disconnected = true;
+    }
+    if (numbytes == -1 || numbytes == 0)
+    {
+        disconnected = true;
+    }
+    return std::make_tuple(moveChoice, disconnected);
 }

@@ -21,7 +21,7 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
     }
 }
 
-void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex)
+void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex)
 {
     bool client_disconnected = false;
     bool message_sent_success;
@@ -159,6 +159,7 @@ int main()
 
     int serv_fd = networking::initServer();
     std::mutex dataMutex;
+    std::mutex disconnectMutex;
 
     const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
     std::array<Player, arraySize> players;
@@ -175,7 +176,7 @@ int main()
         {
             continue;
         }
-        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(lobbies), std::ref(freeIDs), std::ref(dataMutex));
+        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(lobbies), std::ref(freeIDs), std::ref(dataMutex), std::ref(disconnectMutex));
         clientThread.detach();
     }
 
