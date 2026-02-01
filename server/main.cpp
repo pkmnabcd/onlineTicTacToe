@@ -85,10 +85,34 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 break;
             }
         }
-        // TODO: it's possible that I'll need to check the m_isValidPlayer again just in case
+        // TODO: it's possible that I'll need to check the m_isValidPlayer again atomically just in case
         Player guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
 
         message_sent_success = matchmaking::sendHostTheGuestName(client_fd, guest.m_name);
+        if (!message_sent_success)
+        {
+            std::print(stderr, "Error: message send unsucessful\n");
+            critical::addIDToQueue(freeIDs, client_id, dataMutex);
+            networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+            return;
+            // TODO: make sure lobby is closed
+            // TODO: also, make sure that the guest client knows the lobby was closed
+        }
+
+        auto [hostPickedRed, disconnectedTmp1] = matchmaking::hostChoosesRed(client_fd);
+        client_disconnected = disconnectedTmp1;
+        if (client_disconnected)
+        {
+            critical::addIDToQueue(freeIDs, client_id, dataMutex);
+            networking::closeFd(client_fd);
+            return;
+            // TODO: make sure lobby is closed
+            // TODO: also, make sure that the guest client knows the lobby was closed
+        }
+        bool wantToPlay = true;
+        while (wantToPlay)
+        {
+        }
         // TODO:
         // wait until the guest player's m_isValid is finally true (the thread for the guest player will have added their player to it)
         // send the guest name and do the logic to start the game (have host decide who is red, then start the exchange of inputs)
