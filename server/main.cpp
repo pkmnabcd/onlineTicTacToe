@@ -26,6 +26,41 @@ std::tuple<GameState, bool> updateGamestateAndCheckForWinner(bool redMove, std::
     return std::make_tuple(GameState(), true);
 }
 
+std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::mutex& dataMutex)
+{
+    /*
+        * Returns [wantsToPlayAgain: bool, disconnected: bool]
+    */
+    // TODO: add code that loops to make this easier
+    // TODO: add code that updates and checks the gamestate
+
+    GameState gamestate = initialGamestate;
+    bool message_sent_success;
+    bool client_disconnected;
+
+    message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[hostID].m_board);
+    if (!message_sent_success)
+    {
+        std::print(stderr, "Error: message send unsucessful\n");
+        return make_tuple(false, true);
+    }
+
+    auto [hostMove, disconnectedTmp2] = matchmaking::getClientMove(client_fd);
+    client_disconnected = disconnectedTmp2;
+    if (client_disconnected)
+    {
+        return make_tuple(false, true);
+    }
+
+
+    return make_tuple(false, true);
+}
+
+std::tuple<bool, bool> playGameBlue(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::mutex& dataMutex)
+{
+    return make_tuple(false, true);
+}
+
 void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex)
 {
     bool client_disconnected = false;
@@ -121,6 +156,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         bool wantToPlay = true;
         while (wantToPlay)
         {
+            // TODO: move this to the not hosting code
             message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed);
             if (!message_sent_success)
             {
@@ -146,11 +182,24 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[client_id].m_board);
-                if (!message_sent_success)
+                wantToPlay = playGameRed(client_id, gamestate, client_fd, players, gamestates, lobbies, freeIDs, dataMutex, disconnectMutex);
+
+                // TODO: figure out a way for one thread to know that the other client has disconnected.
+                // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
+                // then you can either clean up the lobby or leave that to the other thread.
+
+                // For normal synchronization it should be good enough to just have one thread wait to receive the new state from the server
+                // while the other thread considers the input it will give to the server.
+                // Then they will just check each time if the other player is still there.
+                // So each thread will compare their copy of gamestate with the one in gamestates[] and once it changes, they know they can go
+            }
+            else // lobby owner picked blue
+            {
+                GameState gamestate = GameState(guest, client_player);
+                const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
+                if (!gamestateAdded)
                 {
-                    std::print(stderr, "Error: message send unsucessful\n");
-                    critical::invalidateGamestate(gamestates, client_id, dataMutex);
+                    std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
@@ -158,7 +207,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                auto [hostMove, disconnectedTmp2] = matchmaking::getClientMove(client_fd);
+                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, gamestate, client_fd, players, gamestates, lobbies, freeIDs, dataMutex, disconnectMutex);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
@@ -169,17 +218,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd);
                     return;
                 }
-                // TODO: figure out a way for one thread to know that the other client has disconnected.
-                // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
-                // then you can either clean up the lobby or leave that to the other thread.
-
-                // For normal synchronization it should be good enough to just have one thread wait to receive the new state from the server
-                // while the other thread considers the input it will give to the server.
-                // Then they will just check each time if the other player is still there.
-                // So each thread will compare their copy of gamestate with the one in gamestates[] and once it changes, they know they can go
-            }
-            else
-            {
             }
         }
     }
