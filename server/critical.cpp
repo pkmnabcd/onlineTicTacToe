@@ -1,5 +1,9 @@
 #include "critical.hpp"
 
+#include "GameState.hpp"
+#include "Lobby.hpp"
+#include "Player.hpp"
+
 #include <array>
 #include <cstdint>
 #include <queue>
@@ -56,9 +60,9 @@ bool critical::addLobbyToLobbies(std::array<Lobby, arraySize>& lobbies, Lobby lo
 {
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
     std::uint8_t hostPlayerID = lobby.m_host.m_id;
-    if (lobbies[hostPlayerID].m_host.m_isValidPlayer)
+    if (lobbies[hostPlayerID].m_isValid)
     {
-        return false; // Shouldn't be editing player if there's already one there
+        return false; // Shouldn't be editing lobby if there's already one there
     }
     else
     {
@@ -92,4 +96,24 @@ Player critical::getGuestFromClientLobby(std::array<Lobby, arraySize>& lobbies, 
 {
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
     return lobbies[client_id].m_guest;
+}
+
+bool critical::addGameStateToGameStates(std::array<GameState, arraySize>& gamestates, GameState gamestate, std::uint8_t hostID, std::mutex& mut)
+{
+    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
+    if (gamestates[hostID].m_isValid)
+    {
+        return false; // Shouldn't be editing gamestate if there's already one there
+    }
+    else
+    {
+        gamestates[hostID] = gamestate;
+        return true;
+    }
+}
+
+void critical::invalidateGamestate(std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& mut)
+{
+    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
+    gamestates[hostID].m_isValid = false;
 }

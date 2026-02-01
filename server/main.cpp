@@ -21,11 +21,15 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
     }
 }
 
-void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gameStates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex)
+std::tuple<GameState, bool> updateGamestateAndCheckForWinner(bool redMove, std::uint8_t location, GameState previousState)
+{
+    return std::make_tuple(GameState(), true);
+}
+
+void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex)
 {
     bool client_disconnected = false;
     bool message_sent_success;
-    gameStates[0].m_isValid = false; // TODO: remove this once I start using gameStates. This just gets rid of compiler warnings
 
     auto [client_id, noneAvailable] = critical::getAvailableID(freeIDs, dataMutex);
     if (noneAvailable)
@@ -73,7 +77,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         const bool lobbyAdded = critical::addLobbyToLobbies(lobbies, client_lobby, dataMutex);
         if (!lobbyAdded)
         {
-            std::print(stderr, "Error: lobby attempted to be added to lobbies while valid player was still there\n");
+            std::print(stderr, "Error: lobby attempted to be added to lobbies while valid lobby was still there\n");
             critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
@@ -130,6 +134,41 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
             if (hostPickedRed)
             {
+                GameState gamestate = GameState(client_player, guest);
+                const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
+                if (!gamestateAdded)
+                {
+                    std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayer(players, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    return;
+                }
+
+                message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[client_id].m_board);
+                if (!message_sent_success)
+                {
+                    std::print(stderr, "Error: message send unsucessful\n");
+                    critical::invalidateGamestate(gamestates, client_id, dataMutex);
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayer(players, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    return;
+                }
+
+                auto [hostMove, disconnectedTmp2] = matchmaking::getClientMove(client_fd);
+                client_disconnected = disconnectedTmp2;
+                if (client_disconnected)
+                {
+                    critical::invalidateGamestate(gamestates, client_id, dataMutex); // TODO: might need similar to lobby where I check if other player disconnected first. Also may want to use disconnect mutex for that
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayer(players, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd);
+                    return;
+                }
                 // TODO: figure out a way for one thread to know that the other client has disconnected.
                 // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
                 // then you can either clean up the lobby or leave that to the other thread.
@@ -137,6 +176,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 // For normal synchronization it should be good enough to just have one thread wait to receive the new state from the server
                 // while the other thread considers the input it will give to the server.
                 // Then they will just check each time if the other player is still there.
+                // So each thread will compare their copy of gamestate with the one in gamestates[] and once it changes, they know they can go
             }
             else
             {

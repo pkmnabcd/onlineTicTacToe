@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameState.hpp"
 #include "Lobby.hpp"
 #include "Player.hpp"
 
@@ -7,9 +8,12 @@
 #include <cstdint>
 #include <mutex>
 #include <queue>
+#include <tuple>
 
 const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
 
+// TODO: maybe make it more consistent that when invalidating/closing something
+// you just need the right index.
 namespace critical
 {
     std::tuple<std::uint8_t, bool> getAvailableID(std::queue<std::uint8_t>& freeIDs, std::mutex& mut);
@@ -20,4 +24,6 @@ namespace critical
     void closeLobby(std::array<Lobby, arraySize>& lobbies, Lobby lobby, std::mutex& mut);
     void closeLobbyIfOtherPlayerDisconnected(std::array<Lobby, arraySize>& lobbies, Lobby lobby, std::mutex& dataMut, std::mutex& disconnectMut);
     Player getGuestFromClientLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t client_id, std::mutex& mut);
+    bool addGameStateToGameStates(std::array<GameState, arraySize>& gamestates, GameState gamestate, std::uint8_t hostID, std::mutex& mut);
+    void invalidateGamestate(std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& mut);
 } // namespace critical
