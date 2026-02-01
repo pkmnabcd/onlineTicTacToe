@@ -39,6 +39,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
     if (client_disconnected)
     {
+        critical::invalidatePlayer(players, client_id, dataMutex);
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
         networking::closeFd(client_fd);
         return;
@@ -47,6 +48,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     if (!playerAdded)
     {
         std::print(stderr, "Error: player attempted to be added to players while valid player was still there\n");
+        critical::invalidatePlayer(players, client_id, dataMutex);
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
         networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
         return;
@@ -63,6 +65,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         if (!message_sent_success)
         {
             std::print(stderr, "Error: message send unsucessful\n");
+            critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
             return;
@@ -71,6 +74,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         if (!lobbyAdded)
         {
             std::print(stderr, "Error: lobby attempted to be added to lobbies while valid player was still there\n");
+            critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
             return;
@@ -81,7 +85,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         {
             if (client_lobby.m_guest.m_isValidPlayer)
             {
-                // Don't bother checking atomically until there's a sign that someone joined
+                // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would slow every thread way down.
                 break;
             }
         }
@@ -92,6 +96,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         if (!message_sent_success)
         {
             std::print(stderr, "Error: message send unsucessful\n");
+            critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
             return;
