@@ -96,23 +96,22 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         if (!message_sent_success)
         {
             std::print(stderr, "Error: message send unsucessful\n");
+            critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
             critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
             return;
-            // TODO: make sure lobby is closed
-            // TODO: also, make sure that the guest client knows the lobby was closed
         }
 
         auto [hostPickedRed, disconnectedTmp1] = matchmaking::hostChoosesRed(client_fd);
         client_disconnected = disconnectedTmp1;
         if (client_disconnected)
         {
+            critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+            critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd);
             return;
-            // TODO: make sure lobby is closed
-            // TODO: also, make sure that the guest client knows the lobby was closed
         }
 
         bool wantToPlay = true;
@@ -122,11 +121,11 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             if (!message_sent_success)
             {
                 std::print(stderr, "Error: message send unsucessful\n");
+                critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
                 networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                 return;
-                // TODO: make sure lobby is closed
-                // TODO: also, make sure that the guest client knows the lobby was closed
             }
 
             if (hostPickedRed)
