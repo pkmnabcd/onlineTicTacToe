@@ -29,8 +29,8 @@ std::tuple<GameState, bool> updateGamestateAndCheckForWinner(bool redMove, std::
 std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::mutex& dataMutex)
 {
     /*
-        * Returns [wantsToPlayAgain: bool, disconnected: bool]
-    */
+     * Returns [wantsToPlayAgain: bool, disconnected: bool]
+     */
     // TODO: add code that loops to make this easier
     // TODO: add code that updates and checks the gamestate
 
@@ -42,23 +42,22 @@ std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamesta
     if (!message_sent_success)
     {
         std::print(stderr, "Error: message send unsucessful\n");
-        return make_tuple(false, true);
+        return std::make_tuple(false, true);
     }
 
     auto [hostMove, disconnectedTmp2] = matchmaking::getClientMove(client_fd);
     client_disconnected = disconnectedTmp2;
     if (client_disconnected)
     {
-        return make_tuple(false, true);
+        return std::make_tuple(false, true);
     }
 
-
-    return make_tuple(false, true);
+    return std::make_tuple(false, true);
 }
 
 std::tuple<bool, bool> playGameBlue(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::mutex& dataMutex)
 {
-    return make_tuple(false, true);
+    return std::make_tuple(false, true);
 }
 
 void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex)
@@ -182,7 +181,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                wantToPlay = playGameRed(client_id, gamestate, client_fd, players, gamestates, lobbies, freeIDs, dataMutex, disconnectMutex);
+                auto [wantToPlay, disconnectedTmp2] = playGameRed(client_id, gamestate, client_fd, gamestates, dataMutex);
 
                 // TODO: figure out a way for one thread to know that the other client has disconnected.
                 // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
@@ -207,7 +206,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, gamestate, client_fd, players, gamestates, lobbies, freeIDs, dataMutex, disconnectMutex);
+                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, gamestate, client_fd, gamestates, dataMutex);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
