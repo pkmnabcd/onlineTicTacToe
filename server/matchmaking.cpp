@@ -68,3 +68,18 @@ std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
     }
     return std::make_tuple(choosesRed, disconnected);
 }
+
+bool matchmaking::sendGuestTheHostColor(int client_fd, bool hostChoseRed)
+{
+    const int bufferLen = 1;
+    int bytesSent;
+    if (hostChoseRed)
+    {
+        bytesSent = networking::sendAll(client_fd, "R", bufferLen);
+    }
+    else
+    {
+        bytesSent = networking::sendAll(client_fd, "B", bufferLen);
+    }
+    return bytesSent == bufferLen;
+}

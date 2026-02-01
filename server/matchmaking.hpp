@@ -11,4 +11,5 @@ namespace matchmaking
     bool reportSuccessfulLobbyCreation(int client_fd);
     bool sendHostTheGuestName(int client_fd, std::string guestName);
     std::tuple<bool, bool> hostChoosesRed(int client_fd);
+    bool sendGuestTheHostColor(int client_fd, bool hostChoseRed);
 } // namespace matchmaking

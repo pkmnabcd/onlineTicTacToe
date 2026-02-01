@@ -109,9 +109,20 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             // TODO: make sure lobby is closed
             // TODO: also, make sure that the guest client knows the lobby was closed
         }
+
         bool wantToPlay = true;
         while (wantToPlay)
         {
+            message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed);
+            if (!message_sent_success)
+            {
+                std::print(stderr, "Error: message send unsucessful\n");
+                critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                return;
+                // TODO: make sure lobby is closed
+                // TODO: also, make sure that the guest client knows the lobby was closed
+            }
         }
         // TODO:
         // wait until the guest player's m_isValid is finally true (the thread for the guest player will have added their player to it)
