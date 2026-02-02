@@ -27,17 +27,35 @@ GameState updateGamestate(bool redMove, std::uint8_t location, GameState previou
     return GameState();
 }
 
-std::tuple<bool, bool> playGameRed(std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
+std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
      * Returns [wantsToPlayAgain: bool, disconnected: bool]
      */
 
-    // NOTE: red player starts out with the lock already
+    /*
+     * Red: has lock before getting in this function. The initial state at the start of its loop should be the same as its state, but only that time
+     * Blue: should not have lock before this function. Checks its state against initial state until it changes then it can take the lock
+     */
+
+    bool isFirstTurn = true;
+
     while (true)
     {
+        if (!isFirstTurn || !isRed) // skip the following if it's the 1st turn and you're red
+        {
+            // TODO: probably add check for if opponent disconnected and make sure the state isn't the same as when you finished the loop (making sure you didn't skip their lock)
+        }
+        else
+        {
+            if (!isRed) // if you're blue and it's first turn, take lock
+            {
+                // TODO: wait while gamestate is still initial state
+                gameMutexes[hostID].lock();
+            }
+        }
+
         // Check to see if your opponent already won/stalemated
-        // TODO: probably add check for if opponent disconnected and make sure the state isn't the same as when you finished the loop (making sure you didn't skip their lock)
         GameState gamestate = gamestates[hostID];
         std::uint8_t theWinner = winner::winner(gamestate.m_board);
         if (theWinner != 0)
@@ -90,12 +108,6 @@ std::tuple<bool, bool> playGameRed(std::uint8_t hostID, int client_fd, std::arra
     }
     // TODO: receive msg of whether they want to play again
 
-    return std::make_tuple(false, true);
-}
-
-std::tuple<bool, bool> playGameBlue(std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
-{
-    // NOTE: blue player doesn't start out with the lock already
     return std::make_tuple(false, true);
 }
 
@@ -227,7 +239,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
                 // TODO: somehow ensure that the guest doesn't try to access the gamestate array before the host creates it
 
-                auto [wantToPlay, disconnectedTmp2] = playGameRed(client_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                auto [wantToPlay, disconnectedTmp2] = playGame(true, client_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
@@ -262,7 +274,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                auto [wantToPlay, disconnectedTmp2] = playGame(false, guest.m_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
