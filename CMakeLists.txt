@@ -40,6 +40,7 @@ set(SERVER_HEADER_FILES
     server/critical.hpp
     server/matchmaking.hpp
     server/networking.hpp
+    server/winner.hpp
 )
 set(ALL_HEADER_FILES
     ${GAME_HEADER_FILES}
@@ -66,6 +67,7 @@ set(SERVER_SOURCE_FILES
     server/critical.cpp
     server/matchmaking.cpp
     server/networking.cpp
+    server/winner.cpp
 )
 set(ALL_CLIENT_FILES
     ${GAME_CLIENT_FILES}

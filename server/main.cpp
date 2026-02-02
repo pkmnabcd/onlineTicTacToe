@@ -4,6 +4,7 @@
 #include "critical.hpp"
 #include "matchmaking.hpp"
 #include "networking.hpp"
+#include "winner.hpp"
 
 #include <array>
 #include <mutex>
@@ -37,6 +38,12 @@ std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamesta
     GameState gamestate = initialGamestate;
     bool message_sent_success;
     bool client_disconnected;
+
+    // TODO: fill this out
+    // TODO: figure out how I'm gonna block while waiting for other player
+    while (!winner::winner(gamestate.m_board))
+    {
+    }
 
     message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[hostID].m_board);
     if (!message_sent_success)
