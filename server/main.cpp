@@ -27,7 +27,7 @@ std::tuple<GameState, bool> updateGamestateAndCheckForWinner(bool redMove, std::
     return std::make_tuple(GameState(), true);
 }
 
-std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex)
+std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
      * Returns [wantsToPlayAgain: bool, disconnected: bool]
@@ -40,7 +40,7 @@ std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamesta
     bool client_disconnected;
 
     // TODO: fill this out
-    // TODO: figure out how I'm gonna block while waiting for other player
+    // NOTE: red player starts out with the lock already
     while (!winner::winner(gamestate.m_board))
     {
     }
@@ -62,12 +62,13 @@ std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamesta
     return std::make_tuple(false, true);
 }
 
-std::tuple<bool, bool> playGameBlue(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex)
+std::tuple<bool, bool> playGameBlue(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
 {
+    // NOTE: blue player doesn't start out with the lock already
     return std::make_tuple(false, true);
 }
 
-void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex)
+void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex, std::array<std::mutex, arraySize>& gameMutexes)
 {
     bool client_disconnected = false;
     bool message_sent_success;
@@ -115,6 +116,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
             return;
         }
+
         const bool lobbyAdded = critical::addLobbyToLobbies(lobbies, client_lobby, dataMutex);
         if (!lobbyAdded)
         {
@@ -179,11 +181,13 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
             if (hostPickedRed)
             {
+                gameMutexes[client_id].lock(); // NOTE: make sure that guest stalls until gamestate is added (or disconnect) to try to get the lock
                 GameState gamestate = GameState(client_player, guest);
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
                     std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
+                    gameMutexes[client_id].unlock();
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
@@ -192,7 +196,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
                 // TODO: somehow ensure that the guest doesn't try to access the gamestate array before the host creates it
 
-                auto [wantToPlay, disconnectedTmp2] = playGameRed(client_id, gamestate, client_fd, gamestates, lobbies, dataMutex);
+                auto [wantToPlay, disconnectedTmp2] = playGameRed(client_id, gamestate, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
 
                 // TODO: figure out a way for one thread to know that the other client has disconnected.
                 // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
@@ -205,6 +209,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             }
             else // lobby owner picked blue
             {
+                gameMutexes[client_id].unlock(); // Unlock so that the red player can get it.
                 GameState gamestate = GameState(guest, client_player);
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
@@ -217,10 +222,11 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, gamestate, client_fd, gamestates, lobbies, dataMutex);
+                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, gamestate, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
+                    // TODO: either make sure you don't have the lock or you free it here
                     critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, lobbies, client_id, dataMutex, disconnectMutex);
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
@@ -257,6 +263,7 @@ int main()
     std::array<Player, arraySize> players;
     std::array<GameState, arraySize> gameStates;
     std::array<Lobby, arraySize> lobbies;
+    std::array<std::mutex, arraySize> gameMutexes;
 
     std::queue<std::uint8_t> freeIDs = std::queue<std::uint8_t>();
     initializeFreeIDs(freeIDs, arraySize);
@@ -268,7 +275,7 @@ int main()
         {
             continue;
         }
-        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(lobbies), std::ref(freeIDs), std::ref(dataMutex), std::ref(disconnectMutex));
+        std::thread clientThread(manageClient, client_fd, std::ref(players), std::ref(gameStates), std::ref(lobbies), std::ref(freeIDs), std::ref(dataMutex), std::ref(disconnectMutex), std::ref(gameMutexes));
         clientThread.detach();
     }
 
