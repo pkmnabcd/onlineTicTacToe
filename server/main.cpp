@@ -22,47 +22,78 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
     }
 }
 
-std::tuple<GameState, bool> updateGamestateAndCheckForWinner(bool redMove, std::uint8_t location, GameState previousState)
+GameState updateGamestate(bool redMove, std::uint8_t location, GameState previousState)
 {
-    return std::make_tuple(GameState(), true);
+    return GameState();
 }
 
-std::tuple<bool, bool> playGameRed(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
+std::tuple<bool, bool> playGameRed(std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
      * Returns [wantsToPlayAgain: bool, disconnected: bool]
      */
-    // TODO: add code that loops to make this easier
-    // TODO: add code that updates and checks the gamestate
 
-    GameState gamestate = initialGamestate;
-    bool message_sent_success;
-    bool client_disconnected;
-
-    // TODO: fill this out
     // NOTE: red player starts out with the lock already
-    while (!winner::winner(gamestate.m_board))
+    while (true)
     {
-    }
+        // Check to see if your opponent already won/stalemated
+        // TODO: probably add check for if opponent disconnected and make sure the state isn't the same as when you finished the loop (making sure you didn't skip their lock)
+        GameState gamestate = gamestates[hostID];
+        std::uint8_t theWinner = winner::winner(gamestate.m_board);
+        if (theWinner != 0)
+        {
+            // TODO: send msg of success or failure
+            gameMutexes[hostID].unlock();
+            break;
+        }
+        else
+        {
+            // TODO: send msg of continuing game
+        }
 
-    message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[hostID].m_board);
-    if (!message_sent_success)
-    {
-        std::print(stderr, "Error: message send unsucessful\n");
-        return std::make_tuple(false, true);
-    }
+        // Get your move
+        bool message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[hostID].m_board);
+        if (!message_sent_success)
+        {
+            std::print(stderr, "Error: message send unsucessful\n");
+            gameMutexes[hostID].unlock();
+            return std::make_tuple(false, true);
+        }
 
-    auto [hostMove, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
-    client_disconnected = disconnectedTmp0;
-    if (client_disconnected)
-    {
-        return std::make_tuple(false, true);
+        auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
+        bool client_disconnected = disconnectedTmp0;
+        if (client_disconnected)
+        {
+            gameMutexes[hostID].unlock();
+            return std::make_tuple(false, true);
+        }
+
+        // Update gamestate and see if you win/stalemate
+        gamestate = updateGamestate(true, move, gamestate);
+        gamestates[hostID] = gamestate;
+        theWinner = winner::winner(gamestate.m_board);
+        if (theWinner != 0)
+        {
+            // TODO: send msg of success or failure
+            gameMutexes[hostID].unlock();
+            break;
+        }
+        else
+        {
+            // TODO: send msg of continuing game
+        }
+
+        // Let the other player get their turn
+        gameMutexes[hostID].unlock();
+        std::this_thread::yield();
+        gameMutexes[hostID].lock();
     }
+    // TODO: receive msg of whether they want to play again
 
     return std::make_tuple(false, true);
 }
 
-std::tuple<bool, bool> playGameBlue(std::uint8_t hostID, GameState initialGamestate, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
+std::tuple<bool, bool> playGameBlue(std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
 {
     // NOTE: blue player doesn't start out with the lock already
     return std::make_tuple(false, true);
@@ -196,7 +227,17 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
                 // TODO: somehow ensure that the guest doesn't try to access the gamestate array before the host creates it
 
-                auto [wantToPlay, disconnectedTmp2] = playGameRed(client_id, gamestate, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                auto [wantToPlay, disconnectedTmp2] = playGameRed(client_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                client_disconnected = disconnectedTmp2;
+                if (client_disconnected)
+                {
+                    critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, lobbies, client_id, dataMutex, disconnectMutex);
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayer(players, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd);
+                    return;
+                }
 
                 // TODO: figure out a way for one thread to know that the other client has disconnected.
                 // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
@@ -209,7 +250,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             }
             else // lobby owner picked blue
             {
-                gameMutexes[client_id].unlock(); // Unlock so that the red player can get it.
                 GameState gamestate = GameState(guest, client_player);
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
@@ -222,7 +262,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, gamestate, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                auto [wantToPlay, disconnectedTmp2] = playGameBlue(guest.m_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
