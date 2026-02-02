@@ -13,6 +13,10 @@ class GameState
     GameState(Player redPlayer, Player bluePlayer);
     GameState();
 
+    bool operator==(const GameState& rhs) const;
+
+    bool isInitialState();
+
     StraightBoard m_board;
     Player m_redPlayer;
     Player m_bluePlayer;

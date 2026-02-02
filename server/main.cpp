@@ -39,24 +39,47 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
      */
 
     bool isFirstTurn = true;
+    GameState gamestate = gamestates[hostID];
 
     while (true)
     {
-        if (!isFirstTurn || !isRed) // skip the following if it's the 1st turn and you're red
+        if (!isFirstTurn) // skip the board progress checking if it's the 1st turn and you're red
         {
             // TODO: probably add check for if opponent disconnected and make sure the state isn't the same as when you finished the loop (making sure you didn't skip their lock)
+            // NOTE: if you're here you should have the lock
+            bool yourTurnNow = false;
+            while (!yourTurnNow)
+            {
+                // Wait if the opponent hasn't taken their turn yet
+                if (gamestate == gamestates[hostID]) // TODO: add code to check if opponent disconnected
+                {
+                    gameMutexes[hostID].unlock();
+                    std::this_thread::yield();
+                    gameMutexes[hostID].lock();
+                }
+                else
+                {
+                    yourTurnNow = true;
+                }
+            }
         }
         else
         {
-            if (!isRed) // if you're blue and it's first turn, take lock
+            if (!isRed) // if you're blue and it's first turn, wait while gamestate is in initial state then take lock
             {
-                // TODO: wait while gamestate is still initial state
+                bool redDidFirstTurn = false;
+                while (!redDidFirstTurn) // TODO: add code to check if red disconnected
+                {
+                    gameMutexes[hostID].lock();
+                    redDidFirstTurn = gamestates[hostID].isInitialState();
+                    gameMutexes[hostID].unlock();
+                }
                 gameMutexes[hostID].lock();
             }
         }
 
         // Check to see if your opponent already won/stalemated
-        GameState gamestate = gamestates[hostID];
+        gamestate = gamestates[hostID];
         std::uint8_t theWinner = winner::winner(gamestate.m_board);
         if (theWinner != 0)
         {
@@ -100,6 +123,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
         {
             // TODO: send msg of continuing game
         }
+        isFirstTurn = false;
 
         // Let the other player get their turn
         gameMutexes[hostID].unlock();
@@ -221,6 +245,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                 return;
             }
+            // TODO: end code to move
 
             if (hostPickedRed)
             {
@@ -237,9 +262,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                     return;
                 }
-                // TODO: somehow ensure that the guest doesn't try to access the gamestate array before the host creates it
 
-                auto [wantToPlay, disconnectedTmp2] = playGame(true, client_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                auto [wantToContinue, disconnectedTmp2] = playGame(true, client_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
@@ -251,14 +275,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                // TODO: figure out a way for one thread to know that the other client has disconnected.
-                // Maybe access the lobby m_someoneDisconnected member atomically and see if the other thread has already changed it,
-                // then you can either clean up the lobby or leave that to the other thread.
-
-                // For normal synchronization it should be good enough to just have one thread wait to receive the new state from the server
-                // while the other thread considers the input it will give to the server.
-                // Then they will just check each time if the other player is still there.
-                // So each thread will compare their copy of gamestate with the one in gamestates[] and once it changes, they know they can go
+                wantToPlay = wantToContinue;
             }
             else // lobby owner picked blue
             {
@@ -274,7 +291,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                auto [wantToPlay, disconnectedTmp2] = playGame(false, guest.m_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                auto [wantToContinue, disconnectedTmp2] = playGame(false, guest.m_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
@@ -286,6 +303,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd);
                     return;
                 }
+
+                wantToPlay = wantToContinue;
             }
         }
     }
@@ -297,8 +316,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         // Send client their assigned color from the host
         // Do the game logic
     }
-
-    // TODO: If joining, give a list of lobbies that need a second player.
 
     critical::addIDToQueue(freeIDs, client_id, dataMutex);
     networking::closeFd(client_fd);

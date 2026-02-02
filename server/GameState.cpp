@@ -23,3 +23,21 @@ GameState::GameState(Player redPlayer, Player bluePlayer) :
     m_isValid(true)
 {
 }
+
+bool GameState::operator==(const GameState& rhs) const
+{
+    for (std::uint8_t i = 0; i < m_board.size(); i++)
+    {
+        if (m_board[i] != rhs.m_board[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool GameState::isInitialState()
+{
+    GameState initialState = GameState(Player(), Player());
+    return *this == initialState;
+}
