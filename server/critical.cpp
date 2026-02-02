@@ -125,6 +125,8 @@ void critical::invalidateGamestateIfOtherPlayerDisconnected(std::array<GameState
     {
         critical::invalidateGamestate(gamestates, hostID, dataMut);
     }
+    // TODO: fix a bug here. This will supposedly change someoneDisconnected in lobbies to true before you dothe same check again when deciding whether to clean up the lobby. It's also a race condition.
+    // Either make one function to clean both or have separate someoneDisconnected members
     else
     {
         lobbies[hostID].m_someoneDisconnected = true;

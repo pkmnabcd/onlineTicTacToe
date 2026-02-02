@@ -231,6 +231,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             return;
         }
 
+        // TODO: have some sort of code that confirms if your opponent doesn't want to play anymore (disconnected)
         bool wantToPlay = true;
         while (wantToPlay)
         {
