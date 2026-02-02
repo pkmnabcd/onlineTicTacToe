@@ -119,16 +119,19 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         }
 
         // Wait until someone joins the lobby
+        Player guest;
         while (true)
         {
-            if (client_lobby.m_guest.m_isValidPlayer)
+            // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would constantly block every thread.
+            if (client_lobby.m_guest.m_isValid)
             {
-                // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would slow every thread way down.
-                break;
+                guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
+                if (guest.m_isValid)
+                {
+                    break;
+                }
             }
         }
-        // TODO: it's possible that I'll need to check the m_isValidPlayer again atomically just in case
-        Player guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
 
         message_sent_success = matchmaking::sendHostTheGuestName(client_fd, guest.m_name);
         if (!message_sent_success)

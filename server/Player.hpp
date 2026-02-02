@@ -13,5 +13,5 @@ class Player
     std::string m_name;
     std::uint8_t m_id;
     int m_socket;
-    bool m_isValidPlayer;
+    bool m_isValid;
 };
