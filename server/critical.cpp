@@ -117,3 +117,16 @@ void critical::invalidateGamestate(std::array<GameState, arraySize>& gamestates,
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
     gamestates[hostID].m_isValid = false;
 }
+
+void critical::invalidateGamestateIfOtherPlayerDisconnected(std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut)
+{
+    const std::lock_guard<std::mutex> lock(disconnectMut); // gets released when function returns
+    if (lobbies[hostID].m_someoneDisconnected)
+    {
+        critical::invalidateGamestate(gamestates, hostID, dataMut);
+    }
+    else
+    {
+        lobbies[hostID].m_someoneDisconnected = true;
+    }
+}

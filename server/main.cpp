@@ -155,7 +155,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         bool wantToPlay = true;
         while (wantToPlay)
         {
-            // TODO: move this to the not hosting code
+            // TODO: move this to the not hosting code. Have them check the lobby.someoneDisconnected and the gamestate.isvalid before doing this
             message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed);
             if (!message_sent_success)
             {
@@ -180,6 +180,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                     return;
                 }
+                // TODO: somehow ensure that the guest doesn't try to access the gamestate array before the host creates it
 
                 auto [wantToPlay, disconnectedTmp2] = playGameRed(client_id, gamestate, client_fd, gamestates, dataMutex);
 
@@ -210,7 +211,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
-                    critical::invalidateGamestate(gamestates, client_id, dataMutex); // TODO: might need similar to lobby where I check if other player disconnected first. Also may want to use disconnect mutex for that
+                    critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, lobbies, client_id, dataMutex, disconnectMutex);
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
