@@ -26,6 +26,11 @@ GameState::GameState(Player redPlayer, Player bluePlayer) :
 
 bool GameState::operator==(const GameState& rhs) const
 {
+    if (!m_isValid || !rhs.m_isValid)
+    {
+        return false;
+    }
+
     for (std::uint8_t i = 0; i < m_board.size(); i++)
     {
         if (m_board[i] != rhs.m_board[i])

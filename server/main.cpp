@@ -101,6 +101,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
             return std::make_tuple(false, true);
         }
 
+        // TODO: make function that gets move, validates it agains the board state, and loops until client disconnects or it's right
         auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
         bool client_disconnected = disconnectedTmp0;
         if (client_disconnected)
