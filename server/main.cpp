@@ -43,6 +43,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
 
     while (true)
     {
+        // NOTE: this whole if-else is just to make sure threads are blocked so turn order is correct.
         if (!isFirstTurn) // skip the board progress checking if it's the 1st turn and you're red
         {
             // TODO: probably add check for if opponent disconnected and make sure the state isn't the same as when you finished the loop (making sure you didn't skip their lock)
@@ -102,6 +103,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
         }
 
         // TODO: make function that gets move, validates it agains the board state, and loops until client disconnects or it's right
+        // Currently, it assumes a valid move.
         auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
         bool client_disconnected = disconnectedTmp0;
         if (client_disconnected)
@@ -111,7 +113,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
         }
 
         // Update gamestate and see if you win/stalemate
-        gamestate = updateGamestate(true, move, gamestate);
+        gamestate = updateGamestate(isRed, move, gamestate);
         gamestates[hostID] = gamestate;
         theWinner = winner::winner(gamestate.m_board);
         if (theWinner != 0)

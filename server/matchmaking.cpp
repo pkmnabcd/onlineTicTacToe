@@ -117,7 +117,7 @@ std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
     int numbytes = networking::receiveAll(client_fd, chooseMoveBuffer, chooseMoveBufferLen);
 
     std::uint8_t moveChoice;
-    if (isDigit(chooseMoveBuffer[0]))
+    if (isDigit(chooseMoveBuffer[0])) // Should be 1-9. 0 is invalid
     {
         moveChoice = chooseMoveBuffer[0] - 48;
         if (moveChoice == 0)
