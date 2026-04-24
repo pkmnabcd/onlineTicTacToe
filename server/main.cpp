@@ -39,6 +39,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
      */
 
     bool isFirstTurn = true;
+    bool message_sent_success = false;
     GameState gamestate = gamestates[hostID];
 
     while (true)
@@ -84,17 +85,31 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
         std::uint8_t theWinner = winner::winner(gamestate.m_board);
         if (theWinner != 0)
         {
-            // TODO: send msg of success or failure
+            // send msg of success or failure
+            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, static_cast<char>(theWinner));
+            if (!message_sent_success)
+            {
+                std::print(stderr, "Error: message send unsucessful\n");
+                gameMutexes[hostID].unlock();
+                return std::make_tuple(false, true);
+            }
             gameMutexes[hostID].unlock();
             break;
         }
         else
         {
-            // TODO: send msg of continuing game
+            // send msg of continuing game
+            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, 'C');
+            if (!message_sent_success)
+            {
+                std::print(stderr, "Error: message send unsucessful\n");
+                gameMutexes[hostID].unlock();
+                return std::make_tuple(false, true);
+            }
         }
 
         // Get your move
-        bool message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[hostID].m_board);
+        message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[hostID].m_board);
         if (!message_sent_success)
         {
             std::print(stderr, "Error: message send unsucessful\n");

@@ -140,3 +140,15 @@ std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
     }
     return std::make_tuple(moveChoice, disconnected);
 }
+
+bool matchmaking::sendClientGameContOrEnd(int client_fd, char winnerOrCont)
+{
+    const int bufferLen = 2;
+    char buffer[bufferLen];
+    // NOTE: 'C' for continue, 'X' for red wins, 'O' for blue wins
+    buffer[0] = winnerOrCont;
+    buffer[1] = '\0';
+    int bytesSent;
+    bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
+    return bytesSent == bufferLen;
+}
