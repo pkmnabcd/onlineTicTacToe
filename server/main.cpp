@@ -278,8 +278,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 std::print(stderr, "Error: message send unsucessful\n");
                 critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                 critical::invalidatePlayer(players, client_id, dataMutex);
-                    // TODO: add another function that doesn't free up the disconnected player's ID until the other player frees up the gamestate and lobby
-                    // to prevent another player from getting that ID while the player's opponent could be afk or something.
+                // TODO: add another function that doesn't free up the disconnected player's ID until the other player frees up the gamestate and lobby
+                // to prevent another player from getting that ID while the player's opponent could be afk or something.
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
                 networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                 return;
