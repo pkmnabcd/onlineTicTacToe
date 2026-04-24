@@ -292,6 +292,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 GameState gamestate = GameState(client_player, guest);
                 // TODO: think carefully about which player's ID is the index so that 'gamestates' 'lobbies' and the close___IfOtherPlayerDisconnected
                 // functions expect the same things and look in the right place to mark disconneccted or ready to free.
+                // Should the convention be that red's index is used? or the host's index is used? Probably host index right?
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
@@ -327,6 +328,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 GameState gamestate = GameState(guest, client_player);
                 // TODO: think carefully about which player's ID is the index so that 'gamestates' 'lobbies' and the close___IfOtherPlayerDisconnected
                 // functions expect the same things and look in the right place to mark disconneccted or ready to free.
+                // Should the convention be that red's index is used? or the host's index is used? Probably host index right?
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
