@@ -58,6 +58,7 @@ bool matchmaking::sendHostTheGuestName(int client_fd, std::string guestName)
 std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
 {
     bool disconnected = false;
+    // TODO: probably make this length 2 for the null byte?
     const int chooseColorBufferLen = 1;
     char chooseColorBuffer[chooseColorBufferLen];
     int numbytes = networking::receiveAll(client_fd, chooseColorBuffer, chooseColorBufferLen);
@@ -76,6 +77,7 @@ std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
 
 bool matchmaking::sendGuestTheHostColor(int client_fd, bool hostChoseRed)
 {
+    // TODO: probably make this length 2 for the null byte?
     const int bufferLen = 1;
     int bytesSent;
     if (hostChoseRed)
@@ -91,6 +93,8 @@ bool matchmaking::sendGuestTheHostColor(int client_fd, bool hostChoseRed)
 
 bool matchmaking::sendBoardState(int client_fd, StraightBoard board)
 {
+    // TODO: probably make this length 10 for the null byte?
+    // and make sure /0 at end
     const int bufferLen = 9;
     char buffer[bufferLen];
 
@@ -112,6 +116,7 @@ bool isDigit(std::uint8_t ch)
 std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
 {
     bool disconnected = false;
+    // TODO: probably make this length 2 for the null byte?
     const int chooseMoveBufferLen = 1;
     char chooseMoveBuffer[chooseMoveBufferLen];
     int numbytes = networking::receiveAll(client_fd, chooseMoveBuffer, chooseMoveBufferLen);
