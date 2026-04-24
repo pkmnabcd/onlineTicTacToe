@@ -290,6 +290,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             {
                 gameMutexes[client_id].lock(); // NOTE: make sure that guest stalls until gamestate is added (or disconnect) to try to get the lock
                 GameState gamestate = GameState(client_player, guest);
+                // TODO: think carefully about which player's ID is the index so that 'gamestates' 'lobbies' and the close___IfOtherPlayerDisconnected
+                // functions expect the same things and look in the right place to mark disconneccted or ready to free.
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
@@ -323,12 +325,16 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             else // lobby owner picked blue
             {
                 GameState gamestate = GameState(guest, client_player);
+                // TODO: think carefully about which player's ID is the index so that 'gamestates' 'lobbies' and the close___IfOtherPlayerDisconnected
+                // functions expect the same things and look in the right place to mark disconneccted or ready to free.
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
                     std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
+                    // TODO: add another function that doesn't free up the disconnected player's ID until the other player frees up the gamestate and lobby
+                    // to prevent another player from getting that ID while the player's opponent could be afk or something.
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                     return;
@@ -342,6 +348,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, lobbies, client_id, dataMutex, disconnectMutex);
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
+                    // TODO: add another function that doesn't free up the disconnected player's ID until the other player frees up the gamestate and lobby
+                    // to prevent another player from getting that ID while the player's opponent could be afk or something.
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
                     return;
