@@ -133,13 +133,27 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
         theWinner = winner::winner(gamestate.m_board);
         if (theWinner != 0)
         {
-            // TODO: send msg of success or failure
+            // send msg of success or failure
+            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, static_cast<char>(theWinner));
+            if (!message_sent_success)
+            {
+                std::print(stderr, "Error: message send unsucessful\n");
+                gameMutexes[hostID].unlock();
+                return std::make_tuple(false, true);
+            }
             gameMutexes[hostID].unlock();
             break;
         }
         else
         {
-            // TODO: send msg of continuing game
+            // send msg of continuing game
+            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, 'C');
+            if (!message_sent_success)
+            {
+                std::print(stderr, "Error: message send unsucessful\n");
+                gameMutexes[hostID].unlock();
+                return std::make_tuple(false, true);
+            }
         }
         isFirstTurn = false;
 
