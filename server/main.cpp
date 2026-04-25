@@ -38,8 +38,6 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
      * Blue: should not have lock before this function. Checks its state against initial state until it changes then it can take the lock
      */
 
-    // TODO: when writing the client, make sure that while it waits for new board state it can also recieve opp disconnect signal
-
     bool isFirstTurn = true;
     bool message_sent_success = false;
     bool oppDisconnected = false;
