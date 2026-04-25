@@ -286,6 +286,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             }
             // TODO: end code to move
 
+            // TODO: probably combine this with the else - side since it's nearly identical.
             if (hostPickedRed)
             {
                 gameMutexes[client_id].lock(); // NOTE: make sure that guest stalls until gamestate is added (or disconnect) to try to get the lock
