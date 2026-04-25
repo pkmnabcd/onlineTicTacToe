@@ -118,17 +118,15 @@ void critical::invalidateGamestate(std::array<GameState, arraySize>& gamestates,
     gamestates[hostID].m_isValid = false;
 }
 
-void critical::invalidateGamestateIfOtherPlayerDisconnected(std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut)
+void critical::invalidateGamestateIfOtherPlayerDisconnected(std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut)
 {
     const std::lock_guard<std::mutex> lock(disconnectMut); // gets released when function returns
-    if (lobbies[hostID].m_someoneDisconnected)
+    if (gamestates[hostID].m_someoneDisconnected)
     {
         critical::invalidateGamestate(gamestates, hostID, dataMut);
     }
-    // TODO: fix a bug here. This will supposedly change someoneDisconnected in lobbies to true before you dothe same check again when deciding whether to clean up the lobby. It's also a race condition.
-    // Either make one function to clean both or have separate someoneDisconnected members
     else
     {
-        lobbies[hostID].m_someoneDisconnected = true;
+        gamestates[hostID].m_someoneDisconnected = true;
     }
 }
