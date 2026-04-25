@@ -5,6 +5,7 @@
 #include "Player.hpp"
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <queue>
 #include <mutex>
@@ -138,7 +139,7 @@ void critical::invalidatePlayerOnceLobbyIsInvalid(std::array<Player, arraySize>&
     while (lobbies[playerID].m_isValid) // wait until lobby is invalidated
     {
             mut.unlock();
-            std::this_thread::yield();
+            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
             mut.lock();
     }
     players[playerID].m_isValid = false;
