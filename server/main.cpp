@@ -42,6 +42,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
 
     bool isFirstTurn = true;
     bool message_sent_success = false;
+    bool oppDisconnected = false;
     GameState gamestate = gamestates[hostID];
 
     while (true)
@@ -62,13 +63,18 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
                     if (gamestates[hostID].m_someoneDisconnected)
                     {
                         // TODO: send a message saying oppisgone or something. Make sure it has same length as board state
-                        // TODO: break out of the loops and go to the code it asks if you want to play again.
+                        oppDisconnected = true;
+                        break; // out of wait loop
                     }
                 }
                 else
                 {
                     yourTurnNow = true;
                 }
+            }
+            if (oppDisconnected)
+            {
+                break; // out of game loop
             }
         }
         else // Is the first turn
@@ -82,13 +88,18 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
                     if (gamestates[hostID].m_someoneDisconnected)
                     {
                         // TODO: send a message saying oppisgone or something. Make sure it has same length as board state
-                        // TODO: break out of the loops and go to the code it asks if you want to play again.
+                        oppDisconnected = true;
+                        break; // out of wait loop
                     }
                     waitingForRed = gamestates[hostID].isInitialState();
                     if (waitingForRed)
                     {
                         gameMutexes[hostID].unlock();
                     }
+                }
+                if (oppDisconnected)
+                {
+                    break; // out of game loop
                 }
             }
         }
