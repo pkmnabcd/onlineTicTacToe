@@ -27,7 +27,7 @@ GameState updateGamestate(bool redMove, std::uint8_t location, GameState previou
     return GameState();
 }
 
-std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::mutex& dataMutex, std::array<std::mutex, arraySize>& gameMutexes)
+std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
      * Returns [wantsToPlayAgain: bool, disconnected: bool]
@@ -320,7 +320,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 return;
             }
 
-            auto [wantToContinue, disconnectedTmp2] = playGame(hostPickedRed, client_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+            auto [wantToContinue, disconnectedTmp2] = playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
             client_disconnected = disconnectedTmp2;
             if (client_disconnected)
             {
