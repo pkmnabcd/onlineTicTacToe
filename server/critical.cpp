@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <queue>
 #include <mutex>
+#include <thread>
 #include <tuple>
 
 
@@ -129,4 +130,17 @@ void critical::invalidateGamestateIfOtherPlayerDisconnected(std::array<GameState
     {
         gamestates[hostID].m_someoneDisconnected = true;
     }
+}
+
+void critical::invalidatePlayerOnceLobbyIsInvalid(std::array<Player, arraySize>& players, std::array<Lobby, arraySize>& lobbies, std::uint8_t playerID, std::mutex& mut)
+{
+    mut.lock();
+    while (lobbies[playerID].m_isValid) // wait until lobby is invalidated
+    {
+            mut.unlock();
+            std::this_thread::yield();
+            mut.lock();
+    }
+    players[playerID].m_isValid = false;
+    mut.unlock();
 }
