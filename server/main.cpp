@@ -38,6 +38,8 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
      * Blue: should not have lock before this function. Checks its state against initial state until it changes then it can take the lock
      */
 
+    // TODO: when writing the client, make sure that while it waits for new board state it can also recieve opp disconnect signal
+
     bool isFirstTurn = true;
     bool message_sent_success = false;
     GameState gamestate = gamestates[hostID];
@@ -58,6 +60,11 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
                     gameMutexes[hostID].unlock();
                     std::this_thread::yield();
                     gameMutexes[hostID].lock();
+                    if (gamestates[hostID].m_someoneDisconnected)
+                    {
+                        // TODO: send a message saying oppisgone or something. Make sure it has same length as board state
+                        // TODO: break out of the loops and go to the code it asks if you want to play again.
+                    }
                 }
                 else
                 {
@@ -73,12 +80,17 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
                 while (waitingForRed) // TODO: add code to check if red disconnected
                 {
                     gameMutexes[hostID].lock();
-                    // TODO: make sure to also check if game is valid, make sure the game has the same red and blue player, etc or something
-                    // to make sure we don't accidentally check an invalid game or something
+                    if (gamestates[hostID].m_someoneDisconnected)
+                    {
+                        // TODO: send a message saying oppisgone or something. Make sure it has same length as board state
+                        // TODO: break out of the loops and go to the code it asks if you want to play again.
+                    }
                     waitingForRed = gamestates[hostID].isInitialState();
-                    gameMutexes[hostID].unlock();
+                    if (waitingForRed)
+                    {
+                        gameMutexes[hostID].unlock();
+                    }
                 }
-                gameMutexes[hostID].lock();
             }
         }
 
@@ -119,7 +131,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
             return std::make_tuple(false, true);
         }
 
-        // TODO: make function that gets move, validates it agains the board state, and loops until client disconnects or it's right
+        // TODO: make function that gets move, validates it agains the board state, and loops until client disconnects or it's right.
         // Currently, it assumes a valid move.
         auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
         bool client_disconnected = disconnectedTmp0;
