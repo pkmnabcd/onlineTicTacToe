@@ -49,13 +49,12 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
         // NOTE: this whole if-else is just to make sure threads are blocked so turn order is correct.
         if (!isFirstTurn) // skip the board progress checking if it's the 1st turn and you're red
         {
-            // TODO: probably add check for if opponent disconnected and make sure the state isn't the same as when you finished the loop (making sure you didn't skip their lock)
             // NOTE: if you're here you should have the lock
             bool yourTurnNow = false;
             while (!yourTurnNow)
             {
                 // Wait if the opponent hasn't taken their turn yet
-                if (gamestate == gamestates[hostID]) // TODO: add code to check if opponent disconnected
+                if (gamestate == gamestates[hostID])
                 {
                     gameMutexes[hostID].unlock();
                     std::this_thread::yield();
@@ -77,7 +76,7 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
             if (!isRed) // if you're blue and it's first turn, wait while gamestate is in initial state then take lock to take your turn
             {
                 bool waitingForRed = true;
-                while (waitingForRed) // TODO: add code to check if red disconnected
+                while (waitingForRed)
                 {
                     gameMutexes[hostID].lock();
                     if (gamestates[hostID].m_someoneDisconnected)
