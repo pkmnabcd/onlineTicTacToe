@@ -62,7 +62,13 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
                     gameMutexes[hostID].lock();
                     if (gamestates[hostID].m_someoneDisconnected)
                     {
-                        // TODO: send a message saying oppisgone or something. Make sure it has same length as board state
+                        message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
+                        if (!message_sent_success)
+                        {
+                            std::print(stderr, "Error: message send unsucessful\n");
+                            gameMutexes[hostID].unlock();
+                            return std::make_tuple(false, true, true);
+                        }
                         oppDisconnected = true;
                         break; // out of wait loop
                     }
@@ -87,7 +93,13 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
                     gameMutexes[hostID].lock();
                     if (gamestates[hostID].m_someoneDisconnected)
                     {
-                        // TODO: send a message saying oppisgone or something. Make sure it has same length as board state
+                        message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
+                        if (!message_sent_success)
+                        {
+                            std::print(stderr, "Error: message send unsucessful\n");
+                            gameMutexes[hostID].unlock();
+                            return std::make_tuple(false, true, true);
+                        }
                         oppDisconnected = true;
                         break; // out of wait loop
                     }
@@ -110,7 +122,7 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         if (theWinner != 0)
         {
             // send msg of success or failure
-            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, static_cast<char>(theWinner));
+            message_sent_success = matchmaking::sendClientGameStatus(client_fd, static_cast<char>(theWinner));
             if (!message_sent_success)
             {
                 std::print(stderr, "Error: message send unsucessful\n");
@@ -123,7 +135,7 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         else
         {
             // send msg of continuing game
-            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, 'C');
+            message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'C');
             if (!message_sent_success)
             {
                 std::print(stderr, "Error: message send unsucessful\n");
@@ -158,7 +170,7 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         if (theWinner != 0)
         {
             // send msg of success or failure
-            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, static_cast<char>(theWinner));
+            message_sent_success = matchmaking::sendClientGameStatus(client_fd, static_cast<char>(theWinner));
             if (!message_sent_success)
             {
                 std::print(stderr, "Error: message send unsucessful\n");
@@ -171,7 +183,7 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         else
         {
             // send msg of continuing game
-            message_sent_success = matchmaking::sendClientGameContOrEnd(client_fd, 'C');
+            message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'C');
             if (!message_sent_success)
             {
                 std::print(stderr, "Error: message send unsucessful\n");
