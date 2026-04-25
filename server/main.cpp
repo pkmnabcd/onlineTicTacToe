@@ -290,9 +290,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             {
                 gameMutexes[client_id].lock(); // NOTE: make sure that guest stalls until gamestate is added (or disconnect) to try to get the lock
                 GameState gamestate = GameState(client_player, guest);
-                // TODO: think carefully about which player's ID is the index so that 'gamestates' 'lobbies' and the close___IfOtherPlayerDisconnected
-                // functions expect the same things and look in the right place to mark disconneccted or ready to free.
-                // Should the convention be that red's index is used? or the host's index is used? Probably host index right?
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
@@ -326,9 +323,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             else // lobby owner picked blue
             {
                 GameState gamestate = GameState(guest, client_player);
-                // TODO: think carefully about which player's ID is the index so that 'gamestates' 'lobbies' and the close___IfOtherPlayerDisconnected
-                // functions expect the same things and look in the right place to mark disconneccted or ready to free.
-                // Should the convention be that red's index is used? or the host's index is used? Probably host index right?
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
@@ -342,7 +336,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                auto [wantToContinue, disconnectedTmp2] = playGame(false, guest.m_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
+                auto [wantToContinue, disconnectedTmp2] = playGame(false, client_id, client_fd, gamestates, lobbies, dataMutex, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 if (client_disconnected)
                 {
