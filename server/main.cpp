@@ -65,9 +65,9 @@ std::tuple<bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, 
                 }
             }
         }
-        else
+        else // Is the first turn
         {
-            if (!isRed) // if you're blue and it's first turn, wait while gamestate is in initial state then take lock
+            if (!isRed) // if you're blue and it's first turn, wait while gamestate is in initial state then take lock to take your turn
             {
                 bool redDidFirstTurn = false;
                 while (!redDidFirstTurn) // TODO: add code to check if red disconnected
@@ -272,7 +272,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         while (wantToPlay)
         {
             // TODO: move this to the not hosting code. Have them check the lobby.someoneDisconnected and the gamestate.isvalid before doing this
-            message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed);
+            message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed); // TODO: change to lobby host's fd
             if (!message_sent_success)
             {
                 std::print(stderr, "Error: message send unsucessful\n");
