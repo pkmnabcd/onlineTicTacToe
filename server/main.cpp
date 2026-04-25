@@ -186,6 +186,8 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         std::this_thread::yield();
         gameMutexes[hostID].lock();
     }
+    // TODO: At this point you have the lock. Make sure to release it here or at some point after the function finishes.
+    // Consider how you want to clean up the gamestate
     // TODO: receive msg of whether they want to play again
     bool playAgain = true;
 
