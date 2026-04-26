@@ -22,9 +22,30 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
     }
 }
 
-GameState updateGamestate(bool redMove, std::uint8_t location, GameState previousState)
+std::tuple<GameState, bool> updateGamestate(bool redMove, std::uint8_t location, GameState previousState)
 {
-    return GameState();
+    /*
+     * Returns [updatedGamestate: GameState, invalid: bool]
+     */
+
+    using StraightBoard = std::array<std::string, 9>;
+    char newChar = (redMove) ? 'X' : 'O'; // X is red, O is blue
+
+    GameState gamestate = previousState;
+    StraightBoard board = gamestate.m_board;
+    std::string str = board[location - 1]; // location is 1-indexed while arrays are 0-indexed
+    char val = str[0];
+
+    if (val - 48 == location) // What's supposed to happen
+    {
+        board[location - 1] = std::string(1, newChar);
+        gamestate.m_board = board;
+        return std::make_tuple(gamestate, false);
+    }
+    else // This means there is something in the spot already
+    {
+        return std::make_tuple(GameState(), true);
+    }
 }
 
 std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
@@ -162,7 +183,15 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         }
 
         // Update gamestate and see if you win/stalemate
-        gamestate = updateGamestate(isRed, move, gamestate);
+        auto [newGamestate, invalidMove] = updateGamestate(isRed, move, gamestate);
+        gamestate = newGamestate;
+        if (invalidMove)
+        {
+            std::print(stderr, "Error: bad move detected\n");
+            gameMutexes[hostID].unlock();
+            return std::make_tuple(false, true, false);
+        }
+
         gamestates[hostID] = gamestate;
         theWinner = winner::winner(gamestate.m_board);
         if (theWinner != 0)
