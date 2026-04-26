@@ -148,6 +148,9 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
                 gameMutexes[hostID].unlock();
                 return std::make_tuple(false, true, false);
             }
+            // TODO: this seems to mean that player is unlocked when winner is found.
+            // Figure out if we want to unlock when exiting correclty or not.
+            // I'm thinking yes right now.
             gameMutexes[hostID].unlock();
             break;
         }
@@ -172,8 +175,6 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
             return std::make_tuple(false, true, false);
         }
 
-        // TODO: make function that gets move, validates it agains the board state, and loops until client disconnects or it's right.
-        // Currently, it assumes a valid move.
         auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
         bool client_disconnected = disconnectedTmp0;
         if (client_disconnected)
@@ -204,6 +205,9 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
                 gameMutexes[hostID].unlock();
                 return std::make_tuple(false, true, false);
             }
+            // TODO: this seems to mean that player is unlocked when winner is found.
+            // Figure out if we want to unlock when exiting correclty or not.
+            // I'm thinking yes right now.
             gameMutexes[hostID].unlock();
             break;
         }
@@ -226,7 +230,9 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         gameMutexes[hostID].lock();
     }
     // TODO: At this point you have the lock. Make sure to release it here or at some point after the function finishes.
-    // Consider how you want to clean up the gamestate
+    // Consider how you want to clean up the gamestate.
+    // Maybe keep the lock (except in error states) so that both users can figure out whether they want to play again?
+    // Or maybe, add some member to lobby or something?
     // TODO: receive msg of whether they want to play again
     bool playAgain = true;
 
