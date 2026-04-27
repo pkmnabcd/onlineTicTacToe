@@ -234,9 +234,15 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
     // Maybe keep the lock (except in error states) so that both users can figure out whether they want to play again?
     // Or maybe, add some member to lobby or something?
     // TODO: receive msg of whether they want to play again
-    bool playAgain = true;
+    auto [playAgain, client_disconnected] = matchmaking::getClientPlayAgain(client_fd);
+    if (client_disconnected)
+    {
+        std::print(stderr, "Error: bad playAgain detected\n");
+        gameMutexes[hostID].unlock();
+        return std::make_tuple(false, true, oppDisconnected);
+    }
 
-    return std::make_tuple(playAgain, false, oppDisconnected);
+    return std::make_tuple(playAgain, client_disconnected, oppDisconnected);
 }
 
 void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex, std::array<std::mutex, arraySize>& gameMutexes)

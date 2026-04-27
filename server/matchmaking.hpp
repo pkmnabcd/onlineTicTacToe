@@ -18,4 +18,5 @@ namespace matchmaking
     bool sendBoardState(int client_fd, StraightBoard board);
     std::tuple<std::uint8_t, bool> getClientMove(int client_fd);
     bool sendClientGameStatus(int client_fd, char winnerOrContOrOppDiscon);
+    std::tuple<bool, bool> getClientPlayAgain(int client_fd);
 } // namespace matchmaking

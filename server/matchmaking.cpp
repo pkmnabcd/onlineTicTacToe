@@ -153,3 +153,31 @@ bool matchmaking::sendClientGameStatus(int client_fd, char winnerOrContOrOppDisc
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
 }
+
+std::tuple<bool, bool> matchmaking::getClientPlayAgain(int client_fd)
+{
+    bool disconnected = false;
+    // TODO: probably make this length 2 for the null byte?
+    const int playAgainBufferLen = 1;
+    char playAgainBuffer[playAgainBufferLen];
+    int numbytes = networking::receiveAll(client_fd, playAgainBuffer, playAgainBufferLen);
+
+    bool playAgain = false;
+    if (playAgainBuffer[0] == 'Y')
+    {
+        playAgain = true;
+    }
+    else if (playAgainBuffer[0] == 'N')
+    {
+        playAgain = false;
+    }
+    else
+    {
+        disconnected = true;
+    }
+    if (numbytes == -1 || numbytes == 0)
+    {
+        disconnected = true;
+    }
+    return std::make_tuple(playAgain, disconnected);
+}
