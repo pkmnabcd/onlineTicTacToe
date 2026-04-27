@@ -130,6 +130,10 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
                 }
                 if (oppDisconnected)
                 {
+                    // TODO: this seems to mean that player is unlocked when exiting the loop.
+                    // Figure out if we want to unlock when exiting correctly or not.
+                    // I'm thinking yes right now.
+                    gameMutexes[hostID].unlock();
                     break; // out of game loop
                 }
             }
@@ -149,7 +153,7 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
                 return std::make_tuple(false, true, false);
             }
             // TODO: this seems to mean that player is unlocked when winner is found.
-            // Figure out if we want to unlock when exiting correclty or not.
+            // Figure out if we want to unlock when exiting correctly or not.
             // I'm thinking yes right now.
             gameMutexes[hostID].unlock();
             break;
@@ -206,7 +210,7 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
                 return std::make_tuple(false, true, false);
             }
             // TODO: this seems to mean that player is unlocked when winner is found.
-            // Figure out if we want to unlock when exiting correclty or not.
+            // Figure out if we want to unlock when exiting correctly or not.
             // I'm thinking yes right now.
             gameMutexes[hostID].unlock();
             break;
@@ -229,11 +233,7 @@ std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int clien
         std::this_thread::yield();
         gameMutexes[hostID].lock();
     }
-    // TODO: At this point you have the lock. Make sure to release it here or at some point after the function finishes.
-    // Consider how you want to clean up the gamestate.
-    // Maybe keep the lock (except in error states) so that both users can figure out whether they want to play again?
-    // Or maybe, add some member to lobby or something?
-    // TODO: receive msg of whether they want to play again
+
     auto [playAgain, client_disconnected] = matchmaking::getClientPlayAgain(client_fd);
     if (client_disconnected)
     {
@@ -395,6 +395,12 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 networking::closeFd(client_fd);
                 return;
             }
+
+            // TODO: Paths:
+            // 1. Doesn't want to play anymore: clean up the thread. Can probably add that to the above cleanup
+            // 2. Wants to play but opp disconnected or doesn't: put back into loop where client is waiting for connection.
+            //      Make sure to reset the gamestate and lobby and stuff to what they would be at the beginning of that loop.
+            // 3. Wants to play and opp does want to play: reset gamestate and lobby to what is correct for that scenario
 
             // TODO: Check if opp disconnected or doesn't want to play anymore so you know to go back to waiting for a player
             if (oppDisconnected)
