@@ -5,6 +5,8 @@
 Lobby::Lobby() :
     m_host(Player()),
     m_guest(Player()),
+    m_hostPlayAgain(Lobby::PlayAgain::Undecided),
+    m_guestPlayAgain(Lobby::PlayAgain::Undecided),
     m_isValid(false),
     m_waitingForHost(false),
     m_waitingForGuest(false),
@@ -15,6 +17,8 @@ Lobby::Lobby() :
 Lobby::Lobby(Player host) :
     m_host(host),
     m_guest(Player()),
+    m_hostPlayAgain(Lobby::PlayAgain::Undecided),
+    m_guestPlayAgain(Lobby::PlayAgain::Undecided),
     m_isValid(true),
     m_waitingForHost(false),
     m_waitingForGuest(false),
