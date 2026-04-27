@@ -82,49 +82,25 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             return;
         }
 
-        // Wait until someone joins the lobby
-        Player guest;
-        while (true)
+        bool hostWantsToPlay = true;
+        while (hostWantsToPlay)
         {
-            // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would constantly block every thread.
-            if (client_lobby.m_guest.m_isValid)
+            // Wait until someone joins the lobby
+            Player guest;
+            while (true)
             {
-                guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
-                if (guest.m_isValid)
+                // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would constantly block every thread.
+                if (client_lobby.m_guest.m_isValid)
                 {
-                    break;
+                    guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
+                    if (guest.m_isValid)
+                    {
+                        break;
+                    }
                 }
             }
-        }
 
-        message_sent_success = matchmaking::sendHostTheGuestName(client_fd, guest.m_name);
-        if (!message_sent_success)
-        {
-            std::print(stderr, "Error: message send unsucessful\n");
-            critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
-            critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
-            critical::addIDToQueue(freeIDs, client_id, dataMutex);
-            networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
-            return;
-        }
-
-        auto [hostPickedRed, disconnectedTmp1] = matchmaking::hostChoosesRed(client_fd);
-        client_disconnected = disconnectedTmp1;
-        if (client_disconnected)
-        {
-            critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
-            critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
-            critical::addIDToQueue(freeIDs, client_id, dataMutex);
-            networking::closeFd(client_fd);
-            return;
-        }
-
-        // TODO: have some sort of code that confirms if your opponent doesn't want to play anymore (or disconnected)
-        bool wantToPlay = true;
-        while (wantToPlay)
-        {
-            // TODO: move this to the not hosting code. Have them check the lobby.someoneDisconnected and the gamestate.isvalid before doing this
-            message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed); // TODO: change to lobby host's fd
+            message_sent_success = matchmaking::sendHostTheGuestName(client_fd, guest.m_name);
             if (!message_sent_success)
             {
                 std::print(stderr, "Error: message send unsucessful\n");
@@ -134,61 +110,94 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                 return;
             }
-            // TODO: end code to move
 
-            GameState gamestate;
-            if (hostPickedRed)
+            // TODO: have some sort of code that confirms if your opponent doesn't want to play anymore (or disconnected)
+            bool oppWantsToPlay = true;
+            while (oppWantsToPlay)
             {
-                gameMutexes[client_id].lock(); // NOTE: make sure that guest stalls until gamestate is added (or disconnect) to try to get the lock
-                gamestate = GameState(client_player, guest);
-            }
-            else
-            {
-                gamestate = GameState(guest, client_player);
-            }
-            const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
-            if (!gamestateAdded)
-            {
-                std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
+                auto [hostPickedRed, disconnectedTmp1] = matchmaking::hostChoosesRed(client_fd);
+                client_disconnected = disconnectedTmp1;
+                if (client_disconnected)
+                {
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd);
+                    return;
+                }
+
+                // TODO: move this to the not hosting code. Have them check the lobby.someoneDisconnected and the gamestate.isvalid before doing this
+                message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed); // TODO: change to lobby host's fd
+                if (!message_sent_success)
+                {
+                    std::print(stderr, "Error: message send unsucessful\n");
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    return;
+                }
+                // TODO: end code to move
+
+                GameState gamestate;
                 if (hostPickedRed)
                 {
-                    gameMutexes[client_id].unlock();
+                    gameMutexes[client_id].lock(); // NOTE: make sure that guest stalls until gamestate is added (or disconnect) to try to get the lock
+                    gamestate = GameState(client_player, guest);
                 }
-                critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
-                critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
-                critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
-                return;
-            }
+                else
+                {
+                    gamestate = GameState(guest, client_player);
+                }
+                const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
+                if (!gamestateAdded)
+                {
+                    std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
+                    if (hostPickedRed)
+                    {
+                        gameMutexes[client_id].unlock();
+                    }
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    return;
+                }
 
-            auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
-            client_disconnected = disconnectedTmp2;
-            wantToPlay = wantToContinue;
-            if (client_disconnected || !wantToPlay)
-            {
-                // TODO: either make sure you don't have the lock or you free it here
-                critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
-                critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
-                critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
-                critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                networking::closeFd(client_fd);
-                return;
-            }
-
-            // TODO: Paths:
-            // 1. Doesn't want to play anymore: clean up the thread. Can probably add that to the above cleanup
-            // 2. Wants to play but opp disconnected or doesn't: put back into loop where client is waiting for connection.
-            //      Make sure to reset the gamestate and lobby and stuff to what they would be at the beginning of that loop.
-            // 3. Wants to play and opp does want to play: reset gamestate and lobby to what is correct for that scenario
-
-            // TODO: Check if opp disconnected or doesn't want to play anymore so you know to go back to waiting for a player
-            if (oppDisconnected)
-            {
-                // TODO: handle going back to code where host waits for opponent
-            }
-            // TODO: make sure gamestate gets cleaned up and reset or something but not before opp is finished
-
-        }
+                auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
+                client_disconnected = disconnectedTmp2;
+                hostWantsToPlay = wantToContinue;
+                // TODO: Paths:
+                // 1. Doesn't want to play anymore: clean up the thread. Can probably add that to the above cleanup
+                // 2. Wants to play but opp disconnected or doesn't: put back into loop where client is waiting for connection.
+                //      Make sure to reset the gamestate and lobby and stuff to what they would be at the beginning of that loop.
+                // 3. Wants to play and opp does want to play: reset gamestate and lobby to what is correct for that scenario.
+                if (client_disconnected || !hostWantsToPlay)
+                {
+                    // TODO: either make sure you don't have the lock or you free it here
+                    critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
+                    critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd);
+                    return;
+                }
+                else // Host wants to play again
+                {
+                    // TODO: Add the code to the following to wait and see if opp decides if want to play or not or disconnects.
+                    // It will modify 'oppWantsToPlay'
+                    if (oppDisconnected)
+                    {
+                        oppWantsToPlay = false;
+                        // TODO: add cleanup for lobby and gamestate to prep for a new player in the lobby
+                    }
+                    else
+                    {
+                        // TODO: add cleanup for lobby and gamestate to prep for a new game
+                    }
+                }
+            } // end opp wants to play loop
+        } // end host wants to play loop
     }
     else // client wants to join existing lobby
     {
