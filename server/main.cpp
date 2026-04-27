@@ -163,7 +163,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
             auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
             client_disconnected = disconnectedTmp2;
-            if (client_disconnected)
+            wantToPlay = wantToContinue;
+            if (client_disconnected || !wantToPlay)
             {
                 // TODO: either make sure you don't have the lock or you free it here
                 critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
@@ -187,8 +188,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             }
             // TODO: make sure gamestate gets cleaned up and reset or something but not before opp is finished
 
-            wantToPlay = wantToContinue;
-            // TODO: If doesn't want to play, make sure lobby gets cleaned up
         }
     }
     else // client wants to join existing lobby
