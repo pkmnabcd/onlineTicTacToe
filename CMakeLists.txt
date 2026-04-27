@@ -40,7 +40,8 @@ set(SERVER_HEADER_FILES
     server/critical.hpp
     server/matchmaking.hpp
     server/networking.hpp
-    server/winner.hpp
+    server/play.hpp
+    server/settings.hpp
 )
 set(ALL_HEADER_FILES
     ${GAME_HEADER_FILES}
@@ -67,7 +68,7 @@ set(SERVER_SOURCE_FILES
     server/critical.cpp
     server/matchmaking.cpp
     server/networking.cpp
-    server/winner.cpp
+    server/play.cpp
 )
 set(ALL_CLIENT_FILES
     ${GAME_CLIENT_FILES}
@@ -87,7 +88,7 @@ add_executable(${SERVER} ${SERVER_HEADER_FILES} ${SERVER_SOURCE_FILES} server/ma
 add_executable(${UNIT_TEST_RUNNER} ${ALL_HEADER_FILES} ${ALL_SOURCE_FILES} ${UNIT_TEST_FILES})
 
 #
-# We want the C++ 20 standard for our project
+# We want the C++ 23 standard for our project
 #
 set_property(TARGET ${CLIENT} PROPERTY CXX_STANDARD 23)
 set_property(TARGET ${SERVER} PROPERTY CXX_STANDARD 23)

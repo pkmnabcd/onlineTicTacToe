@@ -3,14 +3,13 @@
 #include "GameState.hpp"
 #include "Lobby.hpp"
 #include "Player.hpp"
+#include "settings.hpp"
 
 #include <array>
 #include <cstdint>
 #include <mutex>
 #include <queue>
 #include <tuple>
-
-const std::size_t arraySize = static_cast<std::size_t>(UINT8_MAX) + 1;
 
 // TODO: maybe make it more consistent that when invalidating/closing something
 // you just need the right index.
