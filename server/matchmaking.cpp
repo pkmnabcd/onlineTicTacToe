@@ -181,3 +181,14 @@ std::tuple<bool, bool> matchmaking::getClientPlayAgain(int client_fd)
     }
     return std::make_tuple(playAgain, disconnected);
 }
+
+bool matchmaking::sendClientOppPlayAgain(int client_fd, bool oppPlayAgain)
+{
+    const int bufferLen = 2;
+    char buffer[bufferLen];
+    buffer[0] = (oppPlayAgain) ? 'Y' : 'N';
+    buffer[1] = '\0';
+    int bytesSent;
+    bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
+    return bytesSent == bufferLen;
+}

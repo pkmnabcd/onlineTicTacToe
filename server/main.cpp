@@ -203,12 +203,21 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         oppWantsToPlay = false;
                         lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::Undecided; // reset PlayAgain
                         lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided;
-                        // TODO: add message to host saying that you'll wait for a new person to join
                     }
                     else // opp wants to play again
                     {
                         lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided; // TODO: add the opposite of this to the guest code
-                        // TODO: add message to host saying that you'll play again
+                    }
+                    message_sent_success = matchmaking::sendClientOppPlayAgain(client_fd, oppWantsToPlay);
+                    if (!message_sent_success)
+                    {
+                        std::print(stderr, "Error: message send unsucessful\n");
+                        critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
+                        critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                        critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
+                        critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                        networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                        return;
                     }
                 }
             } // end opp wants to play loop
