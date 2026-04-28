@@ -172,9 +172,11 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 // 2. Wants to play but opp disconnected or doesn't: put back into loop where client is waiting for connection.
                 //      Make sure to reset the gamestate and lobby and stuff to what they would be at the beginning of that loop.
                 // 3. Wants to play and opp does want to play: reset gamestate and lobby to what is correct for that scenario.
+
                 if (client_disconnected || !hostWantsToPlay)
                 {
                     // TODO: either make sure you don't have the lock or you free it here
+                    lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::No;
                     critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
@@ -184,16 +186,29 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
                 else // Host wants to play again
                 {
-                    // TODO: Add the code to the following to wait and see if opp decides if want to play or not or disconnects.
-                    // It will modify 'oppWantsToPlay'
-                    if (oppDisconnected)
+                    lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::Yes;
+                    auto guestPlayAgain = Lobby::PlayAgain::Undecided;
+                    while (!oppDisconnected) // wait for opp to decide if play again or no or disconnects
+                    {
+                        if (lobbies[client_id].m_guestPlayAgain != Lobby::PlayAgain::Undecided)
+                        {
+                            guestPlayAgain = lobbies[client_id].m_guestPlayAgain;
+                            break;
+                        }
+                        oppDisconnected = lobbies[client_id].m_someoneDisconnected;
+                    }
+                    gamestates[client_id].m_isValid = false;
+                    if (oppDisconnected || guestPlayAgain == Lobby::PlayAgain::No)
                     {
                         oppWantsToPlay = false;
-                        // TODO: add cleanup for lobby and gamestate to prep for a new player in the lobby
+                        lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::Undecided; // reset PlayAgain
+                        lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided;
+                        // TODO: add message to host saying that you'll wait for a new person to join
                     }
-                    else
+                    else // opp wants to play again
                     {
-                        // TODO: add cleanup for lobby and gamestate to prep for a new game
+                        lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided; // TODO: add the opposite of this to the guest code
+                        // TODO: add message to host saying that you'll play again
                     }
                 }
             } // end opp wants to play loop
