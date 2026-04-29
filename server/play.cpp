@@ -134,6 +134,74 @@ std::tuple<GameState, bool> updateGamestate(bool redMove, std::uint8_t location,
     }
 }
 
+std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
+{
+    /*
+     * This function waits until your opponent moves or disconnects
+     * Returns [client_disconnected: bool, oppDisconnected: bool]
+     */
+
+    bool message_sent_success = false;
+    bool oppDisconnected = false;
+    if (!isFirstTurn) // skip the board progress checking only if it's the 1st turn and you're red
+    {
+        // NOTE: if you're here you should have the lock
+        bool yourTurnNow = false;
+        while (!yourTurnNow)
+        {
+            // Wait if the opponent hasn't taken their turn yet
+            if (gamestate == gamestates[hostID])
+            {
+                gameMutexes[hostID].unlock();
+                std::this_thread::yield();
+                gameMutexes[hostID].lock();
+                if (gamestates[hostID].m_someoneDisconnected)
+                {
+                    message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
+                    if (!message_sent_success)
+                    {
+                        return std::make_tuple(true, true);
+                    }
+                    oppDisconnected = true;
+                    break; // out of wait loop
+                }
+            }
+            else
+            {
+                yourTurnNow = true;
+            }
+        }
+    }
+    else // Is the first turn
+    {
+        if (!isRed) // if you're blue and it's first turn, wait while gamestate is in initial state then take lock to take your turn
+        {
+            bool waitingForRed = true;
+            while (waitingForRed)
+            {
+                gameMutexes[hostID].lock();
+                if (gamestates[hostID].m_someoneDisconnected)
+                {
+                    message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
+                    if (!message_sent_success)
+                    {
+                        return std::make_tuple(true, true);
+                    }
+                    oppDisconnected = true;
+                    break; // out of wait loop
+                }
+                waitingForRed = gamestates[hostID].isInitialState();
+                if (waitingForRed)
+                {
+                    gameMutexes[hostID].unlock();
+                    std::this_thread::yield();
+                }
+            }
+        }
+    }
+    return std::make_tuple(false, oppDisconnected);
+}
+
 std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
@@ -148,80 +216,25 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
     bool isFirstTurn = true;
     bool message_sent_success = false;
     bool oppDisconnected = false;
+    bool client_disconnected = false;;
     GameState gamestate = gamestates[hostID];
 
     while (true)
     {
-        // NOTE: this whole if-else is just to make sure threads are blocked so turn order is correct.
-        if (!isFirstTurn) // skip the board progress checking if it's the 1st turn and you're red
+        // Wait for your turn to move
+        auto [client_disconnectedTmp0, oppDisconnectedTmp] = waitTurn(isFirstTurn, gamestate, isRed, hostID, client_fd, gamestates, gameMutexes);
+        oppDisconnected = oppDisconnectedTmp;
+        client_disconnected = client_disconnectedTmp0;
+        if (client_disconnected)
         {
-            // NOTE: if you're here you should have the lock
-            // TODO: maybe make the waiting loops into a function?
-            bool yourTurnNow = false;
-            while (!yourTurnNow)
-            {
-                // Wait if the opponent hasn't taken their turn yet
-                if (gamestate == gamestates[hostID])
-                {
-                    gameMutexes[hostID].unlock();
-                    std::this_thread::yield();
-                    gameMutexes[hostID].lock();
-                    if (gamestates[hostID].m_someoneDisconnected)
-                    {
-                        message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
-                        if (!message_sent_success)
-                        {
-                            std::print(stderr, "Error: message send unsucessful\n");
-                            gameMutexes[hostID].unlock();
-                            return std::make_tuple(false, true, true);
-                        }
-                        oppDisconnected = true;
-                        break; // out of wait loop
-                    }
-                }
-                else
-                {
-                    yourTurnNow = true;
-                }
-            }
-            if (oppDisconnected)
-            {
-                gameMutexes[hostID].unlock();
-                break; // out of game loop
-            }
+            std::print(stderr, "Error: message send unsucessful\n");
+            gameMutexes[hostID].unlock();
+            return std::make_tuple(false, client_disconnected, oppDisconnected);
         }
-        else // Is the first turn
+        if (oppDisconnected)
         {
-            if (!isRed) // if you're blue and it's first turn, wait while gamestate is in initial state then take lock to take your turn
-            {
-                bool waitingForRed = true;
-                while (waitingForRed)
-                {
-                    gameMutexes[hostID].lock();
-                    if (gamestates[hostID].m_someoneDisconnected)
-                    {
-                        message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
-                        if (!message_sent_success)
-                        {
-                            std::print(stderr, "Error: message send unsucessful\n");
-                            gameMutexes[hostID].unlock();
-                            return std::make_tuple(false, true, true);
-                        }
-                        oppDisconnected = true;
-                        break; // out of wait loop
-                    }
-                    waitingForRed = gamestates[hostID].isInitialState();
-                    if (waitingForRed)
-                    {
-                        gameMutexes[hostID].unlock();
-                    }
-                }
-                if (oppDisconnected)
-                {
-                    gameMutexes[hostID].unlock();
-                    break; // out of game loop
-                }
-            }
+            gameMutexes[hostID].unlock();
+            break; // out of game loop
         }
 
         // Check to see if your opponent already won/stalemated
@@ -262,7 +275,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
         }
 
         auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
-        bool client_disconnected = disconnectedTmp0;
+        client_disconnected = disconnectedTmp0;
         if (client_disconnected)
         {
             gameMutexes[hostID].unlock();
@@ -314,7 +327,8 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
     }
 
     // NOTE: make sure that game lock is unlocked when getting here
-    auto [playAgain, client_disconnected] = matchmaking::getClientPlayAgain(client_fd);
+    auto [playAgain, client_disconnectedTmp1] = matchmaking::getClientPlayAgain(client_fd);
+    client_disconnected = client_disconnectedTmp1;
     if (client_disconnected)
     {
         std::print(stderr, "Error: bad playAgain detected\n");
