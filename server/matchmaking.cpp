@@ -8,12 +8,9 @@
 #include <tuple>
 
 using StraightBoard = std::array<std::string, 9>;
-
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
 
-// TODO: see if I need to add 1 to each buffer len for \0
-// TODO: I'll definitely need to add 1 to all the lens to account for \0.
 
 std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t client_id)
 {
@@ -58,8 +55,7 @@ bool matchmaking::sendHostTheGuestName(int client_fd, std::string guestName)
 std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
 {
     bool disconnected = false;
-    // TODO: probably make this length 2 for the null byte?
-    const int chooseColorBufferLen = 1;
+    const int chooseColorBufferLen = 2;
     char chooseColorBuffer[chooseColorBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, chooseColorBuffer, chooseColorBufferLen);
 
@@ -77,8 +73,7 @@ std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
 
 bool matchmaking::sendGuestTheHostColor(int client_fd, bool hostChoseRed)
 {
-    // TODO: probably make this length 2 for the null byte?
-    const int bufferLen = 1;
+    const int bufferLen = 2;
     int bytesSent;
     if (hostChoseRed)
     {
@@ -93,9 +88,8 @@ bool matchmaking::sendGuestTheHostColor(int client_fd, bool hostChoseRed)
 
 bool matchmaking::sendBoardState(int client_fd, StraightBoard board)
 {
-    // TODO: probably make this length 10 for the null byte?
-    // and make sure \0 at end
-    const int bufferLen = 9;
+    // NOTE: 9 for board, +1 for null terminal
+    const int bufferLen = 10;
     char buffer[bufferLen] = "";
 
     for (std::uint8_t i = 0; i < board.size(); i++)
@@ -116,8 +110,7 @@ bool isDigit(std::uint8_t ch)
 std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
 {
     bool disconnected = false;
-    // TODO: probably make this length 2 for the null byte?
-    const int chooseMoveBufferLen = 1;
+    const int chooseMoveBufferLen = 2;
     char chooseMoveBuffer[chooseMoveBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, chooseMoveBuffer, chooseMoveBufferLen);
 
@@ -148,7 +141,6 @@ bool matchmaking::sendClientGameStatus(int client_fd, char winnerOrContOrOppDisc
     // NOTE: 'C' for continue, 'X' for red wins, 'O' for blue wins,
     // 'S' for stalemate, 'D' for opponent disconnected
     buffer[0] = winnerOrContOrOppDiscon;
-    buffer[1] = '\0';
     int bytesSent;
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
@@ -157,8 +149,7 @@ bool matchmaking::sendClientGameStatus(int client_fd, char winnerOrContOrOppDisc
 std::tuple<bool, bool> matchmaking::getClientPlayAgain(int client_fd)
 {
     bool disconnected = false;
-    // TODO: probably make this length 2 for the null byte?
-    const int playAgainBufferLen = 1;
+    const int playAgainBufferLen = 2;
     char playAgainBuffer[playAgainBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, playAgainBuffer, playAgainBufferLen);
 
@@ -187,7 +178,6 @@ bool matchmaking::sendClientOppPlayAgain(int client_fd, bool oppPlayAgain)
     const int bufferLen = 2;
     char buffer[bufferLen] = "";
     buffer[0] = (oppPlayAgain) ? 'Y' : 'N';
-    buffer[1] = '\0';
     int bytesSent;
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
