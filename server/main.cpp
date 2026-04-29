@@ -177,6 +177,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         oppDisconnected = lobbies[client_id].m_someoneDisconnected;
                     }
                     gamestates[client_id].m_isValid = false;
+
+                    // Prepare to wait or play with opp again, depending on opp choice
                     if (oppDisconnected || guestPlayAgain == Lobby::PlayAgain::No)
                     {
                         oppWantsToPlay = false;
@@ -204,7 +206,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     }
     else // client wants to join existing lobby
     {
-        // TODO:
+        // TODO: Code for Joining a lobby
         // Read list of lobbies and send to client.
         // Expect client to either disconnect, try to join a lobby (which may or may not work if the lobby is now full or doesn't exist), or refresh the list.
         // Send client their assigned color from the host
