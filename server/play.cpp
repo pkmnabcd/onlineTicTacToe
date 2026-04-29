@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <mutex>
 #include <print>
 #include <string>
@@ -145,64 +146,44 @@ std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRe
      * Returns [client_disconnected: bool, oppDisconnected: bool]
      */
 
+    // Figure out what function you use to decide if you wait.
+    // Returning true means you should wait. False means you're done waiting.
+    std::function<bool(GameState, GameState)> waitFunc;
+    if (isFirstTurn && !isRed) // first turn and blue
+    {
+        waitFunc = []( [[maybe_unused]]GameState savedState, GameState updatedState) -> bool { return updatedState.isInitialState(); };
+    }
+    else if (isFirstTurn) // first turn and red
+    {
+        waitFunc = []( [[maybe_unused]]GameState savedState, [[maybe_unused]]GameState updatedState) -> bool { return false; };
+    }
+    else // not first turn
+    {
+        waitFunc = [](GameState savedState, GameState updatedState) -> bool { return savedState == updatedState; };
+    }
+
     bool message_sent_success = false;
     bool oppDisconnected = false;
-    if (!isFirstTurn) // skip the board progress checking only if it's the 1st turn and you're red
+    // NOTE: if you're here you should have the lock
+
+    // Wait until the opponent takes their turn
+    while (!waitFunc(gamestate, gamestates[hostID]))
     {
-        // NOTE: if you're here you should have the lock
-        bool yourTurnNow = false;
-        while (!yourTurnNow)
+        gameMutexes[hostID].unlock();
+        std::this_thread::yield();
+        gameMutexes[hostID].lock();
+        if (gamestates[hostID].m_someoneDisconnected)
         {
-            // Wait if the opponent hasn't taken their turn yet
-            if (gamestate == gamestates[hostID])
+            message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
+            if (!message_sent_success)
             {
-                gameMutexes[hostID].unlock();
-                std::this_thread::yield();
-                gameMutexes[hostID].lock();
-                if (gamestates[hostID].m_someoneDisconnected)
-                {
-                    message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
-                    if (!message_sent_success)
-                    {
-                        return std::make_tuple(true, true);
-                    }
-                    oppDisconnected = true;
-                    break; // out of wait loop
-                }
+                return std::make_tuple(true, true);
             }
-            else
-            {
-                yourTurnNow = true;
-            }
+            oppDisconnected = true;
+            break; // out of wait loop
         }
     }
-    else // Is the first turn
-    {
-        if (!isRed) // if you're blue and it's first turn, wait while gamestate is in initial state then take lock to take your turn
-        {
-            bool waitingForRed = true;
-            while (waitingForRed)
-            {
-                gameMutexes[hostID].lock();
-                if (gamestates[hostID].m_someoneDisconnected)
-                {
-                    message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
-                    if (!message_sent_success)
-                    {
-                        return std::make_tuple(true, true);
-                    }
-                    oppDisconnected = true;
-                    break; // out of wait loop
-                }
-                waitingForRed = gamestates[hostID].isInitialState();
-                if (waitingForRed)
-                {
-                    gameMutexes[hostID].unlock();
-                    std::this_thread::yield();
-                }
-            }
-        }
-    }
+
     return std::make_tuple(false, oppDisconnected);
 }
 
@@ -216,6 +197,9 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
      * Red: has lock before getting in this function. The initial state at the start of its loop should be the same as its state, but only that time
      * Blue: should not have lock before this function. Checks its state against initial state until it changes then it can take the lock
      */
+
+    // TODO: make sure red no longer comes in with the lock
+    gameMutexes[hostID].lock();
 
     bool isFirstTurn = true;
     bool message_sent_success = false;

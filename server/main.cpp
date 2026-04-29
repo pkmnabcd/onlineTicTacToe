@@ -121,7 +121,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                // TODO: move this to the not hosting code. Have them check the lobby.someoneDisconnected and the gamestate.isvalid before doing this
+                // TODO: move this to the not hosting code. Have them check the lobby.someoneDisconnected and the gamestate.isValid before doing this
+                // to make sure that the non host can't accidentally start playing before the gamestate is properly initialized.
                 message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed); // TODO: change to lobby host's fd
                 if (!message_sent_success)
                 {
