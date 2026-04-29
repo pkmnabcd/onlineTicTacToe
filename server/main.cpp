@@ -55,10 +55,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         return;
     }
 
-    // TODO: If Hosting, create a 'lobby' in which they can play games.
-    // Lobby can only have the two players, but do this so games can be repeated and
-    // players can swap being the red and blue player
-
     if (isHosting)
     {
         Lobby client_lobby = Lobby(client_player);
@@ -111,7 +107,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 return;
             }
 
-            // TODO: have some sort of code that confirms if your opponent doesn't want to play anymore (or disconnected)
             bool oppWantsToPlay = true;
             while (oppWantsToPlay)
             {
@@ -167,11 +162,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 hostWantsToPlay = wantToContinue;
-                // TODO: Paths:
-                // 1. Doesn't want to play anymore: clean up the thread. Can probably add that to the above cleanup
-                // 2. Wants to play but opp disconnected or doesn't: put back into loop where client is waiting for connection.
-                //      Make sure to reset the gamestate and lobby and stuff to what they would be at the beginning of that loop.
-                // 3. Wants to play and opp does want to play: reset gamestate and lobby to what is correct for that scenario.
 
                 if (client_disconnected || !hostWantsToPlay)
                 {
