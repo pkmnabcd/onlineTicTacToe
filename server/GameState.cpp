@@ -43,7 +43,7 @@ bool GameState::operator==(const GameState& rhs) const
     return true;
 }
 
-bool GameState::isInitialState()
+bool GameState::isInitialState() const
 {
     GameState initialState = GameState(Player(), Player());
     return *this == initialState;

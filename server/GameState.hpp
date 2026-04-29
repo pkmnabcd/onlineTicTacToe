@@ -15,7 +15,7 @@ class GameState
 
     bool operator==(const GameState& rhs) const;
 
-    bool isInitialState();
+    bool isInitialState() const;
 
     StraightBoard m_board;
     Player m_redPlayer;

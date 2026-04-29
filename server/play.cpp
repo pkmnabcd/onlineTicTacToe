@@ -146,18 +146,18 @@ std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRe
 
     // Figure out what function you use to decide if you wait.
     // Returning true means you should wait. False means you're done waiting.
-    std::function<bool(GameState, GameState)> waitFunc;
+    std::function<bool(const GameState&, const GameState&)> waitFunc;
     if (isFirstTurn && !isRed) // first turn and blue
     {
-        waitFunc = []( [[maybe_unused]]GameState savedState, GameState updatedState) -> bool { return updatedState.isInitialState(); };
+        waitFunc = []( [[maybe_unused]]const GameState& savedState, const GameState& updatedState) -> bool { return updatedState.isInitialState(); };
     }
     else if (isFirstTurn) // first turn and red
     {
-        waitFunc = []( [[maybe_unused]]GameState savedState, [[maybe_unused]]GameState updatedState) -> bool { return false; };
+        waitFunc = []( [[maybe_unused]]const GameState& savedState, [[maybe_unused]]const GameState& updatedState) -> bool { return false; };
     }
     else // not first turn
     {
-        waitFunc = [](GameState savedState, GameState updatedState) -> bool { return savedState == updatedState; };
+        waitFunc = [](const GameState& savedState, const GameState& updatedState) -> bool { return savedState == updatedState; };
     }
 
     bool message_sent_success = false;
