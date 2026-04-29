@@ -135,24 +135,12 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
                 // TODO: end code to move
 
-                GameState gamestate;
-                if (hostPickedRed)
-                {
-                    gameMutexes[client_id].lock(); // NOTE: make sure that guest stalls until gamestate is added (or disconnect) to try to get the lock
-                    gamestate = GameState(client_player, guest);
-                }
-                else
-                {
-                    gamestate = GameState(guest, client_player);
-                }
+                GameState gamestate = (hostPickedRed) ? GameState(client_player, guest) : GameState(guest, client_player);
+
                 const bool gamestateAdded = critical::addGameStateToGameStates(gamestates, gamestate, client_id, dataMutex);
                 if (!gamestateAdded)
                 {
                     std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
-                    if (hostPickedRed)
-                    {
-                        gameMutexes[client_id].unlock();
-                    }
                     critical::closeLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
@@ -160,7 +148,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
-                // TODO: refactor playGame's waiting function so that we don't have different, nearly identical lines for first turn
                 auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 hostWantsToPlay = wantToContinue;

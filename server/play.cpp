@@ -135,16 +135,14 @@ std::tuple<GameState, bool> updateGamestate(bool redMove, std::uint8_t location,
     }
 }
 
-// TODO: refactor this so that we don't have different, nearly identical lines for first turn.
-// Probably make it so red no longer has lock when coming in to keep things consistent.
-// Might possibly need a small if statement for the first turn, where blue just compares with initial state
-// while red doesn't wait at all.
 std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
      * This function waits until your opponent moves or disconnects
      * Returns [client_disconnected: bool, oppDisconnected: bool]
      */
+
+    // NOTE: if you're here you should have the lock
 
     // Figure out what function you use to decide if you wait.
     // Returning true means you should wait. False means you're done waiting.
@@ -164,7 +162,6 @@ std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRe
 
     bool message_sent_success = false;
     bool oppDisconnected = false;
-    // NOTE: if you're here you should have the lock
 
     // Wait until the opponent takes their turn
     while (!waitFunc(gamestate, gamestates[hostID]))
@@ -198,7 +195,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
      * Blue: should not have lock before this function. Checks its state against initial state until it changes then it can take the lock
      */
 
-    // TODO: make sure red no longer comes in with the lock
     gameMutexes[hostID].lock();
 
     bool isFirstTurn = true;
