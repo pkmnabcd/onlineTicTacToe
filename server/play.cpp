@@ -156,6 +156,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
         if (!isFirstTurn) // skip the board progress checking if it's the 1st turn and you're red
         {
             // NOTE: if you're here you should have the lock
+            // TODO: maybe make the waiting loops into a function?
             bool yourTurnNow = false;
             while (!yourTurnNow)
             {
@@ -185,6 +186,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
             }
             if (oppDisconnected)
             {
+                gameMutexes[hostID].unlock();
                 break; // out of game loop
             }
         }
@@ -216,9 +218,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
                 }
                 if (oppDisconnected)
                 {
-                    // TODO: this seems to mean that player is unlocked when exiting the loop.
-                    // Figure out if we want to unlock when exiting correctly or not.
-                    // I'm thinking yes right now.
                     gameMutexes[hostID].unlock();
                     break; // out of game loop
                 }
@@ -238,9 +237,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
                 gameMutexes[hostID].unlock();
                 return std::make_tuple(false, true, false);
             }
-            // TODO: this seems to mean that player is unlocked when winner is found.
-            // Figure out if we want to unlock when exiting correctly or not.
-            // I'm thinking yes right now.
             gameMutexes[hostID].unlock();
             break;
         }
@@ -295,9 +291,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
                 gameMutexes[hostID].unlock();
                 return std::make_tuple(false, true, false);
             }
-            // TODO: this seems to mean that player is unlocked when winner is found.
-            // Figure out if we want to unlock when exiting correctly or not.
-            // I'm thinking yes right now.
             gameMutexes[hostID].unlock();
             break;
         }
@@ -320,11 +313,11 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
         gameMutexes[hostID].lock();
     }
 
+    // NOTE: make sure that game lock is unlocked when getting here
     auto [playAgain, client_disconnected] = matchmaking::getClientPlayAgain(client_fd);
     if (client_disconnected)
     {
         std::print(stderr, "Error: bad playAgain detected\n");
-        gameMutexes[hostID].unlock();
         return std::make_tuple(false, true, oppDisconnected);
     }
 
