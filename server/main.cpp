@@ -159,6 +159,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     return;
                 }
 
+                // TODO: refactor playGame's waiting function so that we don't have different, nearly identical lines for first turn
                 auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 hostWantsToPlay = wantToContinue;

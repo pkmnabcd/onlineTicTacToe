@@ -134,6 +134,10 @@ std::tuple<GameState, bool> updateGamestate(bool redMove, std::uint8_t location,
     }
 }
 
+// TODO: refactor this so that we don't have different, nearly identical lines for first turn.
+// Probably make it so red no longer has lock when coming in to keep things consistent.
+// Might possibly need a small if statement for the first turn, where blue just compares with initial state
+// while red doesn't wait at all.
 std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
