@@ -13,6 +13,7 @@
 
 // TODO: maybe make it more consistent that when invalidating/closing something
 // you just need the right index.
+// TODO: change lobby close code to say invalidate instead and take the ID instead of the lobby obj
 namespace critical
 {
     std::tuple<std::uint8_t, bool> getAvailableID(std::queue<std::uint8_t>& freeIDs, std::mutex& mut);
