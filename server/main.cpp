@@ -178,7 +178,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     }
                     else // opp wants to play again
                     {
-                        lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided; // TODO: add the opposite of this to the guest code
+                        lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided;
                     }
                     message_sent_success = matchmaking::sendClientOppPlayAgain(client_fd, oppWantsToPlay);
                     if (!message_sent_success)
@@ -218,7 +218,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 // NOTE: Before unblocking this thread, the host thread should make the gamestate
                 bool hostPickedRed = true;
 
-                message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed); // TODO: change to lobby host's fd
+                message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed);
                 if (!message_sent_success)
                 {
                     std::print(stderr, "Error: message send unsucessful\n");
@@ -286,11 +286,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
             } // end opp wants to play loop
         }     // end guest wants to play loop
-        // TODO: Code for Joining a lobby
-        // Read list of lobbies and send to client.
-        // Expect client to either disconnect, try to join a lobby (which may or may not work if the lobby is now full or doesn't exist), or refresh the list.
-        // Send client their assigned color from the host
-        // Do the game logic
     }
 
     // TODO: evaluate if this is needed
