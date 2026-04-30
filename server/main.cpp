@@ -103,7 +103,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             {
                 std::print(stderr, "Error: message send unsucessful\n");
                 // TODO: change this to follow name convention and use host id instead of a lobby object.
-                critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                 critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
                 networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
@@ -118,7 +118,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 if (client_disconnected)
                 {
                     // TODO: change this to follow name convention and use host id instead of a lobby object.
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
@@ -132,7 +132,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 {
                     std::print(stderr, "Error: gamestate attempted to be added to gamestates while valid gamestate was still there\n");
                     // TODO: change this to follow name convention and use host id instead of a lobby object.
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
@@ -149,7 +149,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::No;
                     critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
                     // TODO: change this to follow name convention and use host id instead of a lobby object.
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
@@ -188,7 +188,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         std::print(stderr, "Error: message send unsucessful\n");
                         critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
                         // TODO: change this to follow name convention and use host id instead of a lobby object.
-                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_lobby, dataMutex, disconnectMutex);
+                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                         critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                         critical::addIDToQueue(freeIDs, client_id, dataMutex);
                         networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
@@ -225,7 +225,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 {
                     std::print(stderr, "Error: message send unsucessful\n");
                     // TODO: change this to follow name convention and use host id instead of a lobby object.
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostLobby, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
                     // NOTE: for now, I don't believe that I need to account for invalidating a player only when a lobby they were in closes.
                     // So we can just invalidate the player since they don't own the lobby.
                     critical::invalidatePlayer(players, client_id, dataMutex);
@@ -244,7 +244,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     lobbies[hostID].m_guestPlayAgain = Lobby::PlayAgain::No;
                     critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, hostID, dataMutex, disconnectMutex);
                     // TODO: change this to follow name convention and use host id instead of a lobby object.
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostLobby, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
@@ -279,7 +279,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         std::print(stderr, "Error: message send unsucessful\n");
                         critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, hostID, dataMutex, disconnectMutex);
                         // TODO: change this to follow name convention and use host id instead of a lobby object.
-                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostLobby, dataMutex, disconnectMutex);
+                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
                         critical::invalidatePlayer(players, client_id, dataMutex);
                         critical::addIDToQueue(freeIDs, client_id, dataMutex);
                         networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted

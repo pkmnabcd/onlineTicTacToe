@@ -73,24 +73,22 @@ bool critical::addLobbyToLobbies(std::array<Lobby, arraySize>& lobbies, Lobby lo
     }
 }
 
-void critical::invalidateLobby(std::array<Lobby, arraySize>& lobbies, Lobby lobby, std::mutex& mut)
+void critical::invalidateLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& mut)
 {
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
-    std::uint8_t hostPlayerID = lobby.m_host.m_id;
-    lobbies[hostPlayerID].m_isValid = false;
+    lobbies[hostID].m_isValid = false;
 }
 
-void critical::invalidateLobbyIfOtherPlayerDisconnected(std::array<Lobby, arraySize>& lobbies, Lobby lobby, std::mutex& dataMut, std::mutex& disconnectMut)
+void critical::invalidateLobbyIfOtherPlayerDisconnected(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut)
 {
     const std::lock_guard<std::mutex> lock(disconnectMut); // gets released when function returns
-    std::uint8_t hostPlayerID = lobby.m_host.m_id;
-    if (lobbies[hostPlayerID].m_someoneDisconnected)
+    if (lobbies[hostID].m_someoneDisconnected)
     {
-        critical::invalidateLobby(lobbies, lobby, dataMut);
+        critical::invalidateLobby(lobbies, hostID, dataMut);
     }
     else
     {
-        lobbies[hostPlayerID].m_someoneDisconnected = true;
+        lobbies[hostID].m_someoneDisconnected = true;
     }
 }
 
