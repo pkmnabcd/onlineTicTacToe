@@ -202,9 +202,16 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         bool guestWantsToPlay = true;
         while (guestWantsToPlay)
         {
-            // TODO: send client list of ID: Name pairs
-            // Send only open lobbies, so lobbies with m_guest that are invalid.
             std::vector<Lobby> openLobbies = critical::getOpenLobbies(lobbies, dataMutex);
+            message_sent_success = matchmaking::sendClientOpenLobbies(client_fd, openLobbies);
+            if (!message_sent_success)
+            {
+                std::print(stderr, "Error: message send unsucessful\n");
+                critical::invalidatePlayer(players, client_id, dataMutex);
+                critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                return;
+            }
 
             // TODO: receive the ID of the player guest wants to join.
             // Check to make sure it's still available.

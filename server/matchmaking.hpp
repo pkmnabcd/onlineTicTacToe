@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Lobby.hpp"
 #include "Player.hpp"
 
 #include <array>
 #include <cstdint>
 #include <tuple>
+#include <vector>
 
 using StraightBoard = std::array<std::string, 9>;
 
@@ -20,4 +22,5 @@ namespace matchmaking
     bool sendClientGameStatus(int client_fd, char winnerOrContOrOppDiscon);
     std::tuple<bool, bool> getClientPlayAgain(int client_fd);
     bool sendClientOppPlayAgain(int client_fd, bool oppPlayAgain);
+    bool sendClientOpenLobbies(int client_fd, std::vector<Lobby> openLobbies);
 } // namespace matchmaking

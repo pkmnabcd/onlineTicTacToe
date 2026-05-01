@@ -1,11 +1,15 @@
 #include "matchmaking.hpp"
 #include "networking.hpp"
+#include "Lobby.hpp"
 #include "Player.hpp"
 
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <format>
+#include <string>
 #include <tuple>
+#include <vector>
 
 using StraightBoard = std::array<std::string, 9>;
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
@@ -62,6 +66,7 @@ std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
     // First char signifies whether client wants to host a game.
     // The other chars are the name the client picks
     // TODO: someday add limits to the names and check the current names to make sure it's unique
+    // TODO: at minimum, make sure client makes sure each character is your regular alphanumeric + other reasonable characters.
     std::string colorChoice(chooseColorBuffer);
     bool choosesRed = colorChoice.at(0) == 'R';
     if (numbytes == -1 || numbytes == 0)
@@ -180,5 +185,20 @@ bool matchmaking::sendClientOppPlayAgain(int client_fd, bool oppPlayAgain)
     buffer[0] = (oppPlayAgain) ? 'Y' : 'N';
     int bytesSent;
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
+    return bytesSent == bufferLen;
+}
+
+bool matchmaking::sendClientOpenLobbies(int client_fd, std::vector<Lobby> openLobbies)
+{
+    std::string msg = "";
+    for (Lobby& lobby : openLobbies)
+    {
+        // NOTE: 3 chars for id, NAME_LEN-1 = 14 for name
+        msg.append(std::format("{:3}{:14}", lobby.m_host.m_id, lobby.m_host.m_name));
+    }
+    msg.push_back('\0');
+
+    const int bufferLen = msg.size();
+    int bytesSent = networking::sendAll(client_fd, msg.data(), bufferLen);
     return bytesSent == bufferLen;
 }
