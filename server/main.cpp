@@ -209,7 +209,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             // TODO: receive the ID of the player guest wants to join.
             // Check to make sure it's still available.
             std::uint8_t hostID = 0;
-            Lobby hostLobby = lobbies[hostID]; // TODO: remove this once I fix the closeLobby functions
 
             bool oppWantsToPlay = true;
             while (oppWantsToPlay)
