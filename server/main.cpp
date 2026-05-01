@@ -14,6 +14,7 @@
 #include <thread>
 #include <tuple>
 #include <unistd.h>
+#include <vector>
 
 void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCount)
 {
@@ -95,8 +96,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     }
                 }
             }
-            // TODO: I'm not sure that guest is actually being added as a player on the lobby.
-            // Make sure that happens.
+            // TODO: Make sure that the guest thread adds the guest player to the lobby.
 
             message_sent_success = matchmaking::sendHostTheGuestName(client_fd, guest.m_name);
             if (!message_sent_success)
@@ -172,6 +172,10 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         oppWantsToPlay = false;
                         lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::Undecided; // reset PlayAgain
                         lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided;
+                        // TODO: make sure that someoneDisconnected gets reset, but not before guest is finished cleaning up the lobby
+                        // Maybe just wait in the loop above for the disconnect instead of PlayAgain::No.
+                        // PlayAgain::No may honestly be unneeded. Just need Yes and Undecided.
+                        lobbies[client_id].m_someoneDisconnected = false;
                         lobbies[client_id].m_guest = Player(); // Invalidate the lobby guest player
                     }
                     else // opp wants to play again
@@ -200,6 +204,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         {
             // TODO: send client list of ID: Name pairs
             // Send only open lobbies, so lobbies with m_guest that are invalid.
+            std::vector<Lobby> openLobbies = critical::getOpenLobbies(lobbies, dataMutex);
 
             // TODO: receive the ID of the player guest wants to join.
             // Check to make sure it's still available.

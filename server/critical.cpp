@@ -11,6 +11,7 @@
 #include <mutex>
 #include <thread>
 #include <tuple>
+#include <vector>
 
 
 std::tuple<std::uint8_t, bool> critical::getAvailableID(std::queue<std::uint8_t>& freeIDs, std::mutex& mut)
@@ -142,4 +143,18 @@ void critical::invalidatePlayerOnceLobbyIsInvalid(std::array<Player, arraySize>&
     }
     players[playerID].m_isValid = false;
     mut.unlock();
+}
+
+std::vector<Lobby> critical::getOpenLobbies(std::array<Lobby, arraySize>& lobbies, std::mutex& mut)
+{
+    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
+    auto openLobbies = std::vector<Lobby>();
+    for (Lobby& lobby : lobbies)
+    {
+        if (lobby.m_isValid && !lobby.m_guest.m_isValid)
+        {
+            openLobbies.push_back(lobby);
+        }
+    }
+    return openLobbies;
 }
