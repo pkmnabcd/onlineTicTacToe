@@ -247,10 +247,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             bool oppWantsToPlay = true;
             while (oppWantsToPlay)
             {
-                // TODO: block until host decides who is red and who is blue.
-                // Do this by checking lobbyies[hostID].someoneDisconnected and gamestates[hostID].isValid,
-                // then checking the gamestate for who the red player is.
-                // NOTE: Before unblocking this thread, the host thread should make the gamestate
+                // Block until host disconnects or chooses red or blue
                 bool hostPickedRed = true;
                 while (lobbies[hostID].m_someoneDisconnected || gamestates[hostID].m_isValid)
                 {
@@ -260,7 +257,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 {
                     hostPickedRed = gamestates[hostID].m_redPlayer.m_id == hostID;
                 }
-
                 char hostColor = (hostPickedRed) ? 'R' : 'B';
                 hostColor = (lobbies[hostID].m_someoneDisconnected) ? 'D' : hostColor;
                 message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostColor);
@@ -275,7 +271,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                     return;
                 }
-
                 if (lobbies[hostID].m_someoneDisconnected)
                 {
                     critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
