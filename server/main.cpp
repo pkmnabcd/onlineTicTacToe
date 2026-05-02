@@ -214,8 +214,9 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             }
 
             // TODO: receive the ID of the player guest wants to join.
-            // Check to make sure it's still available.
-            std::uint8_t hostID = 0;
+            auto [hostID, disconnectedTmp1] = matchmaking::getClientLobbyChoice(client_fd);
+            client_disconnected = disconnectedTmp1;
+            // TODO: Check to make sure the lobby is still available. Do so atomically
 
             bool oppWantsToPlay = true;
             while (oppWantsToPlay)
