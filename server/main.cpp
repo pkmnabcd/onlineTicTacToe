@@ -213,7 +213,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 return;
             }
 
-            // TODO: receive the ID of the player guest wants to join.
+            // Receive the ID of the player guest wants to join.
             auto [hostID, disconnectedTmp1] = matchmaking::getClientLobbyChoice(client_fd);
             client_disconnected = disconnectedTmp1;
             if (client_disconnected)
@@ -224,7 +224,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 return;
             }
 
-            // TODO: Check to make sure the lobby is still available. Do so atomically
+            // Check to make sure the lobby is still available.
             bool guestAdded = critical::addGuestToLobby(lobbies, hostID, client_player, dataMutex);
             message_sent_success = matchmaking::sendClientSuccessfulConnectionToLobby(client_fd, guestAdded);
             if (!message_sent_success)
