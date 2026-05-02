@@ -4,7 +4,7 @@ I have translated it to C++, and will be using this project to help me learn how
 
 # Progress
 This project is in the middle of development still.
-I am currently working on finishing up the server.
+I recently finished a draft of the server, but it remains untested.
 I have largely finished the logic for when a user wants to host a game, but still need to implement the code needed to join a game.
 Right now, you can play the tic tac toe game by yourself by building the project and running the `Client` program.
 This works on Windows and Linux.
