@@ -252,8 +252,18 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 // then checking the gamestate for who the red player is.
                 // NOTE: Before unblocking this thread, the host thread should make the gamestate
                 bool hostPickedRed = true;
+                while (lobbies[hostID].m_someoneDisconnected || gamestates[hostID].m_isValid)
+                {
+                }
+                // TODO: there might be a race condition to fix here
+                if (!lobbies[hostID].m_someoneDisconnected)
+                {
+                    hostPickedRed = gamestates[hostID].m_redPlayer.m_id == hostID;
+                }
 
-                message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostPickedRed);
+                char hostColor = (hostPickedRed) ? 'R' : 'B';
+                hostColor = (lobbies[hostID].m_someoneDisconnected) ? 'D' : hostColor;
+                message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostColor);
                 if (!message_sent_success)
                 {
                     std::print(stderr, "Error: message send unsucessful\n");
@@ -264,6 +274,12 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                     return;
+                }
+
+                if (lobbies[hostID].m_someoneDisconnected)
+                {
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                    break; // go back to searching for a lobby
                 }
 
                 auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(!hostPickedRed, hostID, client_fd, gamestates, gameMutexes);
