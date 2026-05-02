@@ -27,4 +27,5 @@ namespace critical
     void invalidateGamestateIfOtherPlayerDisconnected(std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut);
     void invalidatePlayerOnceLobbyIsInvalid(std::array<Player, arraySize>& players, std::array<Lobby, arraySize>& lobbies, std::uint8_t playerID, std::mutex& mut);
     std::vector<Lobby> getOpenLobbies(std::array<Lobby, arraySize>& lobbies, std::mutex& mut);
+    bool addGuestToLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, Player guest, std::mutex& mut);
 } // namespace critical

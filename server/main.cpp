@@ -224,6 +224,16 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 return;
             }
             // TODO: Check to make sure the lobby is still available. Do so atomically
+            bool guestAdded = critical::addGuestToLobby(lobbies, hostID, client_player, dataMutex);
+            if (guestAdded)
+            {
+                // TODO: send msg of successful connection
+            }
+            else
+            {
+                // TODO: send msg of unsuccessful connection
+                continue;
+            }
 
             bool oppWantsToPlay = true;
             while (oppWantsToPlay)

@@ -158,3 +158,14 @@ std::vector<Lobby> critical::getOpenLobbies(std::array<Lobby, arraySize>& lobbie
     }
     return openLobbies;
 }
+
+bool critical::addGuestToLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, Player guest, std::mutex& mut)
+{
+    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
+    bool canAddGuest = !lobbies[hostID].m_guest.m_isValid;
+    if (canAddGuest)
+    {
+        lobbies[hostID].m_guest = guest;
+    }
+    return canAddGuest;
+}
