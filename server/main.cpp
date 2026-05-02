@@ -223,15 +223,24 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                 return;
             }
+
             // TODO: Check to make sure the lobby is still available. Do so atomically
             bool guestAdded = critical::addGuestToLobby(lobbies, hostID, client_player, dataMutex);
-            if (guestAdded)
+            message_sent_success = matchmaking::sendClientSuccessfulConnectionToLobby(client_fd, guestAdded);
+            if (!message_sent_success)
             {
-                // TODO: send msg of successful connection
+                std::print(stderr, "Error: message send unsucessful\n");
+                if (guestAdded)
+                {
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                }
+                critical::invalidatePlayer(players, client_id, dataMutex);
+                critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                return;
             }
-            else
+            if (!guestAdded)
             {
-                // TODO: send msg of unsuccessful connection
                 continue;
             }
 

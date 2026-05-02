@@ -241,3 +241,13 @@ std::tuple<std::uint8_t, bool> matchmaking::getClientLobbyChoice(int client_fd)
     }
     return std::make_tuple(hostID, disconnected);
 }
+
+bool matchmaking::sendClientSuccessfulConnectionToLobby(int client_fd, bool successfulConnection)
+{
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    buffer[0] = (successfulConnection) ? 'Y' : 'N';
+    int bytesSent;
+    bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
+    return bytesSent == bufferLen;
+}
