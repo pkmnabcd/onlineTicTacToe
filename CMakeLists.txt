@@ -32,7 +32,6 @@ set(CLIENT_HEADER_FILES
     ${GAME_HEADER_FILES}
 )
 set(SERVER_HEADER_FILES
-    ${GAME_HEADER_FILES}
     server/GameState.hpp
     server/Lobby.hpp
     server/Player.hpp
@@ -60,7 +59,6 @@ set(CLIENT_SOURCE_FILES
     ${GAME_SOURCE_FILES}
 )
 set(SERVER_SOURCE_FILES
-    ${GAME_SOURCE_FILES}
     server/GameState.cpp
     server/Lobby.cpp
     server/Player.cpp
