@@ -8,6 +8,7 @@
 #include "settings.hpp"
 
 #include <array>
+#include <chrono>
 #include <mutex>
 #include <print>
 #include <queue>
@@ -121,6 +122,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         break;
                     }
                 }
+                std::this_thread::sleep_for(std::chrono::seconds(4)); // check every few seconds
             }
             // TODO: Make sure that the guest thread adds the guest player to the lobby.
 

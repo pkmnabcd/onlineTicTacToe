@@ -35,6 +35,30 @@ void doMultiplayer()
             return;
         }
         std::print("Received confirmation msg\n");
+
+        // Wait for a guest to join lobby and hear from server
+        while (1)
+        {
+            message_sent_success = matchmaking::sendPing(serv_fd);
+            if (!message_sent_success)
+            {
+                std::print("Disconnected from server while waiting for guest.\n");
+                return;
+            }
+
+            auto [stillWaiting, disconnectedTmp0] = matchmaking::getWaitStatus(serv_fd);
+            disconnected = disconnectedTmp0;
+            if (disconnected)
+            {
+                std::print("Disconnected from server while waiting for guest.\n");
+                return;
+            }
+            if (!stillWaiting)
+            {
+                break;
+            }
+        }
+        std::print("No longer waiting for guest!");
     }
 
     networking::closeFd(serv_fd);

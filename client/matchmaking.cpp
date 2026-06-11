@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <tuple>
 
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
@@ -41,4 +42,42 @@ bool matchmaking::getConfirmationMsg(int serv_fd)
         disconnected = std::string_view(buffer) != std::string_view(successStr);
     }
     return disconnected;
+}
+
+std::tuple<bool, bool> matchmaking::getWaitStatus(int serv_fd)
+{
+    bool stillWaiting = true;
+    bool disconnected = false;
+
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        if (buffer[0] == 'W')
+        {
+            stillWaiting = true;
+        }
+        else if (buffer[0] == 'R')
+        {
+            stillWaiting = false;
+        }
+        else
+        {
+            disconnected = true;
+        }
+    }
+    return std::make_tuple(stillWaiting, disconnected);
+}
+
+bool matchmaking::sendPing(int serv_fd)
+{
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "Y";
+    int bytesSent = networking::sendAll(serv_fd, buffer, bufferLen);
+    return bytesSent == bufferLen;
 }
