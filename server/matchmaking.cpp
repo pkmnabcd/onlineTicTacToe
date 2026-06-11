@@ -19,23 +19,29 @@ const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
 std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t client_id)
 {
+    Player player = Player();
     bool disconnected = false;
+    bool isHosting = false;
+
     const int clientInfoBufferLen = NAME_LEN + 1;
     char clientInfoBuffer[clientInfoBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, clientInfoBuffer, clientInfoBufferLen);
-    assert(clientInfoBuffer[clientInfoBufferLen - 1] == '\0' && "Guest name should end with \\0");
-
-    // First char signifies whether client wants to host a game.
-    // The other chars are the name the client picks
-    // TODO: someday add limits to the names and check the current names to make sure it's unique
-    std::string clientInfo(clientInfoBuffer);
-    bool isHosting = clientInfo.at(0) == 'H';
-    std::string client_name = clientInfo.substr(1);
     if (numbytes == -1 || numbytes == 0)
     {
         disconnected = true;
     }
-    Player player = Player(client_name, client_id, client_fd);
+    else
+    {
+        assert(clientInfoBuffer[clientInfoBufferLen - 1] == '\0' && "Guest name should end with \\0");
+
+        // First char signifies whether client wants to host a game.
+        // The other chars are the name the client picks
+        // TODO: someday add limits to the names and check the current names to make sure it's unique
+        std::string clientInfo(clientInfoBuffer);
+        std::string client_name = clientInfo.substr(1);
+        player = Player(client_name, client_id, client_fd);
+        isHosting = clientInfo.at(0) == 'H';
+    }
     return std::make_tuple(player, disconnected, isHosting);
 }
 
@@ -59,20 +65,24 @@ bool matchmaking::sendHostTheGuestName(int client_fd, std::string guestName)
 
 std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
 {
+    bool choosesRed = false;
     bool disconnected = false;
+
     const int chooseColorBufferLen = 2;
     char chooseColorBuffer[chooseColorBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, chooseColorBuffer, chooseColorBufferLen);
-
-    // First char signifies whether client wants to host a game.
-    // The other chars are the name the client picks
-    // TODO: someday add limits to the names and check the current names to make sure it's unique
-    // TODO: at minimum, make sure client makes sure each character is your regular alphanumeric + other reasonable characters.
-    std::string colorChoice(chooseColorBuffer);
-    bool choosesRed = colorChoice.at(0) == 'R';
     if (numbytes == -1 || numbytes == 0)
     {
         disconnected = true;
+    }
+    else
+    {
+        // First char signifies whether client wants to host a game.
+        // The other chars are the name the client picks
+        // TODO: someday add limits to the names and check the current names to make sure it's unique
+        // TODO: at minimum, make sure client makes sure each character is your regular alphanumeric + other reasonable characters.
+        std::string colorChoice(chooseColorBuffer);
+        choosesRed = colorChoice.at(0) == 'R';
     }
     return std::make_tuple(choosesRed, disconnected);
 }
@@ -110,27 +120,30 @@ bool isDigit(std::uint8_t ch)
 
 std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
 {
+    std::uint8_t moveChoice = 0;
     bool disconnected = false;
+
     const int chooseMoveBufferLen = 2;
     char chooseMoveBuffer[chooseMoveBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, chooseMoveBuffer, chooseMoveBufferLen);
-
-    std::uint8_t moveChoice;
-    if (isDigit(chooseMoveBuffer[0])) // Should be 1-9. 0 is invalid
-    {
-        moveChoice = chooseMoveBuffer[0] - 48;
-        if (moveChoice == 0)
-        {
-            disconnected = true;
-        }
-    }
-    else
-    {
-        disconnected = true;
-    }
     if (numbytes == -1 || numbytes == 0)
     {
         disconnected = true;
+    }
+    else
+    {
+        if (isDigit(chooseMoveBuffer[0])) // Should be 1-9. 0 is invalid
+        {
+            moveChoice = chooseMoveBuffer[0] - 48;
+            if (moveChoice == 0)
+            {
+                disconnected = true;
+            }
+        }
+        else
+        {
+            disconnected = true;
+        }
     }
     return std::make_tuple(moveChoice, disconnected);
 }
@@ -149,27 +162,30 @@ bool matchmaking::sendClientGameStatus(int client_fd, char winnerOrContOrOppDisc
 
 std::tuple<bool, bool> matchmaking::getClientPlayAgain(int client_fd)
 {
+    bool playAgain = false;
     bool disconnected = false;
+
     const int playAgainBufferLen = 2;
     char playAgainBuffer[playAgainBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, playAgainBuffer, playAgainBufferLen);
-
-    bool playAgain = false;
-    if (playAgainBuffer[0] == 'Y')
-    {
-        playAgain = true;
-    }
-    else if (playAgainBuffer[0] == 'N')
-    {
-        playAgain = false;
-    }
-    else
-    {
-        disconnected = true;
-    }
     if (numbytes == -1 || numbytes == 0)
     {
         disconnected = true;
+    }
+    else
+    {
+        if (playAgainBuffer[0] == 'Y')
+        {
+            playAgain = true;
+        }
+        else if (playAgainBuffer[0] == 'N')
+        {
+            playAgain = false;
+        }
+        else
+        {
+            disconnected = true;
+        }
     }
     return std::make_tuple(playAgain, disconnected);
 }
