@@ -199,7 +199,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     }
                 }
             } // end opp wants to play loop
-        }     // end host wants to play loop
+        } // end host wants to play loop
     }
     else // client wants to join existing lobby
     {
@@ -332,7 +332,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     }
                 }
             } // end opp wants to play loop
-        }     // end guest wants to play loop
+        } // end guest wants to play loop
     }
 
     // TODO: evaluate if this is needed

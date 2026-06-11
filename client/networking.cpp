@@ -12,7 +12,6 @@
 
 const char* SERVER_PORT = "3490";
 const char* SERVER_ADDRESS = "127.0.0.1";
-const unsigned int MAXDATASIZE = 100;
 
 
 void sigchld_handler(int s)
@@ -43,8 +42,7 @@ void networking::closeFd(int fd)
 int networking::initClient()
 {
 
-    int sockfd, numbytes;
-    char buf[MAXDATASIZE];
+    int sockfd;
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
