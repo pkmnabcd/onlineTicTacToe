@@ -8,6 +8,7 @@
 
 void doMultiplayer()
 {
+    // TODO: change the game display/interface code to clear the screen
     // TODO: get code to get username, using character limit
     // and whether they want to host or join a lobby
     std::string username = "tmpuser1234567"; // should be max char limit
