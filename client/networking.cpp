@@ -12,8 +12,6 @@
 
 const char* SERVER_PORT = "3490";
 const char* SERVER_ADDRESS = "127.0.0.1";
-const char* CLIENT_PORT = "3491";
-
 
 
 void sigchld_handler(int s)
@@ -50,21 +48,13 @@ int networking::initClient()
     int rv;
     char s[INET6_ADDRSTRLEN];
 
-    if (argc != 2) {
-        //fprintf(stderr,"usage: client hostname\n");
-        std::print(stderr, "usage: client hostname\n");
-        exit(1);
-    }
-
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    // TODO: replace this so that it doesn't use command line arguemtns anymore
-    if ((rv = getaddrinfo(argv[1], SERVER_PORT, &hints, &servinfo)) != 0) {
-        //fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+    if ((rv = getaddrinfo(SERVER_ADDRESS, SERVER_PORT, &hints, &servinfo)) != 0) {
         std::print(stderr, "getaddrinfo: {}\n", gai_strerror(rv));
-        return 1;
+        exit(1);
     }
 
     // loop through all the results and connect to the first we can
@@ -78,7 +68,6 @@ int networking::initClient()
         inet_ntop(p->ai_family,
             get_in_addr((struct sockaddr *)p->ai_addr),
             s, sizeof s);
-        //printf("client: attempting connection to %s\n", s);
         std::print("client: attempting connection to {}\n", s);
 
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
@@ -91,22 +80,17 @@ int networking::initClient()
     }
 
     if (p == NULL) {
-        // TODO: replace this so that it doesn't use command line arguemtns anymore
-        //fprintf(stderr, "client: failed to connect\n");
         std::print(stderr, "client: failed to connect\n");
-        return 2;
+        exit(1);
     }
 
     inet_ntop(p->ai_family,
             get_in_addr((struct sockaddr *)p->ai_addr),
             s, sizeof s);
-    //printf("client: connected to %s\n", s);
-    std::print(stderr, "client: failed to connect\n");
+    std::print("client: connected to {}\n", s);
 
     freeaddrinfo(servinfo); // all done with this structure
-
-    // TODO: print success and setup what comes next
-    return 0;
+    return sockfd;
 }
 
 
