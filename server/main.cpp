@@ -91,6 +91,16 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would constantly block every thread.
                 // TODO: check if the client waiting for a guest disconnected.
                 // Check for another message?
+                client_disconnected = matchmaking::getClientCheckIn(client_fd);
+                if (client_disconnected)
+                {
+                    std::print(stderr, "Error: guest disconnected while waiting for a guest\n");
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                    critical::invalidatePlayer(players, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    return;
+                }
                 if (lobbies[client_id].m_guest.m_isValid)
                 {
                     guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
