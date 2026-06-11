@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <format>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -283,4 +284,14 @@ bool matchmaking::getClientCheckIn(int client_fd)
         }
     }
     return disconnected;
+}
+
+bool matchmaking::sendCheckIn(int client_fd, bool stillWaiting)
+{
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    buffer[0] = (stillWaiting) ? 'W' : 'R';
+    int bytesSent;
+    bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
+    return bytesSent == bufferLen;
 }

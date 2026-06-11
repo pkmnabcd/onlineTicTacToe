@@ -101,6 +101,18 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                     return;
                 }
+
+                message_sent_success = matchmaking::sendCheckIn(client_fd, true); // Still waiting
+                if (!message_sent_success)
+                {
+                    std::print(stderr, "Error: guest disconnected while waiting for a guest\n");
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                    critical::invalidatePlayer(players, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    return;
+                }
+
                 if (lobbies[client_id].m_guest.m_isValid)
                 {
                     guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
@@ -111,6 +123,17 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
             }
             // TODO: Make sure that the guest thread adds the guest player to the lobby.
+
+            message_sent_success = matchmaking::sendCheckIn(client_fd, false); // Done waiting
+            if (!message_sent_success)
+            {
+                std::print(stderr, "Error: guest disconnected while trying to tell them a guest connected.\n");
+                critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                critical::invalidatePlayer(players, client_id, dataMutex);
+                critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                return;
+            }
 
             message_sent_success = matchmaking::sendHostTheGuestName(client_fd, guest.m_name);
             if (!message_sent_success)

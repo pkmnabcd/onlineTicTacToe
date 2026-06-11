@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
