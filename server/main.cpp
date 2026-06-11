@@ -90,7 +90,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             {
                 // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would constantly block every thread.
                 // TODO: check if the client waiting for a guest disconnected.
-                // Send another message?
+                // Check for another message?
                 if (lobbies[client_id].m_guest.m_isValid)
                 {
                     guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);

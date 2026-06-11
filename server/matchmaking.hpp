@@ -25,4 +25,5 @@ namespace matchmaking
     bool sendClientOpenLobbies(int client_fd, std::vector<Lobby> openLobbies);
     std::tuple<std::uint8_t, bool> getClientLobbyChoice(int client_fd);
     bool sendClientSuccessfulConnectionToLobby(int client_fd, bool successfulConnection);
+    bool getClientCheckIn(int client_fd);
 } // namespace matchmaking

@@ -217,39 +217,41 @@ bool matchmaking::sendClientOpenLobbies(int client_fd, std::vector<Lobby> openLo
 
 std::tuple<std::uint8_t, bool> matchmaking::getClientLobbyChoice(int client_fd)
 {
+    std::uint8_t hostID = 0;
     bool disconnected = false;
     const int lobbyBufferLen = 4; // 3 for id in base-10, 1 for \0
     char lobbyBuffer[lobbyBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, lobbyBuffer, lobbyBufferLen);
-
-    std::uint8_t hostID = 0;
-    // Check for valid numbers
-    for (short i = 0; i < lobbyBufferLen-1; i++) // NOTE: ignore \0 at end
-    {
-        if (!isDigit(lobbyBuffer[i]) || lobbyBuffer[i] != ' ')
-        {
-            disconnected = true;
-            break;
-        }
-    }
-    if (disconnected)
-    {
-        return std::make_tuple(hostID, disconnected);
-    }
-    unsigned long hostID_tmp = std::stoul(std::string(lobbyBuffer));
-    if (hostID_tmp > arraySize - 1)
+    if (numbytes == -1 || numbytes == 0)
     {
         disconnected = true;
     }
     else
     {
-        hostID = static_cast<std::uint8_t>(hostID_tmp);
+        // Check for valid numbers
+        for (short i = 0; i < lobbyBufferLen-1; i++) // NOTE: ignore \0 at end
+        {
+            if (!isDigit(lobbyBuffer[i]) || lobbyBuffer[i] != ' ')
+            {
+                disconnected = true;
+                break;
+            }
+        }
+        if (disconnected)
+        {
+            return std::make_tuple(hostID, disconnected);
+        }
+        unsigned long hostID_tmp = std::stoul(std::string(lobbyBuffer));
+        if (hostID_tmp > arraySize - 1)
+        {
+            disconnected = true;
+        }
+        else
+        {
+            hostID = static_cast<std::uint8_t>(hostID_tmp);
+        }
     }
 
-    if (numbytes == -1 || numbytes == 0)
-    {
-        disconnected = true;
-    }
     return std::make_tuple(hostID, disconnected);
 }
 
@@ -261,4 +263,24 @@ bool matchmaking::sendClientSuccessfulConnectionToLobby(int client_fd, bool succ
     int bytesSent;
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
+}
+
+bool matchmaking::getClientCheckIn(int client_fd)
+{
+    bool disconnected = false;
+    const int lobbyBufferLen = 2;
+    char lobbyBuffer[lobbyBufferLen] = "";
+    int numbytes = networking::receiveAll(client_fd, lobbyBuffer, lobbyBufferLen);
+    if (numbytes == -1 || numbytes == 0)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        if (lobbyBuffer[0] != 'Y' || lobbyBuffer[1] != '\0')
+        {
+            disconnected = true;
+        }
+    }
+    return disconnected;
 }
