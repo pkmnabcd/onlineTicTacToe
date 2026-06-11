@@ -30,6 +30,7 @@ set(GAME_HEADER_FILES
 )
 set(CLIENT_HEADER_FILES
     ${GAME_HEADER_FILES}
+    client/matchmaking.hpp
     client/networking.hpp
 )
 set(SERVER_HEADER_FILES
@@ -58,6 +59,7 @@ set(GAME_SOURCE_FILES
 )
 set(CLIENT_SOURCE_FILES
     ${GAME_SOURCE_FILES}
+    client/matchmaking.cpp
     client/networking.cpp
 )
 set(SERVER_SOURCE_FILES
