@@ -46,6 +46,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         networking::closeFd(client_fd);
         return;
     }
+    // TODO: remove debugging statement
+    std::print("Username {} wants to host {}\n", client_player.m_name, isHosting);
     const bool playerAdded = critical::addPlayerToPlayers(players, client_player, dataMutex);
     if (!playerAdded)
     {
@@ -87,6 +89,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             while (true)
             {
                 // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would constantly block every thread.
+                // TODO: check if the client waiting for a guest disconnected.
+                // Send another message?
                 if (lobbies[client_id].m_guest.m_isValid)
                 {
                     guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
