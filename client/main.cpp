@@ -1,5 +1,11 @@
 #include "../game/interface.hpp"
 #include "../game/ttt.hpp"
+#include "networking.hpp"
+
+void doMultiplayer()
+{
+    int serv_fd = networking::initClient();
+}
 
 int main()
 {
@@ -12,6 +18,9 @@ int main()
         {
             case 0:
                 runGame();
+                break;
+            case 1:
+                doMultiplayer();
                 break;
             case 'q':
                 keepPlaying = false;

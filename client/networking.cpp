@@ -12,6 +12,7 @@
 
 const char* SERVER_PORT = "3490";
 const char* SERVER_ADDRESS = "127.0.0.1";
+const unsigned int MAXDATASIZE = 100;
 
 
 void sigchld_handler(int s)

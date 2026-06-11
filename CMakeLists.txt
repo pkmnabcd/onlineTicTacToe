@@ -30,6 +30,7 @@ set(GAME_HEADER_FILES
 )
 set(CLIENT_HEADER_FILES
     ${GAME_HEADER_FILES}
+    client/networking.hpp
 )
 set(SERVER_HEADER_FILES
     server/GameState.hpp
@@ -57,6 +58,7 @@ set(GAME_SOURCE_FILES
 )
 set(CLIENT_SOURCE_FILES
     ${GAME_SOURCE_FILES}
+    client/networking.cpp
 )
 set(SERVER_SOURCE_FILES
     server/GameState.cpp
