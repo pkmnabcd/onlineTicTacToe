@@ -22,3 +22,22 @@ bool matchmaking::sendPlayerInfo(int serv_fd, bool hostGame, std::string usernam
     int bytesSent = networking::sendAll(serv_fd, playerInfoBuffer, playerInfoBufferLen);
     return bytesSent == playerInfoBufferLen;
 }
+
+bool matchmaking::getConfirmationMsg(int serv_fd)
+{
+    bool disconnected = false;
+
+    const int bufferLen = 8;
+    char buffer[bufferLen] = "";
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        char successStr[bufferLen] = "Success";
+        disconnected = std::string_view(buffer) != std::string_view(successStr);
+    }
+    return disconnected;
+}

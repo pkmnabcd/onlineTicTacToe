@@ -11,4 +11,5 @@ using StraightBoard = std::array<std::string, 9>;
 namespace matchmaking
 {
     bool sendPlayerInfo(int serv_fd, bool hostGame, std::string username);
+    bool getConfirmationMsg(int serv_fd);
 } // namespace matchmaking

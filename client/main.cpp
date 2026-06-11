@@ -17,7 +17,24 @@ void doMultiplayer()
 
     bool disconnected;
     disconnected = matchmaking::sendPlayerInfo(serv_fd, hostGame, username);
-    std::print("Sent player info");
+    if (disconnected)
+    {
+        std::print("Disconnected from server.\n");
+        return;
+    }
+    std::print("Sent player info\n");
+
+    if (hostGame)
+    {
+        std::print("Trying to get confirmation\n");
+        disconnected = matchmaking::getConfirmationMsg(serv_fd);
+        if (disconnected)
+        {
+            std::print("Disconnected from server. Didn't receive lobby confirmation msg.\n");
+            return;
+        }
+        std::print("Received confirmation msg\n");
+    }
 
     networking::closeFd(serv_fd);
 }
