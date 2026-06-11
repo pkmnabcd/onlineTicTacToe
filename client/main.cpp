@@ -15,15 +15,16 @@ void doMultiplayer()
     bool hostGame = true;
     int serv_fd = networking::initClient();
 
-    bool disconnected;
-    disconnected = matchmaking::sendPlayerInfo(serv_fd, hostGame, username);
-    if (disconnected)
+    bool message_sent_success;
+    message_sent_success = matchmaking::sendPlayerInfo(serv_fd, hostGame, username);
+    if (!message_sent_success)
     {
         std::print("Disconnected from server.\n");
         return;
     }
     std::print("Sent player info\n");
 
+    bool disconnected;
     if (hostGame)
     {
         std::print("Trying to get confirmation\n");
