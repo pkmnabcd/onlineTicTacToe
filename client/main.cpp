@@ -5,13 +5,14 @@
 
 #include <print>
 #include <string>
+// TODO: move the game folder to just the client folder since I didn't end up using game/ at all in the server.
 
 void doMultiplayer()
 {
     // TODO: change the game display/interface code to clear the screen
     // TODO: get code to get username, using character limit
     // and whether they want to host or join a lobby
-    std::string username = "tmpuser1234567"; // should be max char limit
+    std::string username = interface::getUsername();
     bool hostGame = true;
     int serv_fd = networking::initClient();
 

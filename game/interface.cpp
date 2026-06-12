@@ -167,7 +167,7 @@ std::uint8_t interface::selectGameMode()
     while (true)
     {
         std::print("0) {}\n1) {}\n", interface::green("Local Play"), interface::magenta("Online Play"));
-        std::print("Choose game mode [0/1] or Q to quit > ");
+        std::print("Choose game mode [0/1] or Q to quit> ");
 
         std::string input;
         std::cin >> input;
@@ -203,4 +203,44 @@ void interface::home()
 void interface::clear()
 {
     rlutil::cls();
+}
+
+std::string interface::getUsername()
+{
+    while (true)
+    {
+        std::string input;
+        std::print("Pick a username (max 14 characters) for this online session> ");
+        std::cin >> input;
+
+        if (input.size() > 14)
+        {
+            std::print("Invalid username. Must be only 14 ASCII letters, numbers or symbols with no spaces/tabs.\n");
+        }
+        else if (input.size() == 0)
+        {
+            std::print("Invalid username. Username can't be blank.\n");
+        }
+        else
+        {
+            bool invalid = false;
+            for (std::uint8_t i = 0; i < input.size(); i++)
+            {
+                char c = input.at(i);
+                if (c < 33 || c > 126)
+                {
+                    invalid = true;
+                }
+            }
+            if (invalid)
+            {
+                std::print("Invalid username. Must be only 14 ASCII letters, numbers or symbols (less than ASCII code 127) with no spaces/tabs.\n");
+                continue;
+            }
+            else
+            {
+                return input;
+            }
+        }
+    }
 }
