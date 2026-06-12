@@ -9,9 +9,7 @@
 
 void doMultiplayer()
 {
-    // TODO: change the game display/interface code to clear the screen
-    // TODO: get code to get username, using character limit
-    // and whether they want to host or join a lobby
+    // TODO: Possibly change the game display/interface code to clear the screen.
     std::string username = interface::getUsername();
     bool hostGame = interface::selectHostLobby();
     int serv_fd = networking::initClient();
@@ -60,6 +58,17 @@ void doMultiplayer()
             }
         }
         std::print("No longer waiting for guest!");
+
+        // TODO: Stuff to do:
+        // 1. Receive guest's name from server
+        // 2. ...
+    }
+    else // Player wants to join an existing game
+    {
+        // TODO: Stuff to do:
+        // 1. Get the list of lobbies
+        // 2. Let player decide from the options
+        // 3. ...
     }
 
     networking::closeFd(serv_fd);
