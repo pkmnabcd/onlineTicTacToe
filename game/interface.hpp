@@ -14,6 +14,7 @@ namespace interface
     std::uint8_t player_select();
     std::uint8_t selectGameMode();
     std::string getUsername();
+    bool selectHostLobby();
 
     std::string black(std::string input);
     std::string red(std::string input);

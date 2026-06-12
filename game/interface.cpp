@@ -244,3 +244,44 @@ std::string interface::getUsername()
         }
     }
 }
+
+bool interface::selectHostLobby()
+{
+    while (true)
+    {
+        std::uint8_t choice;
+        std::string input;
+        std::print("0) {}\n1) {}\n", interface::green("Host"), interface::magenta("Join"));
+        std::print("Do you want to host a lobby or join an existing lobby?> ");
+        std::cin >> input;
+
+        if (input.size() != 1)
+        {
+            std::print("I don't understand '{}', try again! (Input one char)\n", input);
+        }
+        else
+        {
+            choice = input[0];
+            if (!util::isDigit(choice))
+            {
+                std::print("I don't understand '{}', try again! (Input valid char)\n", choice);
+            }
+            else
+            {
+                std::uint8_t val = util::toIntVal(choice);
+                if (val == 0)
+                {
+                    return true;
+                }
+                else if (val == 1)
+                {
+                    return false;
+                }
+                else
+                {
+                    std::print("Invalid number. Should be 0 or 1.\n");
+                }
+            }
+        }
+    }
+}

@@ -13,7 +13,7 @@ void doMultiplayer()
     // TODO: get code to get username, using character limit
     // and whether they want to host or join a lobby
     std::string username = interface::getUsername();
-    bool hostGame = true;
+    bool hostGame = interface::selectHostLobby();
     int serv_fd = networking::initClient();
 
     bool message_sent_success;
