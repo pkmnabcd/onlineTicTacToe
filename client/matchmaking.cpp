@@ -81,3 +81,29 @@ bool matchmaking::sendPing(int serv_fd)
     int bytesSent = networking::sendAll(serv_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
 }
+
+std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
+{
+    std::string guestName = "";
+    bool disconnected = false;
+
+    const int bufferLen = NAME_LEN;
+    char buffer[bufferLen] = "";
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        if (buffer[NAME_LEN-1] != '\0')
+        {
+            disconnected = true;
+        }
+        else
+        {
+            guestName = std::string(buffer);
+        }
+    }
+    return std::make_tuple(guestName, disconnected);
+}

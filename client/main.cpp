@@ -62,6 +62,13 @@ void doMultiplayer()
         // TODO: Stuff to do:
         // 1. Receive guest's name from server
         // 2. ...
+        // TODO: test
+        auto [guestName, disconnectedTmp1] = matchmaking::getGuestName(serv_fd);
+        if (disconnected)
+        {
+            std::print("Disconnected from server while getting guest name.\n");
+            return;
+        }
     }
     else // Player wants to join an existing game
     {
