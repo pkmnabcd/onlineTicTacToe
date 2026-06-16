@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <vector>
 
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
@@ -106,4 +107,10 @@ std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
         }
     }
     return std::make_tuple(guestName, disconnected);
+}
+
+std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking::getOpenLobbies(int serv_fd)
+{
+    // TODO: recieve onee char at a time (set that as buffer size) and feed into the bigger string
+    // until a \0 is found. Then parse the data.
 }

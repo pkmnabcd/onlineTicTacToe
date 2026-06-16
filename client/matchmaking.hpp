@@ -15,4 +15,5 @@ namespace matchmaking
     std::tuple<bool, bool> getWaitStatus(int serv_fd);
     bool sendPing(int serv_fd);
     std::tuple<std::string, bool> getGuestName(int serv_fd);
+    std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> getOpenLobbies(int serv_fd);
 } // namespace matchmaking
