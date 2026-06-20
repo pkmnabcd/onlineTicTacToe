@@ -113,4 +113,21 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
 {
     // TODO: recieve onee char at a time (set that as buffer size) and feed into the bigger string
     // until a \0 is found. Then parse the data.
+    // TODO: so \0 can't be the end sign because \0 is probably in the the name if they have less than
+    // the max number of characters, so need a different delimiter.
+    std::vector<std::tuple<std::string, std::uint8_t> openLobbies;
+    bool disconnected = false;
+
+    const int bufferLen = 1;
+    char buffer[bufferLen] = "";
+    while(1)
+    {
+        int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+        if (numbytes == -1 || numbytes == 0)
+        {
+            disconnected = true;
+            break;
+        }
+    }
+    return std::make_tuple(openLobbies, disconnected);
 }
