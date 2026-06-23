@@ -115,7 +115,7 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
     // until a \0 is found. Then parse the data.
     // TODO: so \0 can't be the end sign because \0 is probably in the the name if they have less than
     // the max number of characters, so need a different delimiter.
-    std::vector<std::tuple<std::string, std::uint8_t> openLobbies;
+    std::vector<std::tuple<std::string, std::uint8_t>> openLobbies;
     bool disconnected = false;
 
     const int bufferLen = 1;

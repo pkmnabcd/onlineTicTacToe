@@ -16,6 +16,23 @@ using StraightBoard = std::array<std::string, 9>;
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
 
+bool nameIsValid(std::string name)
+{
+    bool isValid = true;
+    if (name.size() > 14 || name.size() == 0)
+    {
+        isValid = false;
+    }
+    for (std::uint8_t i = 0; i < name.size(); i++)
+    {
+        char c = name.at(i);
+        if (c < 33 || c > 126)
+        {
+            isValid = false;
+        }
+    }
+    return isValid;
+}
 
 std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::uint8_t client_id)
 {
@@ -32,15 +49,27 @@ std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::ui
     }
     else
     {
-        assert(clientInfoBuffer[clientInfoBufferLen - 1] == '\0' && "Guest name should end with \\0");
-
-        // First char signifies whether client wants to host a game.
-        // The other chars are the name the client picks
-        // TODO: someday add limits to the names and check the current names to make sure it's unique
-        std::string clientInfo(clientInfoBuffer);
-        std::string client_name = clientInfo.substr(1);
-        player = Player(client_name, client_id, client_fd);
-        isHosting = clientInfo.at(0) == 'H';
+        if (clientInfoBuffer[clientInfoBufferLen - 1] != '\0')
+        {
+            disconnected = true; // name should end with \0
+        }
+        else
+        {
+            // First char signifies whether client wants to host a game.
+            // The other chars are the name the client picks
+            // TODO: Someday check the current names to make sure it's unique
+            std::string clientInfo(clientInfoBuffer);
+            std::string client_name = clientInfo.substr(1);
+            if (!nameIsValid(client_name))
+            {
+                disconnected = true;
+            }
+            else
+            {
+                player = Player(client_name, client_id, client_fd);
+                isHosting = clientInfo.at(0) == 'H';
+            }
+        }
     }
     return std::make_tuple(player, disconnected, isHosting);
 }
