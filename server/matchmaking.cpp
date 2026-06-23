@@ -44,7 +44,7 @@ std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::ui
     const int clientInfoBufferLen = NAME_LEN + 1;
     char clientInfoBuffer[clientInfoBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, clientInfoBuffer, clientInfoBufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != clientInfoBufferLen)
     {
         disconnected = true;
     }
@@ -101,7 +101,7 @@ std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
     const int chooseColorBufferLen = 2;
     char chooseColorBuffer[chooseColorBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, chooseColorBuffer, chooseColorBufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != chooseColorBufferLen)
     {
         disconnected = true;
     }
@@ -156,7 +156,7 @@ std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
     const int chooseMoveBufferLen = 2;
     char chooseMoveBuffer[chooseMoveBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, chooseMoveBuffer, chooseMoveBufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != chooseMoveBufferLen)
     {
         disconnected = true;
     }
@@ -198,7 +198,7 @@ std::tuple<bool, bool> matchmaking::getClientPlayAgain(int client_fd)
     const int playAgainBufferLen = 2;
     char playAgainBuffer[playAgainBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, playAgainBuffer, playAgainBufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != playAgainBufferLen)
     {
         disconnected = true;
     }
@@ -258,7 +258,7 @@ std::tuple<std::uint8_t, bool> matchmaking::getClientLobbyChoice(int client_fd)
     const int lobbyBufferLen = 4; // 3 for id in base-10, 1 for \0
     char lobbyBuffer[lobbyBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, lobbyBuffer, lobbyBufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != lobbyBufferLen)
     {
         disconnected = true;
     }
@@ -307,7 +307,7 @@ bool matchmaking::getClientCheckIn(int client_fd)
     const int lobbyBufferLen = 2;
     char lobbyBuffer[lobbyBufferLen] = "";
     int numbytes = networking::receiveAll(client_fd, lobbyBuffer, lobbyBufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != lobbyBufferLen)
     {
         disconnected = true;
     }
