@@ -76,6 +76,20 @@ void doMultiplayer()
         // 1. Get the list of lobbies
         // 2. Let player decide from the options
         // 3. ...
+        auto [lobbies, disconnectedTmp0] = matchmaking::getOpenLobbies(serv_fd);
+        disconnected = disconnectedTmp0;
+        if (disconnected)
+        {
+            std::print("Disconnected from server while trying to get the open lobbies.\n");
+            return;
+        }
+        // TODO: delete test code
+        for (auto& lobby : lobbies)
+        {
+            std::string hostName = std::get<0>(lobby);
+            std::uint8_t hostID = std::get<1>(lobby);
+            std::print("{}: {}\n", hostID, hostName);
+        }
     }
 
     networking::closeFd(serv_fd);

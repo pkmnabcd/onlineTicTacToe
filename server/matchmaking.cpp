@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstdint>
 #include <format>
+#include <print>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -236,11 +237,16 @@ bool matchmaking::sendClientOpenLobbies(int client_fd, std::vector<Lobby> openLo
     {
         // NOTE: 3 chars for id, NAME_LEN-1 = 14 for the name and also
         // add \x01 for a sign to expect the lobby and also include the \0 s
-        msg.append(std::format("\x01{:3}\0{:14}\0", lobby.m_host.m_id, lobby.m_host.m_name));
+        msg.push_back('\x01');
+        msg.append(std::format("{:3}", lobby.m_host.m_id));
+        msg.push_back('\0');
+        msg.append(std::format("{:14}", lobby.m_host.m_name));
+        msg.push_back('\0');
     }
     msg.push_back('\x02'); // sign to stop expecting lobbies
 
     const int bufferLen = msg.size();
+    std::print("Buffer Length: {}\n", bufferLen);
     int bytesSent = networking::sendAll(client_fd, msg.data(), bufferLen);
     return bytesSent == bufferLen;
 }
