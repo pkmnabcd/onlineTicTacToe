@@ -4,7 +4,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <print>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -35,7 +34,7 @@ bool matchmaking::getConfirmationMsg(int serv_fd)
     const int bufferLen = 8;
     char buffer[bufferLen] = "";
     int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
     {
         disconnected = true;
     }
@@ -55,7 +54,7 @@ std::tuple<bool, bool> matchmaking::getWaitStatus(int serv_fd)
     const int bufferLen = 2;
     char buffer[bufferLen] = "";
     int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
     {
         disconnected = true;
     }
@@ -93,7 +92,7 @@ std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
     const int bufferLen = NAME_LEN;
     char buffer[bufferLen] = "";
     int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
-    if (numbytes == -1 || numbytes == 0)
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
     {
         disconnected = true;
     }
@@ -115,16 +114,14 @@ std::tuple<std::string, bool> readStr(int serv_fd, char* buffer, const int buffe
 {
     bool disconnected = false;
     int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
-    if (numbytes == -1 || numbytes == 0) // TODO: also check if numbytes doesn't equal the buffer length
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
     {
-        std::print("Error recieving anything\n");
         disconnected = true;
     }
     else
     {
         if (buffer[bufferLen - 1] != 0)
         {
-            std::print("Error not seeing \\0 expected in the buffer: {}.\n", buffer);
             disconnected = true;
         }
     }
@@ -134,12 +131,6 @@ std::tuple<std::string, bool> readStr(int serv_fd, char* buffer, const int buffe
 
 std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking::getOpenLobbies(int serv_fd)
 {
-    // TODO: Process for receiving the lobbies:
-    // 1. Set up a buffers to recieve the lobby data into, but still read one char at a time.
-    // 2. First look for the \x01 byte and then read the rest of the data. If it's \x02 or otherwise,
-    // then report a failure or stop reading the lobbies.
-    // 3. If \x01, read the first three chars and convert to int and then uint8_t, then read name (15 chars)
-    // 4. Repeat until \x01 no longer found.
     std::vector<std::tuple<std::string, std::uint8_t>> openLobbies;
     bool disconnected = false;
 
@@ -151,22 +142,19 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
         std::uint8_t id = 0;
 
         int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
-        if (numbytes == -1 || numbytes == 0)
+        if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
         {
-            std::print("Error recieving anything\n");
             disconnected = true;
             break;
         }
         if (buffer[0] == 1)
         {
-            std::print("Got the signal to expect a lobby.\n");
             // Get an id and name from the server
             char idBuffer[4] = "";
             auto [idStr, disconnectedTmp0] = readStr(serv_fd, idBuffer, 4);
             disconnected = disconnectedTmp0;
             if (disconnected)
             {
-                std::print("Error in readStr\n");
                 break;
             }
 
@@ -175,7 +163,6 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
             disconnected = disconnectedTmp1;
             if (disconnected)
             {
-                std::print("Error in readStr\n");
                 break;
             }
 
@@ -187,13 +174,11 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
             }
             catch (std::invalid_argument const& ex)
             {
-                std::print("Errors with this inputted idStr: {}\n", idStr);
                 disconnected = true;
                 break;
             }
             catch (std::out_of_range const& ex)
             {
-                std::print("Errors with this inputted idStr: {}\n", idStr);
                 disconnected = true;
                 break;
             }
@@ -202,12 +187,10 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
         }
         else if (buffer[0] == 2)
         {
-            std::print("Got the end signal.\n");
             break; // Done getting ids and names
         }
         else
         {
-            std::print("Got some other signal.\n");
             disconnected = true;
             break;
         }
