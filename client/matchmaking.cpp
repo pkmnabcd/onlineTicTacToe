@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -109,6 +110,25 @@ std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
     return std::make_tuple(guestName, disconnected);
 }
 
+std::tuple<std::string, bool> readStr(int serv_fd, char* buffer, const int bufferLen)
+{
+    bool disconnected = false;
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0) // TODO: also check if numbytes doesn't equal the buffer length
+    {
+        disconnected = true;
+    }
+    else
+    {
+        if (buffer[bufferLen - 1] != 0)
+        {
+            disconnected = true;
+        }
+    }
+    std::string output(buffer);
+    return std::make_tuple(output, disconnected);
+}
+
 std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking::getOpenLobbies(int serv_fd)
 {
     // TODO: Process for receiving the lobbies:
@@ -124,8 +144,57 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
     char buffer[bufferLen] = "";
     while(1)
     {
+        std::string name = "";
+        std::uint8_t id = 0;
+
         int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
         if (numbytes == -1 || numbytes == 0)
+        {
+            disconnected = true;
+            break;
+        }
+        if (buffer[0] == 1)
+        {
+            // Get an id and name from the server
+            char idBuffer[4] = "";
+            auto [idStr, disconnectedTmp0] = readStr(serv_fd, idBuffer, 4);
+            disconnected = disconnectedTmp0;
+            if (disconnected)
+            {
+                break;
+            }
+
+            char nameBuffer[15] = "";
+            auto [nameStr, disconnectedTmp1] = readStr(serv_fd, nameBuffer, 15);
+            disconnected = disconnectedTmp1;
+            if (disconnected)
+            {
+                break;
+            }
+
+            // Get the id from the string
+            try
+            {
+                const unsigned long int idInt = std::stoul(idStr);
+                id = static_cast<std::uint8_t>(idInt);
+            }
+            catch (std::invalid_argument const& ex)
+            {
+                disconnected = true;
+                break;
+            }
+            catch (std::out_of_range const& ex)
+            {
+                disconnected = true;
+                break;
+            }
+            openLobbies.push_back(std::make_tuple(name, id));
+        }
+        else if (buffer[0] == 2)
+        {
+            break; // Done getting ids and names
+        }
+        else
         {
             disconnected = true;
             break;
