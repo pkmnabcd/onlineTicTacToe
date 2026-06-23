@@ -85,13 +85,8 @@ void doMultiplayer()
             std::print("Disconnected from server while trying to get the open lobbies.\n");
             return;
         }
-        // TODO: delete test code
-        for (auto& lobby : lobbies)
-        {
-            std::string hostName = std::get<0>(lobby);
-            std::uint8_t hostID = std::get<1>(lobby);
-            std::print("{}: {}\n", hostID, hostName);
-        }
+
+        std::uint8_t lobbyHostID = interface::chooseLobby(lobbies);
     }
 
     networking::closeFd(serv_fd);

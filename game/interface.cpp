@@ -8,6 +8,8 @@
 #include <iostream>
 #include <print>
 #include <string>
+#include <tuple>
+#include <vector>
 
 std::string interface::black(std::string input)
 {
@@ -284,4 +286,65 @@ bool interface::selectHostLobby()
             }
         }
     }
+}
+
+std::uint8_t interface::chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies)
+{
+    std::uint8_t id = 0;
+    for (auto& lobby : lobbies)
+    {
+        std::string hostName = std::get<0>(lobby);
+        std::uint8_t hostID = std::get<1>(lobby);
+        std::print("{}: {}\n", hostID, hostName);
+    }
+
+    bool notValidChoice = true;
+    while (notValidChoice)
+    {
+        std::print("Enter the ID number of the lobby you want to join> ");
+        std::string input;
+        std::cin >> input;
+        if (input.size() < 1 || input.size() > 3)
+        {
+            std::print("Enter a 1-3 digit number (no negatives)\n");
+            continue;
+        }
+        // Get the id from the string
+        try
+        {
+            const unsigned long int idInt = std::stoul(input);
+            if (idInt > UINT8_MAX)
+            {
+                std::print("Please enter a valid ID.\n");
+                continue;
+            }
+            id = static_cast<std::uint8_t>(idInt);
+        }
+        catch (std::invalid_argument const& ex)
+        {
+            std::print("Please enter a valid ID.\n");
+            continue;
+        }
+        catch (std::out_of_range const& ex)
+        {
+            std::print("Please enter a valid ID.\n");
+            continue;
+        }
+
+        // Check if the id is in the list of open lobbies
+        for (auto& lobby : lobbies)
+        {
+            std::uint8_t hostID = std::get<1>(lobby);
+            if (hostID == id)
+            {
+                notValidChoice = false;
+                break;
+            }
+        }
+        if (notValidChoice)
+        {
+            std::print("Please enter a valid ID.\n");
+        }
+    }
+    return id;
 }
