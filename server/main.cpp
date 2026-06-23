@@ -62,7 +62,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     if (isHosting)
     {
         Lobby client_lobby = Lobby(client_player);
-        message_sent_success = matchmaking::reportSuccessfulLobbyCreation(client_fd);
+        message_sent_success = matchmaking::sendClientID(client_fd, client_id);
         if (!message_sent_success)
         {
             std::print(stderr, "Error: message send unsucessful\n");

@@ -75,13 +75,14 @@ std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::ui
     return std::make_tuple(player, disconnected, isHosting);
 }
 
-bool matchmaking::reportSuccessfulLobbyCreation(int client_fd)
+bool matchmaking::sendClientID(int client_fd, std::uint8_t client_id)
 {
-    const int bufferLen = 8;
-    char buffer[bufferLen] = "Success";
-    int bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
+    std::string msg = "";
+    msg.append(std::format("{:3}", client_id));
+    msg.push_back('\0');
+    int bytesSent = networking::sendAll(client_fd, msg.data(), msg.size()); // should be 4 bytes
 
-    return bytesSent == bufferLen;
+    return bytesSent == static_cast<int>(msg.size());
 }
 
 bool matchmaking::sendHostTheGuestName(int client_fd, std::string guestName)

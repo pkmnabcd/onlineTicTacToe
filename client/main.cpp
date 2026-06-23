@@ -27,13 +27,14 @@ void doMultiplayer()
     if (hostGame)
     {
         std::print("Trying to get confirmation\n");
-        disconnected = matchmaking::getConfirmationMsg(serv_fd);
+        auto [yourID, disconnectedTmp0] = matchmaking::getYourID(serv_fd);
+        disconnected = disconnectedTmp0;
         if (disconnected)
         {
-            std::print("Disconnected from server. Didn't receive lobby confirmation msg.\n");
+            std::print("Disconnected from server. Didn't receive your ID.\n");
             return;
         }
-        std::print("Received confirmation msg\n");
+        std::print("Your Online ID for this session is: {}\n", yourID);
 
         // Wait for a guest to join lobby and hear from server
         while (1)
@@ -45,8 +46,8 @@ void doMultiplayer()
                 return;
             }
 
-            auto [stillWaiting, disconnectedTmp0] = matchmaking::getWaitStatus(serv_fd);
-            disconnected = disconnectedTmp0;
+            auto [stillWaiting, disconnectedTmp1] = matchmaking::getWaitStatus(serv_fd);
+            disconnected = disconnectedTmp1;
             if (disconnected)
             {
                 std::print("Disconnected from server while waiting for guest.\n");
@@ -63,7 +64,8 @@ void doMultiplayer()
         // 1. Receive guest's name from server
         // 2. ...
         // TODO: test
-        auto [guestName, disconnectedTmp1] = matchmaking::getGuestName(serv_fd);
+        auto [guestName, disconnectedTmp2] = matchmaking::getGuestName(serv_fd);
+        disconnected = disconnectedTmp2;
         if (disconnected)
         {
             std::print("Disconnected from server while getting guest name.\n");

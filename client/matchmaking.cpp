@@ -27,12 +27,9 @@ bool matchmaking::sendPlayerInfo(int serv_fd, bool hostGame, std::string usernam
     return bytesSent == playerInfoBufferLen;
 }
 
-bool matchmaking::getConfirmationMsg(int serv_fd)
+std::tuple<std::string, bool> readStr(int serv_fd, char* buffer, const int bufferLen)
 {
     bool disconnected = false;
-
-    const int bufferLen = 8;
-    char buffer[bufferLen] = "";
     int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
     if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
     {
@@ -40,10 +37,42 @@ bool matchmaking::getConfirmationMsg(int serv_fd)
     }
     else
     {
-        char successStr[bufferLen] = "Success";
-        disconnected = std::string_view(buffer) != std::string_view(successStr);
+        if (buffer[bufferLen - 1] != 0)
+        {
+            disconnected = true;
+        }
     }
-    return disconnected;
+    std::string output(buffer);
+    return std::make_tuple(output, disconnected);
+}
+
+std::tuple<std::uint8_t, bool> matchmaking::getYourID(int serv_fd)
+{
+    std::uint8_t id = 0;
+    bool disconnected = false;
+
+    const int bufferLen = 4;
+    char buffer[bufferLen] = "";
+    auto [idStr, disconnectedTmp0] = readStr(serv_fd, buffer, bufferLen);
+    disconnected = disconnectedTmp0;
+    if (!disconnected)
+    {
+        // Get the id from the string
+        try
+        {
+            const unsigned long int idInt = std::stoul(idStr);
+            id = static_cast<std::uint8_t>(idInt);
+        }
+        catch (std::invalid_argument const& ex)
+        {
+            disconnected = true;
+        }
+        catch (std::out_of_range const& ex)
+        {
+            disconnected = true;
+        }
+    }
+    return std::make_tuple(id, disconnected);
 }
 
 std::tuple<bool, bool> matchmaking::getWaitStatus(int serv_fd)
@@ -110,25 +139,6 @@ std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
     return std::make_tuple(guestName, disconnected);
 }
 
-std::tuple<std::string, bool> readStr(int serv_fd, char* buffer, const int bufferLen)
-{
-    bool disconnected = false;
-    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
-    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
-    {
-        disconnected = true;
-    }
-    else
-    {
-        if (buffer[bufferLen - 1] != 0)
-        {
-            disconnected = true;
-        }
-    }
-    std::string output(buffer);
-    return std::make_tuple(output, disconnected);
-}
-
 std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking::getOpenLobbies(int serv_fd)
 {
     std::vector<std::tuple<std::string, std::uint8_t>> openLobbies;
@@ -158,6 +168,7 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
                 break;
             }
 
+            // TODO: change these to not magic numbers
             char nameBuffer[15] = "";
             auto [nameStr, disconnectedTmp1] = readStr(serv_fd, nameBuffer, 15);
             disconnected = disconnectedTmp1;
