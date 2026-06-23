@@ -234,10 +234,11 @@ bool matchmaking::sendClientOpenLobbies(int client_fd, std::vector<Lobby> openLo
     std::string msg = "";
     for (Lobby& lobby : openLobbies)
     {
-        // NOTE: 3 chars for id, NAME_LEN-1 = 14 for name
-        msg.append(std::format("{:3}{:14}", lobby.m_host.m_id, lobby.m_host.m_name));
+        // NOTE: 3 chars for id, NAME_LEN-1 = 14 for the name and also
+        // add \x01 for a sign to expect the lobby and also include the \0
+        msg.append(std::format("\x01{:3}{:14}\0", lobby.m_host.m_id, lobby.m_host.m_name));
     }
-    msg.push_back('\0');
+    msg.push_back('\x02'); // sign to stop expecting lobbies
 
     const int bufferLen = msg.size();
     int bytesSent = networking::sendAll(client_fd, msg.data(), bufferLen);

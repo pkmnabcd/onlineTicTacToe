@@ -111,10 +111,12 @@ std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
 
 std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking::getOpenLobbies(int serv_fd)
 {
-    // TODO: recieve onee char at a time (set that as buffer size) and feed into the bigger string
-    // until a \0 is found. Then parse the data.
-    // TODO: so \0 can't be the end sign because \0 is probably in the the name if they have less than
-    // the max number of characters, so need a different delimiter.
+    // TODO: Process for receiving the lobbies:
+    // 1. Set up a buffers to recieve the lobby data into, but still read one char at a time.
+    // 2. First look for the \x01 byte and then read the rest of the data. If it's \x02 or otherwise,
+    // then report a failure or stop reading the lobbies.
+    // 3. If \x01, read the first three chars and convert to int and then uint8_t, then read name (15 chars)
+    // 4. Repeat until \x01 no longer found.
     std::vector<std::tuple<std::string, std::uint8_t>> openLobbies;
     bool disconnected = false;
 
