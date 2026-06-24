@@ -60,10 +60,6 @@ void doMultiplayer()
         }
         std::print("No longer waiting for guest!");
 
-        // TODO: Stuff to do:
-        // 1. Receive guest's name from server
-        // 2. ...
-        // TODO: test
         auto [guestName, disconnectedTmp2] = matchmaking::getGuestName(serv_fd);
         disconnected = disconnectedTmp2;
         if (disconnected)
@@ -72,6 +68,11 @@ void doMultiplayer()
             return;
         }
         std::print("You have connected with guest: {}\n", guestName);
+
+        // TODO: Stuff to do:
+        // 1. Choose between being red or blue
+        // 2. Game logic
+        // 3. ...
     }
     else // Player wants to join an existing game
     {
@@ -91,9 +92,9 @@ void doMultiplayer()
             return;
         }
         // TODO: Stuff to do:
-        // 1. Recieve the confirmation of connection to the lobby
-        // 2. Recieve the color of your opponent
-        // 3. ...
+        // 1. Recieve the color of your opponent
+        // 3. Game logic
+        // 2. ...
 
         auto [connectionSuccess, disconnectedTmp1] = matchmaking::getLobbyConnectionSuccessConfirmation(serv_fd);
         disconnected = disconnectedTmp1;
