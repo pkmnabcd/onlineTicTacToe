@@ -87,6 +87,12 @@ void doMultiplayer()
         }
 
         std::uint8_t lobbyHostID = interface::chooseLobby(lobbies);
+        message_sent_success = matchmaking::sendLobbyChoice(serv_fd, lobbyHostID);
+        if (!message_sent_success)
+        {
+            std::print("Disconnected from server while sending lobby choice.\n");
+            return;
+        }
     }
 
     networking::closeFd(serv_fd);

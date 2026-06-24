@@ -8,7 +8,7 @@
 #include <cassert>
 #include <cstdint>
 #include <format>
-#include <print>
+#include <print> // TODO: remove when done debugging
 #include <string>
 #include <tuple>
 #include <vector>
@@ -247,7 +247,6 @@ bool matchmaking::sendClientOpenLobbies(int client_fd, std::vector<Lobby> openLo
     msg.push_back('\x02'); // sign to stop expecting lobbies
 
     const int bufferLen = msg.size();
-    std::print("Buffer Length: {}\n", bufferLen);
     int bytesSent = networking::sendAll(client_fd, msg.data(), bufferLen);
     return bytesSent == bufferLen;
 }
@@ -268,7 +267,7 @@ std::tuple<std::uint8_t, bool> matchmaking::getClientLobbyChoice(int client_fd)
         // Check for valid numbers
         for (short i = 0; i < lobbyBufferLen-1; i++) // NOTE: ignore \0 at end
         {
-            if (!isDigit(lobbyBuffer[i]) || lobbyBuffer[i] != ' ')
+            if (!isDigit(lobbyBuffer[i]) && lobbyBuffer[i] != ' ')
             {
                 disconnected = true;
                 break;
