@@ -71,6 +71,7 @@ void doMultiplayer()
             std::print("Disconnected from server while getting guest name.\n");
             return;
         }
+        std::print("You have connected with guest: {}\n", guestName);
     }
     else // Player wants to join an existing game
     {
@@ -93,6 +94,14 @@ void doMultiplayer()
         // 1. Recieve the confirmation of connection to the lobby
         // 2. Recieve the color of your opponent
         // 3. ...
+
+        auto [connectionSuccess, disconnectedTmp1] = matchmaking::getLobbyConnectionSuccessConfirmation(serv_fd);
+        disconnected = disconnectedTmp1;
+        if (disconnected)
+        {
+            std::print("Disconnected from server while confirming lobby selection.\n");
+            return;
+        }
     }
 
     networking::closeFd(serv_fd);

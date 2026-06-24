@@ -218,3 +218,29 @@ bool matchmaking::sendLobbyChoice(int serv_fd, std::uint8_t hostID)
 
     return bytesSent == static_cast<int>(msg.size());
 }
+
+std::tuple<bool, bool> matchmaking::getLobbyConnectionSuccessConfirmation(int serv_fd)
+{
+    bool connectionSuccess = false;
+    bool disconnected = false;
+
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        if (buffer[0] == 'Y')
+        {
+            connectionSuccess = true;
+        }
+        else if (buffer[0] != 'N')
+        {
+            disconnected = true;
+        }
+    }
+    return std::make_tuple(connectionSuccess, disconnected);
+}
