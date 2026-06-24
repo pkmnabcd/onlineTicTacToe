@@ -74,10 +74,6 @@ void doMultiplayer()
     }
     else // Player wants to join an existing game
     {
-        // TODO: Stuff to do:
-        // 1. Get the list of lobbies
-        // 2. Let player decide from the options
-        // 3. ...
         auto [lobbies, disconnectedTmp0] = matchmaking::getOpenLobbies(serv_fd);
         disconnected = disconnectedTmp0;
         if (disconnected)
@@ -93,6 +89,10 @@ void doMultiplayer()
             std::print("Disconnected from server while sending lobby choice.\n");
             return;
         }
+        // TODO: Stuff to do:
+        // 1. Recieve the confirmation of connection to the lobby
+        // 2. Recieve the color of your opponent
+        // 3. ...
     }
 
     networking::closeFd(serv_fd);

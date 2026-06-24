@@ -254,7 +254,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
             // Receive the ID of the player guest wants to join.
             auto [hostID, disconnectedTmp1] = matchmaking::getClientLobbyChoice(client_fd);
-            std::print("Client disconnected: {}\n", disconnectedTmp1);
             std::print("Client made the choice: {}\n", hostID);
             client_disconnected = disconnectedTmp1;
             if (client_disconnected)
