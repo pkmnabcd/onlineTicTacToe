@@ -227,7 +227,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
             // Receive the ID of the player guest wants to join.
             auto [hostID, disconnectedTmp1] = matchmaking::getClientLobbyChoice(client_fd);
-            std::print("Guest made the choice: {}\n", hostID);
             client_disconnected = disconnectedTmp1;
             if (client_disconnected)
             {
@@ -236,6 +235,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
                 return;
             }
+            std::print("Guest made the choice: {}\n", hostID);
 
             // Check to make sure the lobby is still available.
             bool guestAdded = critical::addGuestToLobby(lobbies, hostID, client_player, dataMutex);

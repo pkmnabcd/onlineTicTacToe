@@ -83,6 +83,11 @@ void doMultiplayer()
                 std::print("Disconnected from server while trying to get the open lobbies.\n");
                 return;
             }
+            if (lobbies.size() == 0)
+            {
+                std::print("No open lobbies. Host a lobby or try again later.\n");
+                return;
+            }
 
             std::uint8_t lobbyHostID = interface::chooseLobby(lobbies);
             message_sent_success = matchmaking::sendLobbyChoice(serv_fd, lobbyHostID);
