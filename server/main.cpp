@@ -261,9 +261,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             while (oppWantsToPlay)
             {
                 // Block until host disconnects or chooses red or blue
-                // TODO: get pings back and forth so you know if guest disconnected
-                // while waiting. See the above 'getClientCheckIn' and 'sendCheckIn' usage.
-                // I think I can use the same functions as before.
                 std::function<bool()> waitForHostColor = [&]
                 {
                     bool hostLeft = lobbies[hostID].m_someoneDisconnected;
