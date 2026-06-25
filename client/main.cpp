@@ -1,11 +1,10 @@
-#include "../game/interface.hpp"
-#include "../game/ttt.hpp"
+#include "interface.hpp"
 #include "matchmaking.hpp"
 #include "networking.hpp"
+#include "ttt.hpp"
 
 #include <print>
 #include <string>
-// TODO: move the game folder to just the client folder since I didn't end up using game/ at all in the server.
 
 void doMultiplayer()
 {

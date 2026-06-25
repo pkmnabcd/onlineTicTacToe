@@ -12,26 +12,22 @@ project(${PROJECT_NAME})
 #
 include_directories(
     client
-    game
     server
 )
 
 #
 # Manually specifying all the source files.
 #
-set(GAME_HEADER_FILES
-    game/ai.hpp
-    game/engine.hpp
-    game/interface.hpp
-    game/ttt.hpp
-    game/util.hpp
-
-    game/rlutil.h
-)
 set(CLIENT_HEADER_FILES
-    ${GAME_HEADER_FILES}
+    client/ai.hpp
+    client/engine.hpp
+    client/interface.hpp
     client/matchmaking.hpp
     client/networking.hpp
+    client/ttt.hpp
+    client/util.hpp
+
+    client/rlutil.h
 )
 set(SERVER_HEADER_FILES
     server/GameState.hpp
@@ -45,22 +41,18 @@ set(SERVER_HEADER_FILES
     server/settings.hpp
 )
 set(ALL_HEADER_FILES
-    ${GAME_HEADER_FILES}
     ${CLIENT_HEADER_FILES}
     ${SERVER_HEADER_FILES}
 )
 
-set(GAME_SOURCE_FILES
-    game/ai.cpp
-    game/engine.cpp
-    game/interface.cpp
-    game/ttt.cpp
-    game/util.cpp
-)
 set(CLIENT_SOURCE_FILES
-    ${GAME_SOURCE_FILES}
+    client/ai.cpp
+    client/engine.cpp
+    client/interface.cpp
     client/matchmaking.cpp
     client/networking.cpp
+    client/ttt.cpp
+    client/util.cpp
 )
 set(SERVER_SOURCE_FILES
     server/GameState.cpp
@@ -73,7 +65,6 @@ set(SERVER_SOURCE_FILES
     server/play.cpp
 )
 set(ALL_CLIENT_FILES
-    ${GAME_CLIENT_FILES}
     ${CLIENT_CLIENT_FILES}
     ${SERVER_CLIENT_FILES}
 )
