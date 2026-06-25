@@ -4,10 +4,11 @@ I have translated it to C++, and will be using this project to help me learn how
 
 # Progress
 This project is in the middle of development still.
-I recently finished a draft of the server, but it remains untested.
-I have largely finished the logic for when a user wants to host a game, but still need to implement the code needed to join a game.
+I recently finished a draft of the server, but it remains largely untested.
 Right now, you can play the tic tac toe game by yourself by building the project and running the `Client` program.
-This works on Windows and Linux.
+I'm making good progress in finally hooking up the client to the server for online play.
+This currently works only on Linux.
+I have yet to test anything on Windows, and I need to include the right header files for socket programming in Windows.
 
 # Some Design Notes
 As of now, I have the server designed such that connecting to a client creates a thread that handles all the interaction with that user.
@@ -15,7 +16,7 @@ I am aware that this design does not scale well, but I am having fun attempting 
 
 # Future Ideas
 Once I mostly finish this project, I hope to rewrite it using a more scalable design.
-I also don't currently have any tests, so I will change that.
+I also don't currently have any tests, or even a way to monitor the server's state, so I will change that.
 
 # Building
 Here are the steps for building this project.

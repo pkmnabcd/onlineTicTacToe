@@ -19,6 +19,10 @@
 using StraightBoard = std::array<std::string, 9>;
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
+// TODO: change the paradigm so that I don't just rely on the order of
+// packages being sent/received to function. Ex: have tags at the start
+// of each send/recv message that say the purpose of the packet. Ex 0x01
+// for pings, 0x02 for moves, etc
 
 bool nameIsValid(std::string name)
 {
