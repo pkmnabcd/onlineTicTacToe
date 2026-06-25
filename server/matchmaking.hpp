@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <tuple>
 #include <vector>
 
@@ -27,4 +28,5 @@ namespace matchmaking
     bool sendClientSuccessfulConnectionToLobby(int client_fd, bool successfulConnection);
     bool getClientCheckIn(int client_fd);
     bool sendCheckIn(int client_fd, bool stillWaiting);
+    bool blockUntilCondition(int client_fd, std::function<bool()> condition);
 } // namespace matchmaking

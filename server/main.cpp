@@ -9,6 +9,7 @@
 
 #include <array>
 #include <chrono>
+#include <functional>
 #include <mutex>
 #include <print>
 #include <queue>
@@ -87,49 +88,20 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         {
             // Wait until someone joins the lobby
             Player guest;
-            while (true)
+            std::function<bool()> guestJoinedCondition = [&]()
             {
-                // Don't bother checking atomically until there's a sign that someone joined. Checking atomically would constantly block every thread.
-                // TODO: check if the client waiting for a guest disconnected.
-                // Check for another message?
-                client_disconnected = matchmaking::getClientCheckIn(client_fd);
-                if (client_disconnected)
-                {
-                    std::print(stderr, "Error: guest disconnected while waiting for a guest\n");
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
-                    critical::invalidatePlayer(players, client_id, dataMutex);
-                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
-                    return;
-                }
-
-                message_sent_success = matchmaking::sendCheckIn(client_fd, true); // Still waiting
-                if (!message_sent_success)
-                {
-                    std::print(stderr, "Error: guest disconnected while waiting for a guest\n");
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
-                    critical::invalidatePlayer(players, client_id, dataMutex);
-                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
-                    return;
-                }
-
                 if (lobbies[client_id].m_guest.m_isValid)
                 {
+                    // NOTE: guest is modified inside the blockUntilCondition function.
                     guest = critical::getGuestFromClientLobby(lobbies, client_id, dataMutex);
-                    if (guest.m_isValid)
-                    {
-                        break;
-                    }
+                    return guest.m_isValid;
                 }
-                std::this_thread::sleep_for(std::chrono::seconds(4)); // check every few seconds
-            }
-            // TODO: Make sure that the guest thread adds the guest player to the lobby.
-
-            message_sent_success = matchmaking::sendCheckIn(client_fd, false); // Done waiting
-            if (!message_sent_success)
+                return false;
+            };
+            client_disconnected = matchmaking::blockUntilCondition(client_fd, guestJoinedCondition);
+            if (client_disconnected)
             {
-                std::print(stderr, "Error: guest disconnected while trying to tell them a guest connected.\n");
+                std::print(stderr, "Error: guest disconnected while waiting for a guest.\n");
                 critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                 critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);

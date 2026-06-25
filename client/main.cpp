@@ -53,10 +53,6 @@ void doMultiplayer()
         }
         std::print("You have connected with guest: {}\n", guestName);
 
-        // TODO: Stuff to do:
-        // 1. Choose between being red or blue
-        // 2. Game logic
-        // 3. ...
         bool choseRed = interface::chooseRedOrBlue();
         message_sent_success = matchmaking::sendLobbyChoice(serv_fd, choseRed);
         if (!message_sent_success)
@@ -64,6 +60,10 @@ void doMultiplayer()
             std::print("Disconnected from server while sending color choice.\n");
             return;
         }
+
+        // TODO: Stuff to do for host:
+        // 1. Game logic
+        // 2. ...
     }
     else // Player wants to join an existing game
     {
@@ -82,10 +82,6 @@ void doMultiplayer()
             std::print("Disconnected from server while sending lobby choice.\n");
             return;
         }
-        // TODO: Stuff to do:
-        // 1. Recieve the color of your opponent
-        // 3. Game logic
-        // 2. ...
 
         auto [connectionSuccess, disconnectedTmp1] = matchmaking::getLobbyConnectionSuccessConfirmation(serv_fd);
         disconnected = disconnectedTmp1;
@@ -94,6 +90,11 @@ void doMultiplayer()
             std::print("Disconnected from server while confirming lobby selection.\n");
             return;
         }
+
+        // TODO: Stuff to do for guest:
+        // 1. Recieve the color of your opponent
+        // 3. Game logic
+        // 2. ...
     }
 
     networking::closeFd(serv_fd);

@@ -6,10 +6,13 @@
 
 #include <array>
 #include <cassert>
+#include <chrono>
 #include <cstdint>
 #include <format>
+#include <functional>
 #include <print> // TODO: remove when done debugging
 #include <string>
+#include <thread>
 #include <tuple>
 #include <vector>
 
@@ -342,4 +345,41 @@ bool matchmaking::sendCheckIn(int client_fd, bool stillWaiting)
     int bytesSent;
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);
     return bytesSent == bufferLen;
+}
+
+bool matchmaking::blockUntilCondition(int client_fd, std::function<bool()> condition)
+{
+    bool disconnected = false;
+    while (true)
+    {
+        bool client_disconnected = matchmaking::getClientCheckIn(client_fd);
+        if (client_disconnected)
+        {
+            disconnected = true;
+            break;
+        }
+
+        bool message_sent_success = matchmaking::sendCheckIn(client_fd, true); // Still waiting
+        if (!message_sent_success)
+        {
+            disconnected = true;
+            break;
+        }
+
+        if (condition())
+        {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(4)); // check every few seconds
+    }
+
+    if (!disconnected)
+    {
+        bool message_sent_success = matchmaking::sendCheckIn(client_fd, false); // Done waiting
+        if (!message_sent_success)
+        {
+            disconnected = true;
+        }
+    }
+    return disconnected;
 }
