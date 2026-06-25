@@ -74,7 +74,12 @@ void doMultiplayer()
         // 2. Game logic
         // 3. ...
         bool choseRed = interface::chooseRedOrBlue();
-        std::print("You chose {}!\n", (choseRed) ? "red" : "blue");
+        message_sent_success = matchmaking::sendLobbyChoice(serv_fd, choseRed);
+        if (!message_sent_success)
+        {
+            std::print("Disconnected from server while sending color choice.\n");
+            return;
+        }
     }
     else // Player wants to join an existing game
     {
