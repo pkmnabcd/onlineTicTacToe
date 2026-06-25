@@ -133,6 +133,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd);
                     return;
                 }
+                std::print("Host chose the color: {}\n", (hostPickedRed) ? "red" : "blue");
 
                 GameState gamestate = (hostPickedRed) ? GameState(client_player, guest) : GameState(guest, client_player);
 
@@ -226,7 +227,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
             // Receive the ID of the player guest wants to join.
             auto [hostID, disconnectedTmp1] = matchmaking::getClientLobbyChoice(client_fd);
-            std::print("Client made the choice: {}\n", hostID);
+            std::print("Guest made the choice: {}\n", hostID);
             client_disconnected = disconnectedTmp1;
             if (client_disconnected)
             {
@@ -270,8 +271,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     bool keepWaiting = !hostLeft && !hostMadeChoice;
                     return !keepWaiting;
                 };
-                message_sent_success = matchmaking::blockUntilCondition(client_fd, waitForHostColor);
-                if (!message_sent_success)
+                client_disconnected = matchmaking::blockUntilCondition(client_fd, waitForHostColor);
+                if (client_disconnected)
                 {
                     std::print(stderr, "Error: guest disconnected while waiting for host color.\n");
                     critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
@@ -286,6 +287,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 auto [hostPickedRed, hostDisconnected] = critical::hostPickedRed(gamestates, lobbies, hostID, dataMutex);
                 char hostColor = (hostPickedRed) ? 'R' : 'B';
                 hostColor = (hostDisconnected) ? 'D' : hostColor;
+                std::print("Attempting to send the host color {}.\n", hostColor);
                 message_sent_success = matchmaking::sendGuestTheHostColor(client_fd, hostColor);
                 if (!message_sent_success)
                 {

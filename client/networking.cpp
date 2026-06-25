@@ -108,7 +108,7 @@ int networking::receiveAll(int fd, char buffer[], int len)
         }
         if (newBytes == 0)
         {
-            std::print("Server: The client disconnected.\n");
+            std::print("Client: The server disconnected.\n");
             bytesReceived = newBytes;
             break;
         }
@@ -133,7 +133,7 @@ int networking::sendAll(int fd, const char buffer[], int len)
         }
         if (newBytes == 0)
         {
-            std::print("Server: Connection closed or unable to send.\n");
+            std::print("Client: Connection closed or unable to send.\n");
             bytesSent = newBytes;
             break;
         }

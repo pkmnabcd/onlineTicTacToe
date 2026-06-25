@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstdint>
 #include <format>
+#include <print>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -271,4 +272,32 @@ bool matchmaking::blockAndPing(int serv_fd)
         }
     }
     return disconnected;
+}
+
+std::tuple<bool, bool, bool> matchmaking::getHostColor(int serv_fd)
+{
+    bool hostPickedRed = false;
+    bool hostDisconnected = false;
+    bool disconnected = false;
+
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
+    {
+        disconnected = true;
+    }
+    if (buffer[0] == 'R')
+    {
+        hostPickedRed = true;
+    }
+    else if (buffer[0] == 'D')
+    {
+        hostDisconnected = true;
+    }
+    else if (buffer[0] != 'B')
+    {
+        disconnected = true;
+    }
+    return std::make_tuple(hostPickedRed, hostDisconnected, disconnected);
 }

@@ -20,4 +20,5 @@ namespace matchmaking
     std::tuple<bool, bool> getLobbyConnectionSuccessConfirmation(int serv_fd);
     bool sendLobbyChoice(int serv_fd, bool choseRed);
     bool blockAndPing(int serv_fd);
+    std::tuple<bool, bool, bool> getHostColor(int serv_fd);
 } // namespace matchmaking

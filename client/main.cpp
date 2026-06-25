@@ -95,6 +95,21 @@ void doMultiplayer()
         // 1. Recieve the color of your opponent
         // 3. Game logic
         // 2. ...
+        disconnected = matchmaking::blockAndPing(serv_fd);
+        if (disconnected)
+        {
+            std::print("Disconnected from server while waiting for the host to pick color.\n");
+            return;
+        }
+        // TODO: add looping code to match the server's expectation that the other player disconnecting means that you just go back to earlier step
+        auto [hostChoseRed, hostDisconnected, disconnectedTmp2] = matchmaking::getHostColor(serv_fd);
+        disconnected = disconnectedTmp2;
+        if (disconnected)
+        {
+            std::print("Disconnected from server while getting the host's color choice.\n");
+            return;
+        }
+        std::print("Host chose {}.\n", (hostChoseRed) ? "red" : "blue");
     }
 
     networking::closeFd(serv_fd);
