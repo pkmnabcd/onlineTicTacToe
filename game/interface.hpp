@@ -18,6 +18,7 @@ namespace interface
     std::string getUsername();
     bool selectHostLobby();
     std::uint8_t chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies);
+    bool chooseRedOrBlue();
 
     std::string black(std::string input);
     std::string red(std::string input);

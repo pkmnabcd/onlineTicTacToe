@@ -349,3 +349,41 @@ std::uint8_t interface::chooseLobby(std::vector<std::tuple<std::string, std::uin
     }
     return id;
 }
+
+// TODO: with these interactive functions, make sure you can quit anytime
+bool interface::chooseRedOrBlue()
+{
+    bool choosingRed = false;
+
+    std::print("0) {}\n1) {}\n", interface::red("Red Player (X)"), interface::cyan("Blue Player (O)"));
+    bool notValidChoice = true;
+    while (notValidChoice)
+    {
+        std::print("Pick whether you want to go {} or {}> ", interface::red("first"), interface::cyan("second"));
+        std::string input;
+        std::cin >> input;
+        if (input.size() != 1)
+        {
+            std::print("\nInvalid selection! (Input one char)\n\n");
+        }
+        else
+        {
+            std::uint8_t choice = input[0];
+            if (choice == '0' || choice == '1')
+            {
+                choosingRed = choice == '0';
+                notValidChoice = false;
+            }
+            else if (util::toLower(choice) == 'q')
+            {
+                // TODO: actually finish this
+                notValidChoice = true;
+            }
+            else
+            {
+                std::print("\nInvalid selection!\n\n");
+            }
+        }
+    }
+    return choosingRed;
+}

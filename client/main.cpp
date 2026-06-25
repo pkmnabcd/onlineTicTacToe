@@ -58,7 +58,7 @@ void doMultiplayer()
                 break;
             }
         }
-        std::print("No longer waiting for guest!");
+        std::print("No longer waiting for guest!\n");
 
         auto [guestName, disconnectedTmp2] = matchmaking::getGuestName(serv_fd);
         disconnected = disconnectedTmp2;
@@ -73,6 +73,8 @@ void doMultiplayer()
         // 1. Choose between being red or blue
         // 2. Game logic
         // 3. ...
+        bool choseRed = interface::chooseRedOrBlue();
+        std::print("You chose {}!\n", (choseRed) ? "red" : "blue");
     }
     else // Player wants to join an existing game
     {
