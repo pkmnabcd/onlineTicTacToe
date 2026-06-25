@@ -106,33 +106,23 @@ std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
     bool choosesRed = false;
     bool disconnected = false;
 
-    bool clientStillPinging = true;
-    while (clientStillPinging)
+    const int chooseColorBufferLen = 2;
+    char chooseColorBuffer[chooseColorBufferLen] = "";
+    int numbytes = networking::receiveAll(client_fd, chooseColorBuffer, chooseColorBufferLen);
+    if (numbytes == -1 || numbytes == 0 || numbytes != chooseColorBufferLen)
     {
-        const int chooseColorBufferLen = 2;
-        char chooseColorBuffer[chooseColorBufferLen] = "";
-        int numbytes = networking::receiveAll(client_fd, chooseColorBuffer, chooseColorBufferLen);
-        if (numbytes == -1 || numbytes == 0 || numbytes != chooseColorBufferLen)
+        disconnected = true;
+    }
+    else
+    {
+        std::string colorChoice(chooseColorBuffer);
+        if (colorChoice.at(0) == 'R')
+        {
+            choosesRed = true;
+        }
+        else if (colorChoice.at(0) != 'B')
         {
             disconnected = true;
-        }
-        else
-        {
-            std::string colorChoice(chooseColorBuffer);
-            if (colorChoice.at(0) == 'R')
-            {
-                choosesRed = true;
-                clientStillPinging = false;
-            }
-            else if (colorChoice.at(0) == 'B')
-            {
-                clientStillPinging = false;
-            }
-            else if (colorChoice.at(0) != 'Y') // Y is the pinging sign that the client may have sent while waiting
-            {
-                disconnected = true;
-                clientStillPinging = false;
-            }
         }
     }
     return std::make_tuple(choosesRed, disconnected);
