@@ -263,8 +263,24 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 // TODO: get pings back and forth so you know if guest disconnected
                 // while waiting. See the above 'getClientCheckIn' and 'sendCheckIn' usage.
                 // I think I can use the same functions as before.
-                while (lobbies[hostID].m_someoneDisconnected || gamestates[hostID].m_isValid)
+                std::function<bool()> waitForHostColor = [&]
                 {
+                    bool hostLeft = lobbies[hostID].m_someoneDisconnected;
+                    bool hostMadeChoice = gamestates[hostID].m_isValid;
+                    bool keepWaiting = !hostLeft && !hostMadeChoice;
+                    return !keepWaiting;
+                };
+                message_sent_success = matchmaking::blockUntilCondition(client_fd, waitForHostColor);
+                if (!message_sent_success)
+                {
+                    std::print(stderr, "Error: guest disconnected while waiting for host color.\n");
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                    // NOTE: for now, I don't believe that I need to account for invalidating a player only when a lobby they were in closes.
+                    // So we can just invalidate the player since they don't own the lobby.
+                    critical::invalidatePlayer(players, client_id, dataMutex);
+                    critical::addIDToQueue(freeIDs, client_id, dataMutex);
+                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    return;
                 }
 
                 auto [hostPickedRed, hostDisconnected] = critical::hostPickedRed(gamestates, lobbies, hostID, dataMutex);
