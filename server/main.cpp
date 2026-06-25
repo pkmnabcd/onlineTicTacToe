@@ -161,7 +161,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     networking::closeFd(client_fd);
                     return;
                 }
-                std::print("Host chose the color: {}\n", (hostPickedRed) ? "Red" : "Blue");
 
                 GameState gamestate = (hostPickedRed) ? GameState(client_player, guest) : GameState(guest, client_player);
 
