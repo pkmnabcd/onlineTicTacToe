@@ -108,10 +108,6 @@ std::tuple<bool, bool> matchmaking::hostChoosesRed(int client_fd)
     }
     else
     {
-        // First char signifies whether client wants to host a game.
-        // The other chars are the name the client picks
-        // TODO: someday add limits to the names and check the current names to make sure it's unique
-        // TODO: at minimum, make sure client makes sure each character is your regular alphanumeric + other reasonable characters.
         std::string colorChoice(chooseColorBuffer);
         choosesRed = colorChoice.at(0) == 'R';
     }

@@ -289,10 +289,14 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             {
                 // Block until host disconnects or chooses red or blue
                 bool hostPickedRed = true;
+                // TODO: get pings back and forth so you know if guest disconnected
+                // while waiting. See the above 'getClientCheckIn' and 'sendCheckIn' usage.
+                // I think I can use the same functions as before.
                 while (lobbies[hostID].m_someoneDisconnected || gamestates[hostID].m_isValid)
                 {
                 }
-                // TODO: there might be a race condition to fix here
+                // TODO: there might be a race condition to fix here. Make this
+                // a function in the critical:: namespace
                 if (!lobbies[hostID].m_someoneDisconnected)
                 {
                     hostPickedRed = gamestates[hostID].m_redPlayer.m_id == hostID;
