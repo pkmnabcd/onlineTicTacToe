@@ -36,26 +36,11 @@ void doMultiplayer()
         std::print("Your Online ID for this session is: {}\n", yourID);
 
         // Wait for a guest to join lobby and hear from server
-        while (1)
+        disconnected = matchmaking::blockAndPing(serv_fd);
+        if (disconnected)
         {
-            message_sent_success = matchmaking::sendPing(serv_fd);
-            if (!message_sent_success)
-            {
-                std::print("Disconnected from server while waiting for guest.\n");
-                return;
-            }
-
-            auto [stillWaiting, disconnectedTmp1] = matchmaking::getWaitStatus(serv_fd);
-            disconnected = disconnectedTmp1;
-            if (disconnected)
-            {
-                std::print("Disconnected from server while waiting for guest.\n");
-                return;
-            }
-            if (!stillWaiting)
-            {
-                break;
-            }
+            std::print("Disconnected from server while waiting for guest.\n");
+            return;
         }
         std::print("No longer waiting for guest!\n");
 
