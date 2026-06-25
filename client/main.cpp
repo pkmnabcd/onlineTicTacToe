@@ -1,6 +1,7 @@
 #include "interface.hpp"
 #include "matchmaking.hpp"
 #include "networking.hpp"
+#include "play.hpp"
 #include "ttt.hpp"
 
 #include <print>
@@ -68,6 +69,9 @@ void doMultiplayer()
             // TODO: Stuff to do for host:
             // 1. Game logic
             // 2. ...
+            auto [playAgainTmp, disconnectedTmp3, oppDisconnected] = play::playGame(serv_fd, choseRed);
+            wantsToPlay = playAgainTmp;
+            disconnected = disconnectedTmp3;
             return; // TODO: remove this. It's just here to not mess with the server logic while it's incomplete.
         }
     }
@@ -128,6 +132,9 @@ void doMultiplayer()
             // TODO: Stuff to do for guest:
             // 1. Game logic
             // 2. ...
+            auto [playAgainTmp, disconnectedTmp3, oppDisconnected] = play::playGame(serv_fd, !hostChoseRed);
+            wantsToPlay = playAgainTmp;
+            disconnected = disconnectedTmp3;
             return; // TODO: remove this. It's just here to not mess with the server logic while it's incomplete.
         }
     }

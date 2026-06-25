@@ -190,11 +190,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
      * Returns [wantsToPlayAgain: bool, disconnected: bool, oppDisconnected: bool]
      */
 
-    /*
-     * Red: has lock before getting in this function. The initial state at the start of its loop should be the same as its state, but only that time
-     * Blue: should not have lock before this function. Checks its state against initial state until it changes then it can take the lock
-     */
-
     gameMutexes[hostID].lock();
 
     bool isFirstTurn = true;
@@ -217,6 +212,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
         }
         if (oppDisconnected)
         {
+            // NOTE: client already got sent the 'D' game status
             gameMutexes[hostID].unlock();
             break; // out of game loop
         }

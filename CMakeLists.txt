@@ -24,6 +24,7 @@ set(CLIENT_HEADER_FILES
     client/interface.hpp
     client/matchmaking.hpp
     client/networking.hpp
+    client/play.hpp
     client/ttt.hpp
     client/util.hpp
 
@@ -51,6 +52,7 @@ set(CLIENT_SOURCE_FILES
     client/interface.cpp
     client/matchmaking.cpp
     client/networking.cpp
+    client/play.cpp
     client/ttt.cpp
     client/util.cpp
 )
