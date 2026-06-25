@@ -33,83 +33,98 @@ void doMultiplayer()
             std::print("Disconnected from server. Didn't receive your ID.\n");
             return;
         }
-        std::print("Your Online ID for this session is: {}\n", yourID);
 
-        // Wait for a guest to join lobby and hear from server
-        disconnected = matchmaking::blockAndPing(serv_fd);
-        if (disconnected)
+        bool wantsToPlay = true;
+        while (wantsToPlay)
         {
-            std::print("Disconnected from server while waiting for guest.\n");
-            return;
-        }
-        std::print("No longer waiting for guest!\n");
+            std::print("Your Online ID for this session is: {}\n", yourID);
 
-        auto [guestName, disconnectedTmp2] = matchmaking::getGuestName(serv_fd);
-        disconnected = disconnectedTmp2;
-        if (disconnected)
-        {
-            std::print("Disconnected from server while getting guest name.\n");
-            return;
-        }
-        std::print("You have connected with guest: {}\n", guestName);
+            // Wait for a guest to join lobby and hear from server
+            disconnected = matchmaking::blockAndPing(serv_fd);
+            if (disconnected)
+            {
+                std::print("Disconnected from server while waiting for guest.\n");
+                return;
+            }
+            std::print("No longer waiting for guest!\n");
 
-        bool choseRed = interface::chooseRedOrBlue();
-        message_sent_success = matchmaking::sendLobbyChoice(serv_fd, choseRed);
-        if (!message_sent_success)
-        {
-            std::print("Disconnected from server while sending color choice.\n");
-            return;
-        }
+            auto [guestName, disconnectedTmp2] = matchmaking::getGuestName(serv_fd);
+            disconnected = disconnectedTmp2;
+            if (disconnected)
+            {
+                std::print("Disconnected from server while getting guest name.\n");
+                return;
+            }
+            std::print("You have connected with guest: {}\n", guestName);
 
-        // TODO: Stuff to do for host:
-        // 1. Game logic
-        // 2. ...
+            bool choseRed = interface::chooseRedOrBlue();
+            message_sent_success = matchmaking::sendLobbyChoice(serv_fd, choseRed);
+            if (!message_sent_success)
+            {
+                std::print("Disconnected from server while sending color choice.\n");
+                return;
+            }
+
+            // TODO: Stuff to do for host:
+            // 1. Game logic
+            // 2. ...
+            return; // TODO: remove this. It's just here to not mess with the server logic while it's incomplete.
+        }
     }
     else // Player wants to join an existing game
     {
-        auto [lobbies, disconnectedTmp0] = matchmaking::getOpenLobbies(serv_fd);
-        disconnected = disconnectedTmp0;
-        if (disconnected)
+        bool wantsToPlay = true;
+        while (wantsToPlay)
         {
-            std::print("Disconnected from server while trying to get the open lobbies.\n");
-            return;
-        }
+            auto [lobbies, disconnectedTmp0] = matchmaking::getOpenLobbies(serv_fd);
+            disconnected = disconnectedTmp0;
+            if (disconnected)
+            {
+                std::print("Disconnected from server while trying to get the open lobbies.\n");
+                return;
+            }
 
-        std::uint8_t lobbyHostID = interface::chooseLobby(lobbies);
-        message_sent_success = matchmaking::sendLobbyChoice(serv_fd, lobbyHostID);
-        if (!message_sent_success)
-        {
-            std::print("Disconnected from server while sending lobby choice.\n");
-            return;
-        }
+            std::uint8_t lobbyHostID = interface::chooseLobby(lobbies);
+            message_sent_success = matchmaking::sendLobbyChoice(serv_fd, lobbyHostID);
+            if (!message_sent_success)
+            {
+                std::print("Disconnected from server while sending lobby choice.\n");
+                return;
+            }
 
-        auto [connectionSuccess, disconnectedTmp1] = matchmaking::getLobbyConnectionSuccessConfirmation(serv_fd);
-        disconnected = disconnectedTmp1;
-        if (disconnected)
-        {
-            std::print("Disconnected from server while confirming lobby selection.\n");
-            return;
-        }
+            auto [connectionSuccess, disconnectedTmp1] = matchmaking::getLobbyConnectionSuccessConfirmation(serv_fd);
+            disconnected = disconnectedTmp1;
+            if (disconnected)
+            {
+                std::print("Disconnected from server while confirming lobby selection.\n");
+                return;
+            }
 
-        // TODO: Stuff to do for guest:
-        // 1. Recieve the color of your opponent
-        // 3. Game logic
-        // 2. ...
-        disconnected = matchmaking::blockAndPing(serv_fd);
-        if (disconnected)
-        {
-            std::print("Disconnected from server while waiting for the host to pick color.\n");
-            return;
+            disconnected = matchmaking::blockAndPing(serv_fd);
+            if (disconnected)
+            {
+                std::print("Disconnected from server while waiting for the host to pick color.\n");
+                return;
+            }
+            auto [hostChoseRed, hostDisconnected, disconnectedTmp2] = matchmaking::getHostColor(serv_fd);
+            disconnected = disconnectedTmp2;
+            if (disconnected)
+            {
+                std::print("Disconnected from server while getting the host's color choice.\n");
+                return;
+            }
+            if (hostDisconnected)
+            {
+                std::print("The lobby host disconnected.\n");
+                continue; // Go back to choosing a lobby
+            }
+            std::print("Host chose {}.\n", (hostChoseRed) ? "red" : "blue");
+
+            // TODO: Stuff to do for guest:
+            // 1. Game logic
+            // 2. ...
+            return; // TODO: remove this. It's just here to not mess with the server logic while it's incomplete.
         }
-        // TODO: add looping code to match the server's expectation that the other player disconnecting means that you just go back to earlier step
-        auto [hostChoseRed, hostDisconnected, disconnectedTmp2] = matchmaking::getHostColor(serv_fd);
-        disconnected = disconnectedTmp2;
-        if (disconnected)
-        {
-            std::print("Disconnected from server while getting the host's color choice.\n");
-            return;
-        }
-        std::print("Host chose {}.\n", (hostChoseRed) ? "red" : "blue");
     }
 
     networking::closeFd(serv_fd);
