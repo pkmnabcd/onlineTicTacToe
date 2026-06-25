@@ -28,4 +28,5 @@ namespace critical
     void invalidatePlayerOnceLobbyIsInvalid(std::array<Player, arraySize>& players, std::array<Lobby, arraySize>& lobbies, std::uint8_t playerID, std::mutex& mut);
     std::vector<Lobby> getOpenLobbies(std::array<Lobby, arraySize>& lobbies, std::mutex& mut);
     bool addGuestToLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, Player guest, std::mutex& mut);
+    std::tuple<bool, bool> hostPickedRed(std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& mut);
 } // namespace critical

@@ -170,3 +170,19 @@ bool critical::addGuestToLobby(std::array<Lobby, arraySize>& lobbies, std::uint8
     }
     return canAddGuest;
 }
+
+std::tuple<bool, bool> critical::hostPickedRed(std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& mut)
+{
+    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
+    bool hostPickedRed = false;
+    bool disconnected = false;
+    if (lobbies[hostID].m_someoneDisconnected)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        hostPickedRed = gamestates[hostID].m_redPlayer.m_id == hostID;
+    }
+    return std::make_tuple(hostPickedRed, disconnected);
+}
