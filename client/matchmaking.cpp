@@ -258,18 +258,11 @@ bool matchmaking::sendLobbyChoice(int serv_fd, bool choseRed)
 bool matchmaking::blockAndPing(int serv_fd)
 {
     /*
-     * Block but send and recieve pings to/from the server
+     * Block but receive pings from the server
     */
     bool disconnected = false;
     while (1)
     {
-        bool message_sent_success = matchmaking::sendPing(serv_fd);
-        if (!message_sent_success)
-        {
-            disconnected = true;
-            break;
-        }
-
         auto [stillWaiting, disconnectedTmp1] = matchmaking::getWaitStatus(serv_fd);
         disconnected = disconnectedTmp1;
         if (disconnected || !stillWaiting)

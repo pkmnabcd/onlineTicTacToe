@@ -356,13 +356,6 @@ bool matchmaking::blockUntilCondition(int client_fd, std::function<bool()> condi
     bool disconnected = false;
     while (true)
     {
-        bool client_disconnected = matchmaking::getClientCheckIn(client_fd);
-        if (client_disconnected)
-        {
-            disconnected = true;
-            break;
-        }
-
         bool message_sent_success = matchmaking::sendCheckIn(client_fd, true); // Still waiting
         if (!message_sent_success)
         {
@@ -374,7 +367,7 @@ bool matchmaking::blockUntilCondition(int client_fd, std::function<bool()> condi
         {
             break;
         }
-        std::this_thread::sleep_for(std::chrono::seconds(4)); // check every few seconds
+        std::this_thread::sleep_for(std::chrono::seconds(3)); // check every few seconds
     }
 
     if (!disconnected)

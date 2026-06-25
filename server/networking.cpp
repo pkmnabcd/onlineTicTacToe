@@ -188,7 +188,8 @@ int networking::sendAll(int fd, const char buffer[], int len)
     while (bytesSent != len)
     {
         // NOTE: char is 1B so 'bytesSent' is # chars sent
-        const int newBytes = send(fd, buffer+bytesSent, len-bytesSent, 0);
+        // TODO: instead of the MSG_NOSIGNAL flag, use 0 when compiling for windows.
+        const int newBytes = send(fd, buffer+bytesSent, len-bytesSent, MSG_NOSIGNAL);
         if (newBytes == -1)
         {
             perror("send");
