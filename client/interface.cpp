@@ -290,7 +290,6 @@ bool interface::selectHostLobby()
 
 std::uint8_t interface::chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies)
 {
-    // TODO: handle the case when there is no one hosting yet
     std::uint8_t id = 0;
     for (auto& lobby : lobbies)
     {
