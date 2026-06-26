@@ -164,7 +164,7 @@ std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRe
     bool oppDisconnected = false;
 
     // Wait until the opponent takes their turn
-    while (!waitFunc(gamestate, gamestates[hostID]))
+    while (waitFunc(gamestate, gamestates[hostID]))
     {
         gameMutexes[hostID].unlock();
         std::this_thread::yield();
@@ -201,7 +201,9 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
     while (true)
     {
         // Wait for your turn to move
+        std::print("{} player waiting...\n", (isRed) ? "Red" : "Blue");
         auto [client_disconnectedTmp0, oppDisconnectedTmp] = waitTurn(isFirstTurn, gamestate, isRed, hostID, client_fd, gamestates, gameMutexes);
+        std::print("{} player DONE waiting...\n", (isRed) ? "Red" : "Blue");
         oppDisconnected = oppDisconnectedTmp;
         client_disconnected = client_disconnectedTmp0;
         if (client_disconnected)
@@ -223,6 +225,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
         if (theWinner != 0)
         {
             // send msg of success or failure
+            // TODO: Change so that the last move is sent so it can be displayed to the loser.
             message_sent_success = matchmaking::sendClientGameStatus(client_fd, static_cast<char>(theWinner));
             if (!message_sent_success)
             {
@@ -230,6 +233,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
                 gameMutexes[hostID].unlock();
                 return std::make_tuple(false, true, false);
             }
+            // TODO: probably push this to after sending the board state so we can send the final state.
             gameMutexes[hostID].unlock();
             break;
         }

@@ -2,14 +2,59 @@
 
 #include "matchmaking.hpp"
 
+#include <print>
 #include <tuple>
 
+
+void showBlueRedsFirstTurn(Board board)
+{
+}
 
 std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed)
 {
     /*
      * Returns [wantsToPlayAgain: bool, disconnected: bool, oppDisconnected: bool]
      */
+    bool wantsToPlayAgain = false;
+    bool disconnected = false;
+    bool oppDisconnected = false;
+
+    bool firstTurn = true;
+    while (true) // game loop
+    {
+        // Get existing state
+        std::print("Waiting for the status update!\n");
+        auto [continuePlay, winner, oppDisconnectedTmp0, disconnectedTmp0] = matchmaking::getGameStatus(serv_fd);
+        oppDisconnected = oppDisconnectedTmp0;
+        disconnected = disconnectedTmp0;
+        if (disconnected)
+        {
+            std::print("Got disconnected while waiting for gamestate update.\n");
+            return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+        }
+        if (oppDisconnected)
+        {
+            std::print("Your opponent disconnected. Ending game.\n");
+            return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+        }
+        if (!continuePlay)
+        {
+            // TODO: add the message of the winner here
+            // TODO: change the server and this so that the last move is acquired
+            break; // Go to code that asks whether to play again.
+        }
+
+        // Get existing board
+        std::print("Waiting for the board state!\n");
+        auto [previousBoard, disconnectedTmp1] = matchmaking::getBoardState(serv_fd);
+        disconnected = disconnectedTmp1;
+        if (disconnected)
+        {
+            std::print("Got disconnected while waiting for board update.\n");
+            return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+        }
+        std::print("Got the board state!\n");
+    }
     // TODO: Process for this function:
     // 1. get the game status
     // 2. get the board state
