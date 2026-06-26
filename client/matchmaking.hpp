@@ -33,4 +33,6 @@ namespace matchmaking
     std::tuple<bool, matchmaking::Winner, bool, bool> getGameStatus(int serv_fd);
     std::tuple<Board, bool> getBoardState(int serv_fd);
     bool sendMove(int serv_fd, char move);
+    bool sendPlayAgain(int serv_fd, bool playAgain);
+    std::tuple<bool, bool> getOppPlayAgain(int serv_fd);
 } // namespace matchmaking

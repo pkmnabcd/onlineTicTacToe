@@ -406,3 +406,39 @@ bool sendMove(int serv_fd, char move)
 
     return bytesSent == bufferLen;
 }
+
+bool matchmaking::sendPlayAgain(int serv_fd, bool playAgain)
+{
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    buffer[0] = (playAgain) ? 'Y' : 'N';
+    int bytesSent = networking::sendAll(serv_fd, buffer, bufferLen);
+
+    return bytesSent == bufferLen;
+}
+
+std::tuple<bool, bool> matchmaking::getOppPlayAgain(int serv_fd)
+{
+    bool oppPlayAgain = false;
+    bool disconnected = false;
+
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        if (buffer[0] == 'Y')
+        {
+            oppPlayAgain = true;
+        }
+        else if (buffer[0] != 'N')
+        {
+            disconnected = true;
+        }
+    }
+    return std::make_tuple(oppPlayAgain, disconnected);
+}
