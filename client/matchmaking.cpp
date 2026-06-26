@@ -1,6 +1,7 @@
 #include "matchmaking.hpp"
 
 #include "networking.hpp"
+#include "util.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -345,4 +346,53 @@ std::tuple<bool, matchmaking::Winner, bool, bool> matchmaking::getGameStatus(int
         disconnected = true;
     }
     return std::make_tuple(cont, winner, oppDisconnected, disconnected);
+}
+
+Board getBoardFromStraightBoard(StraightBoard straightBoard)
+{
+    Board board;
+    std::uint8_t s_index = 0;
+    for (std::uint8_t i = 0; i < 3; i++)
+    {
+        for (std::uint8_t j = 0; j < 3; j++)
+        {
+            board[i][j] = straightBoard[s_index];
+            s_index++;
+        }
+    }
+    return board;
+}
+
+bool isGoodSpace(char c)
+{
+    return c == 'X' || c == 'O' || (util::isDigit(c) && c != '0');
+}
+
+std::tuple<Board, bool> matchmaking::getBoardState(int serv_fd)
+{
+    Board board;
+    bool disconnected = false;
+
+    const int bufferLen = 10;
+    char buffer[bufferLen] = "";
+    int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
+    if (numbytes == -1 || numbytes == 0 || numbytes != bufferLen)
+    {
+        disconnected = true;
+    }
+    else
+    {
+        StraightBoard sBoard;
+        for (std::uint8_t i = 0; i < bufferLen-1; i++)
+        {
+            if (!isGoodSpace(buffer[i]))
+            {
+                disconnected = true;
+                break;
+            }
+            sBoard[i].at(0) = buffer[i];
+        }
+        board = getBoardFromStraightBoard(sBoard);
+    }
+    return std::make_tuple(board, disconnected);
 }

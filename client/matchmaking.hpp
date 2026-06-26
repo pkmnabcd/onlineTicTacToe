@@ -7,6 +7,7 @@
 #include <vector>
 
 using StraightBoard = std::array<std::string, 9>;
+using Board = std::array<std::array<std::string, 3>, 3>;
 
 namespace matchmaking
 {
@@ -30,4 +31,5 @@ namespace matchmaking
     bool blockAndPing(int serv_fd);
     std::tuple<bool, bool, bool> getHostColor(int serv_fd);
     std::tuple<bool, matchmaking::Winner, bool, bool> getGameStatus(int serv_fd);
+    std::tuple<Board, bool> getBoardState(int serv_fd);
 } // namespace matchmaking
