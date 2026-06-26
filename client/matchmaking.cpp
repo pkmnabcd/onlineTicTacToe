@@ -396,3 +396,13 @@ std::tuple<Board, bool> matchmaking::getBoardState(int serv_fd)
     }
     return std::make_tuple(board, disconnected);
 }
+
+bool sendMove(int serv_fd, char move)
+{
+    const int bufferLen = 2;
+    char buffer[bufferLen] = "";
+    buffer[0] = move;
+    int bytesSent = networking::sendAll(serv_fd, buffer, bufferLen);
+
+    return bytesSent == bufferLen;
+}
