@@ -37,12 +37,6 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed)
             std::print("Your opponent disconnected. Ending game.\n");
             return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
         }
-        if (!continuePlay)
-        {
-            // TODO: add the message of the winner here
-            // TODO: change the server and this so that the last move is acquired
-            break; // Go to code that asks whether to play again.
-        }
 
         // Get existing board
         std::print("Waiting for the board state!\n");
@@ -54,6 +48,18 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed)
             return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
         }
         std::print("Got the board state!\n");
+
+        // If the game is over, show the final move and break out of game loop
+        if (!continuePlay)
+        {
+            // TODO: add the message of the winner here
+            break; // Go to code that asks whether to play again.
+        }
+
+        // TODO: put function where blue is shown red's first turn here
+        // since that won't happen automatically
+
+        // Get move from user and send to server
     }
     // TODO: Process for this function:
     // 1. get the game status

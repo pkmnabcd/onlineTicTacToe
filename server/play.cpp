@@ -225,7 +225,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
         if (theWinner != 0)
         {
             // send msg of success or failure
-            // TODO: Change so that the last move is sent so it can be displayed to the loser.
             message_sent_success = matchmaking::sendClientGameStatus(client_fd, static_cast<char>(theWinner));
             if (!message_sent_success)
             {
@@ -233,9 +232,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
                 gameMutexes[hostID].unlock();
                 return std::make_tuple(false, true, false);
             }
-            // TODO: probably push this to after sending the board state so we can send the final state.
-            gameMutexes[hostID].unlock();
-            break;
         }
         else
         {
@@ -249,7 +245,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
             }
         }
 
-        // Get your move
+        // Send client the board state
         message_sent_success = matchmaking::sendBoardState(client_fd, gamestates[hostID].m_board);
         if (!message_sent_success)
         {
@@ -257,7 +253,14 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
             gameMutexes[hostID].unlock();
             return std::make_tuple(false, true, false);
         }
+        // If game finished, break out of game loop
+        if (theWinner != 0)
+        {
+            gameMutexes[hostID].unlock();
+            break;
+        }
 
+        // Get your move
         auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
         client_disconnected = disconnectedTmp0;
         if (client_disconnected)
