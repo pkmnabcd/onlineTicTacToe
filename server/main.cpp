@@ -35,7 +35,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
     if (noneAvailable)
     {
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
-        networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+        networking::closeFd(client_fd);
         return;
     }
     auto [client_player, disconnectedTmp0, isHosting] = matchmaking::getClientInfo(client_fd, client_id);
@@ -56,7 +56,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         std::print(stderr, "Error: player attempted to be added to players while valid player was still there\n");
         critical::invalidatePlayer(players, client_id, dataMutex);
         critical::addIDToQueue(freeIDs, client_id, dataMutex);
-        networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+        networking::closeFd(client_fd);
         return;
     }
 
@@ -69,7 +69,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             std::print(stderr, "Error: message send unsucessful\n");
             critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
-            networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+            networking::closeFd(client_fd);
             return;
         }
 
@@ -79,7 +79,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             std::print(stderr, "Error: lobby attempted to be added to lobbies while valid lobby was still there\n");
             critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
-            networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+            networking::closeFd(client_fd);
             return;
         }
 
@@ -105,7 +105,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                 critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                networking::closeFd(client_fd);
                 return;
             }
 
@@ -116,7 +116,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                 critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                networking::closeFd(client_fd);
                 return;
             }
 
@@ -144,7 +144,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    networking::closeFd(client_fd);
                     return;
                 }
 
@@ -203,12 +203,12 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                         critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                         critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                        networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                        networking::closeFd(client_fd);
                         return;
                     }
                 }
             } // end opp wants to play loop
-        } // end host wants to play loop
+        }     // end host wants to play loop
     }
     else // client wants to join existing lobby
     {
@@ -222,7 +222,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 std::print(stderr, "Error: message send unsucessful\n");
                 critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                networking::closeFd(client_fd);
                 return;
             }
 
@@ -233,7 +233,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             {
                 critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                networking::closeFd(client_fd);
                 return;
             }
             std::print("Guest made the choice: {}\n", hostID);
@@ -250,7 +250,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 }
                 critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                networking::closeFd(client_fd);
                 return;
             }
             if (!guestAdded)
@@ -279,7 +279,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     // So we can just invalidate the player since they don't own the lobby.
                     critical::invalidatePlayer(players, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    networking::closeFd(client_fd);
                     return;
                 }
 
@@ -296,7 +296,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     // So we can just invalidate the player since they don't own the lobby.
                     critical::invalidatePlayer(players, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                    networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                    networking::closeFd(client_fd);
                     return;
                 }
                 if (hostDisconnected)
@@ -352,12 +352,12 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                         critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
                         critical::invalidatePlayer(players, client_id, dataMutex);
                         critical::addIDToQueue(freeIDs, client_id, dataMutex);
-                        networking::closeFd(client_fd); // TODO: Make sure that client knows why they got booted
+                        networking::closeFd(client_fd);
                         return;
                     }
                 }
             } // end opp wants to play loop
-        } // end guest wants to play loop
+        }     // end guest wants to play loop
     }
 
     // TODO: evaluate if this is needed
