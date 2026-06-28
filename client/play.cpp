@@ -74,7 +74,7 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
             break; // Go to code that asks whether to play again.
         }
 
-        // Get move from user and send to server
+        // Get move from user
         std::int8_t yourMove = interface::getHumanMove(currentBoard, yourLetter);
         if (yourMove == -1) // quit
         {
@@ -82,8 +82,14 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
             wantsToPlayAgain = false;
             return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
         }
-        // TODO: apply the move to the board and show.
-        // Also make currentBoard this updated board
+
+        // Apply the move and show it
+        StraightBoard tmpBoard = util::get1dFrom2dBoard(currentBoard);
+        tmpBoard[yourMove - 1] = yourLetter;
+        currentBoard = matchmaking::getBoardFromStraightBoard(tmpBoard);
+        interface::show(currentBoard);
+
+        // Send move to server
         bool sentMove = matchmaking::sendMove(serv_fd, yourMove);
         disconnected = !sentMove;
         if (disconnected)

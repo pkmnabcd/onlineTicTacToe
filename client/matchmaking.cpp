@@ -348,7 +348,7 @@ std::tuple<bool, util::Winner, bool, bool> matchmaking::getGameStatus(int serv_f
     return std::make_tuple(cont, winner, oppDisconnected, disconnected);
 }
 
-Board getBoardFromStraightBoard(StraightBoard straightBoard)
+Board matchmaking::getBoardFromStraightBoard(StraightBoard straightBoard)
 {
     Board board;
     std::uint8_t s_index = 0;
@@ -392,7 +392,7 @@ std::tuple<Board, bool> matchmaking::getBoardState(int serv_fd)
             }
             sBoard[i].at(0) = buffer[i];
         }
-        board = getBoardFromStraightBoard(sBoard);
+        board = matchmaking::getBoardFromStraightBoard(sBoard);
     }
     return std::make_tuple(board, disconnected);
 }
