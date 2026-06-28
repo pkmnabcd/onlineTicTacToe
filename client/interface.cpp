@@ -386,3 +386,35 @@ bool interface::chooseRedOrBlue()
     }
     return choosingRed;
 }
+
+void interface::printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name)
+{
+    std::string msg;
+    if (isRed)
+    {
+        msg = interface::red(std::format("{} X took their turn... played on {}", name, movePos));
+    }
+    else
+    {
+        msg = interface::cyan(std::format("{} O took their turn... played on {}", name, movePos));
+    }
+    std::print("{}\n", msg);
+}
+
+void interface::printWinnerMessage(util::Winner winner)
+{
+    std::string msg;
+    if (winner == util::Winner::Red)
+    {
+        msg = interface::red("\nX is the winner!\n");
+    }
+    else if (winner == util::Winner::Blue)
+    {
+        msg = interface::cyan("\nO is the winner!\n");
+    }
+    else
+    {
+        msg = interface::green("\nStalemate.\n");
+    }
+    std::print("{}\n", msg);
+}

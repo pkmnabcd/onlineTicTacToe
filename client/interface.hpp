@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util.hpp"
+
 #include <array>
 #include <cstdint>
 #include <string>
@@ -31,4 +33,8 @@ namespace interface
 
     void home();
     void clear();
+
+    // Multiplayer specific functions
+    void printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name);
+    void printWinnerMessage(util::Winner winner);
 } // namespace interface

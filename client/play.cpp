@@ -14,64 +14,6 @@ void showBlueRedsFirstTurn(Board board)
 {
 }
 
-std::uint8_t getMovePosition(Board prevBoard, Board currBoard)
-{
-    /*
-     * Returns 0 for no difference, 1-9 for the position of a difference, and 10 for multiple differences (bad)
-    */
-
-    std::array<std::string, 9> prevBoardStraight = util::get1dFrom2dBoard(prevBoard);
-    std::array<std::string, 9> currBoardStraight = util::get1dFrom2dBoard(currBoard);
-
-    std::uint8_t pos = 0;
-    for (std::uint8_t i = 0; i < 9; i++)
-    {
-        if (prevBoard[i].at(0) != currBoard[i].at(0))
-        {
-            if (pos != 0)
-            {
-                pos = 10; // should only be one difference
-            }
-            else
-            {
-                pos = i+1;
-            }
-        }
-    }
-    return pos;
-}
-
-void printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name)
-{
-    std::string msg;
-    if (isRed)
-    {
-        msg = interface::red(std::format("{} X took their turn... played on {}", name, movePos));
-    }
-    else
-    {
-        msg = interface::cyan(std::format("{} O took their turn... played on {}", name, movePos));
-    }
-    std::print("{}\n", msg);
-}
-
-void printWinnerMessage(matchmaking::Winner winner)
-{
-    std::string msg;
-    if (winner == matchmaking::Winner::Red)
-    {
-        msg = interface::red("\nX is the winner!\n");
-    }
-    else if (winner == matchmaking::Winner::Blue)
-    {
-        msg = interface::cyan("\nO is the winner!\n");
-    }
-    else
-    {
-        msg = interface::green("\nStalemate.\n");
-    }
-    std::print("{}\n", msg);
-}
 
 std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed)
 {

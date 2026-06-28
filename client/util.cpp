@@ -247,3 +247,30 @@ std::uint8_t util::toIntVal(std::uint8_t ch)
         return 0;
     }
 }
+
+std::uint8_t util::getMovePosition(Board prevBoard, Board currBoard)
+{
+    /*
+     * Returns 0 for no difference, 1-9 for the position of a difference, and 10 for multiple differences (bad)
+    */
+
+    std::array<std::string, 9> prevBoardStraight = util::get1dFrom2dBoard(prevBoard);
+    std::array<std::string, 9> currBoardStraight = util::get1dFrom2dBoard(currBoard);
+
+    std::uint8_t pos = 0;
+    for (std::uint8_t i = 0; i < 9; i++)
+    {
+        if (prevBoard[i].at(0) != currBoard[i].at(0))
+        {
+            if (pos != 0)
+            {
+                pos = 10; // should only be one difference
+            }
+            else
+            {
+                pos = i+1;
+            }
+        }
+    }
+    return pos;
+}

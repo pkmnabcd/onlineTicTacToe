@@ -303,13 +303,13 @@ std::tuple<bool, bool, bool> matchmaking::getHostColor(int serv_fd)
     return std::make_tuple(hostPickedRed, hostDisconnected, disconnected);
 }
 
-std::tuple<bool, matchmaking::Winner, bool, bool> matchmaking::getGameStatus(int serv_fd)
+std::tuple<bool, util::Winner, bool, bool> matchmaking::getGameStatus(int serv_fd)
 {
     /*
      * Returns [continue?, winner, oppDisconnected, youDisconnected]
     */
     bool cont = true;
-    matchmaking::Winner winner = matchmaking::Winner::Undecided;
+    util::Winner winner = util::Winner::Undecided;
     bool oppDisconnected = false;
     bool disconnected = false;
 
@@ -323,17 +323,17 @@ std::tuple<bool, matchmaking::Winner, bool, bool> matchmaking::getGameStatus(int
     if (buffer[0] == 'X')
     {
         cont = false;
-        winner = matchmaking::Winner::Red;
+        winner = util::Winner::Red;
     }
     else if (buffer[0] == 'O')
     {
         cont = false;
-        winner = matchmaking::Winner::Blue;
+        winner = util::Winner::Blue;
     }
     else if (buffer[0] == 'S')
     {
         cont = false;
-        winner = matchmaking::Winner::Stalemate;
+        winner = util::Winner::Stalemate;
     }
     else if (buffer[0] == 'D')
     {

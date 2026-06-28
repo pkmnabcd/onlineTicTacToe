@@ -28,4 +28,14 @@ namespace util
     std::uint8_t toLower(std::uint8_t ch);
     std::uint8_t toIntVal(std::uint8_t ch);
 
+    // Multiplayer Utils
+    enum Winner
+    {
+        Stalemate,
+        Red,
+        Blue,
+        Undecided
+    };
+    std::uint8_t getMovePosition(Board prevBoard, Board currBoard);
+
 } // namespace util

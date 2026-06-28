@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util.hpp"
+
 #include <array>
 #include <cstdint>
 #include <string>
@@ -11,14 +13,6 @@ using Board = std::array<std::array<std::string, 3>, 3>;
 
 namespace matchmaking
 {
-    enum Winner
-    {
-        Stalemate,
-        Red,
-        Blue,
-        Undecided
-    };
-
     bool sendPlayerInfo(int serv_fd, bool hostGame, std::string username);
     std::tuple<std::uint8_t, bool> getYourID(int serv_fd);
     std::tuple<bool, bool> getWaitStatus(int serv_fd);
@@ -30,7 +24,7 @@ namespace matchmaking
     bool sendLobbyChoice(int serv_fd, bool choseRed);
     bool blockAndPing(int serv_fd);
     std::tuple<bool, bool, bool> getHostColor(int serv_fd);
-    std::tuple<bool, matchmaking::Winner, bool, bool> getGameStatus(int serv_fd);
+    std::tuple<bool, util::Winner, bool, bool> getGameStatus(int serv_fd);
     std::tuple<Board, bool> getBoardState(int serv_fd);
     bool sendMove(int serv_fd, char move);
     bool sendPlayAgain(int serv_fd, bool playAgain);
