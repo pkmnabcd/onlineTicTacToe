@@ -175,6 +175,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                             break;
                         }
                         oppDisconnected = lobbies[client_id].m_someoneDisconnected;
+                        std::this_thread::sleep_for(std::chrono::seconds(2)); // check every few seconds
                     }
                     gamestates[client_id].m_isValid = false;
 
@@ -261,6 +262,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             while (oppWantsToPlay)
             {
                 // Block until host disconnects or chooses red or blue
+                // TODO: make sure the guest doesn't get here before the host cleans up
                 std::function<bool()> waitForHostColor = [&]
                 {
                     bool hostLeft = lobbies[hostID].m_someoneDisconnected;
@@ -330,6 +332,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                             break;
                         }
                         oppDisconnected = lobbies[hostID].m_someoneDisconnected;
+                        std::this_thread::sleep_for(std::chrono::seconds(2)); // check every few seconds
                     }
 
                     // Prepare to choose another lobby or play with opp again, depending on opp choice

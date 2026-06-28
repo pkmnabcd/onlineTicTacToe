@@ -82,7 +82,8 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
             wantsToPlayAgain = false;
             return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
         }
-        // TODO: apply the move to the board and show
+        // TODO: apply the move to the board and show.
+        // Also make currentBoard this updated board
         bool sentMove = matchmaking::sendMove(serv_fd, yourMove);
         disconnected = !sentMove;
         if (disconnected)

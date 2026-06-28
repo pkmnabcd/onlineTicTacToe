@@ -84,6 +84,18 @@ std::uint8_t diagonalWinner(StraightBoard board)
     }
 }
 
+bool boardFull(StraightBoard board)
+{
+    for (std::uint8_t i = 0; i < 9; i++)
+    {
+        if (board[i].at(0) != 'X' && board[i].at(0) != 'O')
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::uint8_t winner(StraightBoard board)
 {
     /*
@@ -102,6 +114,11 @@ std::uint8_t winner(StraightBoard board)
     else if (std::uint8_t diaWinner = diagonalWinner(board); diaWinner)
     {
         return diaWinner;
+    }
+    else if (boardFull(board))
+    {
+        std::print("Full board detected\n");
+        return 'S';
     }
     else
     {
