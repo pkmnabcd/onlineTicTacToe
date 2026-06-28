@@ -45,7 +45,7 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
         if (oppDisconnected)
         {
             std::print("Your opponent disconnected. Ending game.\n");
-            return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+            break;
         }
 
         // Get existing board
@@ -78,21 +78,52 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
         std::int8_t yourMove = interface::getHumanMove(currentBoard, yourLetter);
         if (yourMove == -1) // quit
         {
-            // TODO: send to server that you're quitting
+            // TODO: send to server that you're quitting using sendMove
             wantsToPlayAgain = false;
             return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
         }
+        // TODO: apply the move to the board and show
+        bool sentMove = matchmaking::sendMove(serv_fd, yourMove);
+        disconnected = !sentMove;
+        if (disconnected)
+        {
+            std::print("Got disconnected while sending your move.\n");
+            return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+        }
+        std::print("Sent move!\n");
 
+        // Get back whether to expect another turn or not.
+        std::print("Waiting for the status update!\n");
+        auto [continuePlayTmp0, winnerTmp0, oppDisconnectedTmp1, disconnectedTmp2] = matchmaking::getGameStatus(serv_fd);
+        continuePlay = continuePlayTmp0;
+        winner = winnerTmp0;
+        oppDisconnected = oppDisconnectedTmp1;
+        disconnected = disconnectedTmp2;
+        if (disconnected)
+        {
+            std::print("Got disconnected while waiting for gamestate update.\n");
+            return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+        }
+
+        // If the game is over, show the final move and break out of game loop
+        if (!continuePlay)
+        {
+            interface::printWinnerMessage(winner);
+            interface::show(currentBoard);
+            break; // Go to code that asks whether to play again.
+        }
 
         firstTurn = false;
         previousBoard = currentBoard;
     }
-    // TODO: Process for this function:
-    // 1. get the game status
-    // 2. get the board state
-    // 3. get move from user and send to server
-    // 4. get game status again
-    // 5. Repeat until status other than 'C'
-    // 6. Decide if you want to play again
-    return std::make_tuple(true, true, true);
+    // Decide if play again
+    wantsToPlayAgain = interface::playAgain(oppName);
+    bool message_sent_success = matchmaking::sendPlayAgain(serv_fd, wantsToPlayAgain);
+    disconnected = !message_sent_success;
+    if (disconnected)
+    {
+        std::print("Got disconnected while sending play again decision.\n");
+        return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+    }
+    return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
 }

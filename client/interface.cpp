@@ -117,7 +117,7 @@ std::int8_t interface::getHumanMove(interface::Board board, std::string letter)
                 }
                 else
                 {
-                    std::print("I don't understand '{}', try again! (Input valid char)\n", choice);
+                    std::print("I don't understand '{}', try again! (Input valid char)\n", static_cast<char>(choice));
                 }
             }
             else
@@ -426,4 +426,38 @@ void interface::printWinnerMessage(util::Winner winner)
         msg = interface::green("\nStalemate.\n");
     }
     std::print("{}\n", msg);
+}
+
+bool interface::playAgain(std::string oppName)
+{
+    std::print("0) Yes\n1) No\n");
+    std::print("Play again with {}? > ", oppName);
+    bool notValidChoice = true;
+    bool playAgain = false;
+    while (notValidChoice)
+    {
+        std::string input;
+        std::cin >> input;
+        if (input.size() != 1)
+        {
+            std::print("\nInvalid selection! (Input one char)\n\n");
+        }
+        else
+        {
+            if (input.at(0) == '0')
+            {
+                playAgain = true;
+                notValidChoice = false;
+            }
+            else if (input.at(0) == '1')
+            {
+                notValidChoice = false;
+            }
+            else
+            {
+                std::print("\nInvalid selection!\n\n");
+            }
+        }
+    }
+    return playAgain;
 }

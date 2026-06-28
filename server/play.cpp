@@ -190,7 +190,9 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
      * Returns [wantsToPlayAgain: bool, disconnected: bool, oppDisconnected: bool]
      */
 
+    std::print("{} player waiting for lock...\n", (isRed) ? "Red" : "Blue");
     gameMutexes[hostID].lock();
+    std::print("{} player has lock...\n", (isRed) ? "Red" : "Blue");
 
     bool isFirstTurn = true;
     bool message_sent_success = false;
@@ -261,13 +263,15 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
         }
 
         // Get your move
-        auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
+        std::print("Waiting for {} move.\n", (isRed) ? "Red" : "Blue");
+        auto [move, disconnectedTmp0] = matchmaking::getClientMove(client_fd); // TODO: add logic for when client quits
         client_disconnected = disconnectedTmp0;
         if (client_disconnected)
         {
             gameMutexes[hostID].unlock();
             return std::make_tuple(false, true, false);
         }
+        std::print("{} move: {}\n", (isRed) ? "Red" : "Blue", move);
 
         // Update gamestate and see if you win/stalemate
         auto [newGamestate, invalidMove] = updateGamestate(isRed, move, gamestate);

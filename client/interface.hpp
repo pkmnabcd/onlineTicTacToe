@@ -37,4 +37,5 @@ namespace interface
     bool chooseRedOrBlue();
     void printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name);
     void printWinnerMessage(util::Winner winner);
+    bool playAgain(std::string oppName);
 } // namespace interface

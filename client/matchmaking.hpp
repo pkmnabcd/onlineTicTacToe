@@ -26,7 +26,7 @@ namespace matchmaking
     std::tuple<bool, bool, bool> getHostColor(int serv_fd);
     std::tuple<bool, util::Winner, bool, bool> getGameStatus(int serv_fd);
     std::tuple<Board, bool> getBoardState(int serv_fd);
-    bool sendMove(int serv_fd, char move);
+    bool sendMove(int serv_fd, std::uint8_t move);
     bool sendPlayAgain(int serv_fd, bool playAgain);
     std::tuple<bool, bool> getOppPlayAgain(int serv_fd);
 } // namespace matchmaking

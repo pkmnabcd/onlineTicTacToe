@@ -397,11 +397,12 @@ std::tuple<Board, bool> matchmaking::getBoardState(int serv_fd)
     return std::make_tuple(board, disconnected);
 }
 
-bool sendMove(int serv_fd, char move)
+bool matchmaking::sendMove(int serv_fd, std::uint8_t move)
 {
+    assert(move > 0 && move < 10 && "Move should be between 1 and 9.\n");
     const int bufferLen = 2;
     char buffer[bufferLen] = "";
-    buffer[0] = move;
+    buffer[0] = move + 48; // convert to char representation of numbers 1-9
     int bytesSent = networking::sendAll(serv_fd, buffer, bufferLen);
 
     return bytesSent == bufferLen;
