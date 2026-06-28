@@ -92,6 +92,7 @@ void interface::show(interface::Board board)
 
 std::int8_t interface::getHumanMove(interface::Board board, std::string letter)
 {
+    std::array<std::string, 9> straightBoard = util::get1dFrom2dBoard(board);
     while (true)
     {
         interface::show(board);
@@ -114,14 +115,20 @@ std::int8_t interface::getHumanMove(interface::Board board, std::string letter)
                 {
                     return -1;  // Sign to quit
                 }
-                else 
+                else
                 {
                     std::print("I don't understand '{}', try again! (Input valid char)\n", choice);
                 }
             }
             else
             {
-                return util::toIntVal(choice);
+                choice = util::toIntVal(choice);
+                bool isValidMove = choice != 0 && util::isDigit(straightBoard[choice - 1].at(0));
+                if (isValidMove)
+                {
+                    return choice;
+                }
+                std::print("You must choose an open space.\n");
             }
         }
     }

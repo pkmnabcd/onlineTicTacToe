@@ -76,6 +76,12 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
 
         // Get move from user and send to server
         std::int8_t yourMove = interface::getHumanMove(currentBoard, yourLetter);
+        if (yourMove == -1) // quit
+        {
+            // TODO: send to server that you're quitting
+            wantsToPlayAgain = false;
+            return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
+        }
 
 
         firstTurn = false;
