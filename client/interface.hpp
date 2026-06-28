@@ -18,9 +18,6 @@ namespace interface
     std::uint8_t player_select();
     std::uint8_t selectGameMode();
     std::string getUsername();
-    bool selectHostLobby();
-    std::uint8_t chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies);
-    bool chooseRedOrBlue();
 
     std::string black(std::string input);
     std::string red(std::string input);
@@ -35,6 +32,9 @@ namespace interface
     void clear();
 
     // Multiplayer specific functions
+    bool selectHostLobby();
+    std::tuple<std::uint8_t, std::string> chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies);
+    bool chooseRedOrBlue();
     void printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name);
     void printWinnerMessage(util::Winner winner);
 } // namespace interface

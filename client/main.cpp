@@ -69,7 +69,7 @@ void doMultiplayer()
             // TODO: Stuff to do for host:
             // 1. Game logic
             // 2. ...
-            auto [playAgainTmp, disconnectedTmp3, oppDisconnected] = play::playGame(serv_fd, choseRed);
+            auto [playAgainTmp, disconnectedTmp3, oppDisconnected] = play::playGame(serv_fd, choseRed, guestName);
             wantsToPlay = playAgainTmp;
             disconnected = disconnectedTmp3;
             return; // TODO: remove this. It's just here to not mess with the server logic while it's incomplete.
@@ -93,7 +93,7 @@ void doMultiplayer()
                 return;
             }
 
-            std::uint8_t lobbyHostID = interface::chooseLobby(lobbies);
+            auto [lobbyHostID, hostName] = interface::chooseLobby(lobbies);
             message_sent_success = matchmaking::sendLobbyChoice(serv_fd, lobbyHostID);
             if (!message_sent_success)
             {
@@ -132,7 +132,7 @@ void doMultiplayer()
             // TODO: Stuff to do for guest:
             // 1. Game logic
             // 2. ...
-            auto [playAgainTmp, disconnectedTmp3, oppDisconnected] = play::playGame(serv_fd, !hostChoseRed);
+            auto [playAgainTmp, disconnectedTmp3, oppDisconnected] = play::playGame(serv_fd, !hostChoseRed, hostName);
             wantsToPlay = playAgainTmp;
             disconnected = disconnectedTmp3;
             return; // TODO: remove this. It's just here to not mess with the server logic while it's incomplete.

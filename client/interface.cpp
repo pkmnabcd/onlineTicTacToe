@@ -288,9 +288,10 @@ bool interface::selectHostLobby()
     }
 }
 
-std::uint8_t interface::chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies)
+std::tuple<std::uint8_t, std::string> interface::chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies)
 {
     std::uint8_t id = 0;
+    std::string oppName = "";
     for (auto& lobby : lobbies)
     {
         std::string hostName = std::get<0>(lobby);
@@ -337,6 +338,7 @@ std::uint8_t interface::chooseLobby(std::vector<std::tuple<std::string, std::uin
             std::uint8_t hostID = std::get<1>(lobby);
             if (hostID == id)
             {
+                oppName = std::get<0>(lobby);
                 notValidChoice = false;
                 break;
             }
@@ -346,7 +348,7 @@ std::uint8_t interface::chooseLobby(std::vector<std::tuple<std::string, std::uin
             std::print("Please enter a valid ID.\n");
         }
     }
-    return id;
+    return std::make_tuple(id, oppName);
 }
 
 // TODO: with these interactive functions, make sure you can quit anytime

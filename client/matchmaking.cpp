@@ -382,7 +382,7 @@ std::tuple<Board, bool> matchmaking::getBoardState(int serv_fd)
     }
     else
     {
-        StraightBoard sBoard;
+        StraightBoard sBoard = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
         for (std::uint8_t i = 0; i < bufferLen-1; i++)
         {
             if (!isGoodSpace(buffer[i]))
