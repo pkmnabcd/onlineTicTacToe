@@ -359,9 +359,10 @@ std::tuple<std::uint8_t, std::string> interface::chooseLobby(std::vector<std::tu
 }
 
 // TODO: with these interactive functions, make sure you can quit anytime
-bool interface::chooseRedOrBlue()
+std::tuple<bool, bool> interface::chooseRedOrBlue()
 {
     bool choosingRed = false;
+    bool quitting = false;
 
     std::print("0) {}\n1) {}\n", interface::red("Red Player (X)"), interface::cyan("Blue Player (O)"));
     bool notValidChoice = true;
@@ -385,7 +386,8 @@ bool interface::chooseRedOrBlue()
             else if (util::toLower(choice) == 'q')
             {
                 // TODO: actually finish this
-                notValidChoice = true;
+                notValidChoice = false;
+                quitting = true;
             }
             else
             {
@@ -393,7 +395,7 @@ bool interface::chooseRedOrBlue()
             }
         }
     }
-    return choosingRed;
+    return std::make_tuple(choosingRed, quitting);
 }
 
 void interface::printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name)

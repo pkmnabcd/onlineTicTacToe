@@ -34,7 +34,7 @@ namespace interface
     // Multiplayer specific functions
     bool selectHostLobby();
     std::tuple<std::uint8_t, std::string> chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies);
-    bool chooseRedOrBlue();
+    std::tuple<bool, bool> chooseRedOrBlue();
     void printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name);
     void printWinnerMessage(util::Winner winner);
     bool playAgain(std::string oppName);

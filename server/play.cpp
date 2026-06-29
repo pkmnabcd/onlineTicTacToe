@@ -281,7 +281,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
 
         // Get your move
         std::print("Waiting for {} move.\n", (isRed) ? "Red" : "Blue");
-        auto [move, clientQuit, disconnectedTmp0] = matchmaking::getClientMove(client_fd); // TODO: add logic for when client quits
+        auto [move, clientQuit, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
         client_disconnected = disconnectedTmp0;
         if (client_disconnected)
         {
