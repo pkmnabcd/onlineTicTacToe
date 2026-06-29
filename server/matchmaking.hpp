@@ -19,7 +19,7 @@ namespace matchmaking
     std::tuple<bool, bool> hostChoosesRed(int client_fd);
     bool sendGuestTheHostColor(int client_fd, char hostColor);
     bool sendBoardState(int client_fd, StraightBoard board);
-    std::tuple<std::uint8_t, bool> getClientMove(int client_fd);
+    std::tuple<std::uint8_t, bool, bool> getClientMove(int client_fd);
     bool sendClientGameStatus(int client_fd, char winnerOrContOrOppDiscon);
     std::tuple<bool, bool> getClientPlayAgain(int client_fd);
     bool sendClientOppPlayAgain(int client_fd, bool oppPlayAgain);

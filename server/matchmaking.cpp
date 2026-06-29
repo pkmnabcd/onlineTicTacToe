@@ -159,9 +159,10 @@ bool isDigit(std::uint8_t ch)
     return ch >= 48 && ch <= 57;
 }
 
-std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
+std::tuple<std::uint8_t, bool, bool> matchmaking::getClientMove(int client_fd)
 {
     std::uint8_t moveChoice = 0;
+    bool clientQuit = false;
     bool disconnected = false;
 
     const int chooseMoveBufferLen = 2;
@@ -183,10 +184,14 @@ std::tuple<std::uint8_t, bool> matchmaking::getClientMove(int client_fd)
         }
         else
         {
+            if (chooseMoveBuffer[0] == 'q')
+            {
+                clientQuit = true;
+            }
             disconnected = true;
         }
     }
-    return std::make_tuple(moveChoice, disconnected);
+    return std::make_tuple(moveChoice, clientQuit, disconnected);
 }
 
 bool matchmaking::sendClientGameStatus(int client_fd, char winnerOrContOrOppDiscon)
