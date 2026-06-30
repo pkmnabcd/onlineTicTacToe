@@ -7,6 +7,20 @@
 #include <print>
 #include <string>
 
+std::string getCleanedName(std::string& name)
+{
+    /*
+     * This function gets rid of the trailing spaces in the hostName string
+     */
+    std::string::size_type index;
+    index = name.find_first_of(' ');
+    if (index == std::string::npos)
+    {
+        return name;
+    }
+    return name.substr(0, index); // index should also be the number of chars before the spaces start
+}
+
 void doMultiplayer()
 {
     // TODO: Possibly change the game display/interface code to clear the screen.
@@ -130,6 +144,7 @@ void doMultiplayer()
             }
 
             auto [lobbyHostID, hostName] = interface::chooseLobby(lobbies);
+            hostName = getCleanedName(hostName);
             message_sent_success = matchmaking::sendLobbyChoice(serv_fd, lobbyHostID);
             if (!message_sent_success)
             {

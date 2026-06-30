@@ -123,7 +123,14 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
         previousBoard = currentBoard;
     }
     // Decide if play again
-    wantsToPlayAgain = interface::playAgain(oppName);
+    if (!oppDisconnected)
+    {
+        wantsToPlayAgain = interface::playAgain(oppName);
+    }
+    else
+    {
+        wantsToPlayAgain = true;
+    }
     bool message_sent_success = matchmaking::sendPlayAgain(serv_fd, wantsToPlayAgain);
     disconnected = !message_sent_success;
     if (disconnected)
