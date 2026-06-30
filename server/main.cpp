@@ -309,6 +309,8 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(!hostPickedRed, hostID, client_fd, gamestates, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 guestWantsToPlay = wantToContinue;
+                // TODO: fix the race condition or whatever happens here that causes guest to start and finish game without host.
+                // It looks like it happens when the game ends (winner or stalemate) and the host says yes first, the guest then sees the end game state before it's cleared
 
                 if (client_disconnected || !guestWantsToPlay)
                 {
