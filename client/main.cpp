@@ -66,15 +66,15 @@ void doMultiplayer()
             while (oppWantsPlay)
             {
                 auto [choseRed, wantsQuit] = interface::chooseRedOrBlue();
-                message_sent_success = matchmaking::sendLobbyChoice(serv_fd, choseRed);
-                if (!message_sent_success)
+                if (wantsQuit)
                 {
-                    std::print("Disconnected from server while sending color choice.\n");
                     networking::closeFd(serv_fd);
                     return;
                 }
-                if (wantsQuit)
+                message_sent_success = matchmaking::sendColorChoice(serv_fd, choseRed);
+                if (!message_sent_success)
                 {
+                    std::print("Disconnected from server while sending color choice.\n");
                     networking::closeFd(serv_fd);
                     return;
                 }
@@ -168,7 +168,7 @@ void doMultiplayer()
                 if (hostDisconnected)
                 {
                     std::print("The lobby host disconnected.\n");
-                    continue; // Go back to choosing a lobby
+                    break; // Go back to choosing a lobby
                 }
                 std::print("Host chose {}.\n", (hostChoseRed) ? "red" : "blue");
 

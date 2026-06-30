@@ -21,7 +21,7 @@ namespace matchmaking
     std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> getOpenLobbies(int serv_fd);
     bool sendLobbyChoice(int serv_fd, std::uint8_t hostID);
     std::tuple<bool, bool> getLobbyConnectionSuccessConfirmation(int serv_fd);
-    bool sendLobbyChoice(int serv_fd, bool choseRed);
+    bool sendColorChoice(int serv_fd, bool choseRed);
     bool blockAndPing(int serv_fd);
     std::tuple<bool, bool, bool> getHostColor(int serv_fd);
     std::tuple<bool, util::Winner, bool, bool> getGameStatus(int serv_fd);

@@ -247,7 +247,7 @@ std::tuple<bool, bool> matchmaking::getLobbyConnectionSuccessConfirmation(int se
     return std::make_tuple(connectionSuccess, disconnected);
 }
 
-bool matchmaking::sendLobbyChoice(int serv_fd, bool choseRed)
+bool matchmaking::sendColorChoice(int serv_fd, bool choseRed)
 {
     const int bufferLen = 2;
     char buffer[bufferLen] = "";
