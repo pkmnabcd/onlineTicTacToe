@@ -74,7 +74,7 @@ std::tuple<Player, bool, bool> matchmaking::getClientInfo(int client_fd, std::ui
             }
             else
             {
-                player = Player(client_name, client_id, client_fd);
+                player = Player(client_name, client_id);
                 isHosting = clientInfo.at(0) == 'H';
             }
         }
