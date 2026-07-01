@@ -4,15 +4,23 @@ I have translated it to C++, and will be using this project to help me learn how
 
 # Progress
 This project is in the middle of development still.
-I recently finished a draft of the server, but it remains largely untested.
+The server and client are largely finished.
+If you run the server and some clients, you can get basic multiplayer going.
+The server and client are currently coded to work only on localhost, but that can be easily fixed.
 Right now, you can play the tic tac toe game by yourself by building the project and running the `Client` program.
-I'm making good progress in finally hooking up the client to the server for online play.
 This currently works only on Linux.
 I have yet to test anything on Windows, and I need to include the right header files for socket programming in Windows.
 
 # Some Design Notes
 As of now, I have the server designed such that connecting to a client creates a thread that handles all the interaction with that user.
 I am aware that this design does not scale well, but I am having fun attempting to think through all the logic that goes along with this design.
+
+# Soon TODOs
+* Clean up the user experience and debugging print statements
+* Add the simple code to make this work on windows
+* Change the board design to use `char` instead of `std::string` since I treat the cells like `char`s anyway
+* Make more helpful server logs
+* Use a config/env file to let you set whatever IP address/DNS you want the server to be at
 
 # Future Ideas
 Once I mostly finish this project, I hope to rewrite it using a more scalable design.
@@ -46,4 +54,4 @@ cmake --build build
 
 This will create the MSVC project files that you can open and then compile using MSVC.
 
-TODO: finish these instructions
+TODO: finish these instructions for windows
