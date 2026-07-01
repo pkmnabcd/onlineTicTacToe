@@ -339,6 +339,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, int
     }
 
     // NOTE: make sure that game lock is unlocked when getting here
+    gamestates[hostID].m_gameFinished = true;
     auto [playAgain, client_disconnectedTmp1] = matchmaking::getClientPlayAgain(client_fd);
     client_disconnected = client_disconnectedTmp1;
     if (client_disconnected)

@@ -209,7 +209,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     }
                 }
             } // end opp wants to play loop
-        } // end host wants to play loop
+        }     // end host wants to play loop
     }
     else // client wants to join existing lobby
     {
@@ -263,11 +263,10 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             while (oppWantsToPlay)
             {
                 // Block until host disconnects or chooses red or blue
-                // TODO: make sure the guest doesn't get here before the host cleans up
                 std::function<bool()> waitForHostColor = [&]
                 {
                     bool hostLeft = lobbies[hostID].m_someoneDisconnected;
-                    bool hostMadeChoice = gamestates[hostID].m_isValid;
+                    bool hostMadeChoice = gamestates[hostID].m_isValid && !gamestates[hostID].m_gameFinished;
                     bool keepWaiting = !hostLeft && !hostMadeChoice;
                     return !keepWaiting;
                 };
@@ -309,12 +308,9 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                 auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(!hostPickedRed, hostID, client_fd, gamestates, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 guestWantsToPlay = wantToContinue;
-                // TODO: fix the race condition or whatever happens here that causes guest to start and finish game without host.
-                // It looks like it happens when the game ends (winner or stalemate) and the host says yes first, the guest then sees the end game state before it's cleared
 
                 if (client_disconnected || !guestWantsToPlay)
                 {
-                    // TODO: either make sure you don't have the lock or you free it here
                     lobbies[hostID].m_guestPlayAgain = Lobby::PlayAgain::No;
                     critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, hostID, dataMutex, disconnectMutex);
                     critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
@@ -360,7 +356,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
                     }
                 }
             } // end opp wants to play loop
-        } // end guest wants to play loop
+        }     // end guest wants to play loop
     }
 
     // TODO: evaluate if this is needed

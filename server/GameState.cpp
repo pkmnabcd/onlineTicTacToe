@@ -13,7 +13,8 @@ GameState::GameState() :
     m_redPlayer(),
     m_bluePlayer(),
     m_isValid(false),
-    m_someoneDisconnected(false)
+    m_someoneDisconnected(false),
+    m_gameFinished(false)
 {
 }
 
@@ -22,7 +23,8 @@ GameState::GameState(Player redPlayer, Player bluePlayer) :
     m_redPlayer(redPlayer),
     m_bluePlayer(bluePlayer),
     m_isValid(true),
-    m_someoneDisconnected(false)
+    m_someoneDisconnected(false),
+    m_gameFinished(false)
 {
 }
 
