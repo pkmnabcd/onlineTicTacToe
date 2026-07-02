@@ -67,7 +67,7 @@ std::uint8_t verticalWinner(StraightBoard board)
     {
         return board[1][0];
     }
-    else if (board[2] == board[5] && board[2] == board[6])
+    else if (board[2] == board[5] && board[2] == board[8])
     {
         return board[2][0];
     }
