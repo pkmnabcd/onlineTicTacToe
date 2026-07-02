@@ -437,11 +437,11 @@ void interface::printWinnerMessage(util::Winner winner)
 bool interface::playAgain(std::string oppName)
 {
     std::print("0) Yes\n1) No\n");
-    std::print("Play again with {}? > ", oppName);
     bool notValidChoice = true;
     bool playAgain = false;
     while (notValidChoice)
     {
+        std::print("Play again with {}? > ", oppName);
         std::string input;
         std::cin >> input;
         std::print("\n");
