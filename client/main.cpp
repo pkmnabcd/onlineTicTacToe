@@ -106,6 +106,7 @@ void doMultiplayer()
                 }
 
                 // Handle opponent response
+                std::print("Waiting for the guest's decision.\n");
                 auto [oppPlayAgainTmp0, disconnectedTmp4] = matchmaking::getOppPlayAgain(serv_fd);
                 oppWantsPlay = oppPlayAgainTmp0;
                 disconnected = disconnectedTmp4;
@@ -169,11 +170,12 @@ void doMultiplayer()
                 std::print("Lobby host disconnected. Searching again for open lobbies.\n");
                 continue;
             }
-            std::print("\nConnected to the lobby. Waiting for the host to choose red or blue.\n");
+            std::print("\nConnected to the lobby.\n");
 
             bool oppWantsPlay = true;
             while (oppWantsPlay)
             {
+                std::print("Waiting for the host to choose red or blue.\n");
                 disconnected = matchmaking::blockAndPing(serv_fd);
                 if (disconnected)
                 {
@@ -206,6 +208,7 @@ void doMultiplayer()
                 }
 
                 // Handle opponent response
+                std::print("Waiting for the host's decision.\n");
                 auto [oppPlayAgainTmp0, disconnectedTmp4] = matchmaking::getOppPlayAgain(serv_fd);
                 oppWantsPlay = oppPlayAgainTmp0;
                 disconnected = disconnectedTmp4;
