@@ -1,28 +1,29 @@
 #include "networking.hpp"
 
-#include <arpa/inet.h>
 #include <cstring>
+#include <print>
+
+#ifdef _WIN32
+
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#else
+
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <print>
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#endif
+
+
 const char* SERVER_PORT = "3490";
 const char* SERVER_ADDRESS = "127.0.0.1";
 
-
-void sigchld_handler(int s)
-{
-    (void)s; // this quiets unused parameter warning.
-
-    const int saved_errno = errno;
-    while (waitpid(-1, nullptr, WNOHANG) > 0)
-        ;
-    errno = saved_errno;
-}
 
 void* get_in_addr(struct sockaddr* sa)
 {
@@ -33,16 +34,28 @@ void* get_in_addr(struct sockaddr* sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void networking::closeFd(int fd)
+void networking::closeFd(SocketType fd)
 {
+    #ifdef _WIN32
+    closesocket(fd);
+    #else
     close(fd);
+    #endif
 }
 
 // NOTE: this is only slightly modified from the Beej networking guide.
-int networking::initClient()
+SocketType networking::initClient()
 {
+    #ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
+        //std::print(stderr, "WSAStartup failed.\n");
+        return INVALID_SOCK_VAL;
+    }
+    #endif
 
-    int sockfd;
+    SocketType sockfd;
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
@@ -53,7 +66,7 @@ int networking::initClient()
 
     if ((rv = getaddrinfo(SERVER_ADDRESS, SERVER_PORT, &hints, &servinfo)) != 0) {
         //std::print(stderr, "getaddrinfo: {}\n", gai_strerror(rv));
-        return -1;
+        return INVALID_SOCK_VAL;
     }
 
     // loop through all the results and connect to the first we can
@@ -79,7 +92,7 @@ int networking::initClient()
     }
 
     if (p == NULL) {
-        return -1;
+        return INVALID_SOCK_VAL;
     }
 
     inet_ntop(p->ai_family,
@@ -91,7 +104,7 @@ int networking::initClient()
 }
 
 
-int networking::receiveAll(int fd, char buffer[], int len)
+int networking::receiveAll(SocketType fd, char buffer[], int len)
 {
     int bytesReceived = 0;
     while (bytesReceived != len)
@@ -114,7 +127,7 @@ int networking::receiveAll(int fd, char buffer[], int len)
     return bytesReceived;
 }
 
-int networking::sendAll(int fd, const char buffer[], int len)
+int networking::sendAll(SocketType fd, const char buffer[], int len)
 {
     int bytesSent = 0;
     while (bytesSent != len)
@@ -138,3 +151,9 @@ int networking::sendAll(int fd, const char buffer[], int len)
     return bytesSent;
 }
 
+void networking::cleanup()
+{
+    #ifdef _WIN32
+    WSACleanup();
+    #endif
+}

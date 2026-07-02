@@ -2,6 +2,7 @@
 
 #include "interface.hpp"
 #include "matchmaking.hpp"
+#include "networking.hpp"
 #include "util.hpp"
 
 #include <cstdint>
@@ -11,7 +12,7 @@
 #include <tuple>
 
 
-std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string oppName)
+std::tuple<bool, bool, bool> play::playGame(SocketType serv_fd, bool isRed, std::string oppName)
 {
     /*
      * Returns [wantsToPlayAgain: bool, disconnected: bool, oppDisconnected: bool]

@@ -15,7 +15,7 @@
 
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
-bool matchmaking::sendPlayerInfo(int serv_fd, bool hostGame, std::string username)
+bool matchmaking::sendPlayerInfo(SocketType serv_fd, bool hostGame, std::string username)
 {
     const int playerInfoBufferLen = NAME_LEN + 1;
     char playerInfoBuffer[playerInfoBufferLen] = "";
@@ -30,7 +30,7 @@ bool matchmaking::sendPlayerInfo(int serv_fd, bool hostGame, std::string usernam
     return bytesSent == playerInfoBufferLen;
 }
 
-std::tuple<std::string, bool> readStr(int serv_fd, char* buffer, const int bufferLen)
+std::tuple<std::string, bool> readStr(SocketType serv_fd, char* buffer, const int bufferLen)
 {
     bool disconnected = false;
     int numbytes = networking::receiveAll(serv_fd, buffer, bufferLen);
@@ -49,7 +49,7 @@ std::tuple<std::string, bool> readStr(int serv_fd, char* buffer, const int buffe
     return std::make_tuple(output, disconnected);
 }
 
-std::tuple<std::uint8_t, bool> matchmaking::getYourID(int serv_fd)
+std::tuple<std::uint8_t, bool> matchmaking::getYourID(SocketType serv_fd)
 {
     std::uint8_t id = 0;
     bool disconnected = false;
@@ -78,7 +78,7 @@ std::tuple<std::uint8_t, bool> matchmaking::getYourID(int serv_fd)
     return std::make_tuple(id, disconnected);
 }
 
-std::tuple<bool, bool> matchmaking::getWaitStatus(int serv_fd)
+std::tuple<bool, bool> matchmaking::getWaitStatus(SocketType serv_fd)
 {
     bool stillWaiting = true;
     bool disconnected = false;
@@ -108,7 +108,7 @@ std::tuple<bool, bool> matchmaking::getWaitStatus(int serv_fd)
     return std::make_tuple(stillWaiting, disconnected);
 }
 
-bool matchmaking::sendPing(int serv_fd)
+bool matchmaking::sendPing(SocketType serv_fd)
 {
     const int bufferLen = 2;
     char buffer[bufferLen] = "Y";
@@ -116,7 +116,7 @@ bool matchmaking::sendPing(int serv_fd)
     return bytesSent == bufferLen;
 }
 
-std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
+std::tuple<std::string, bool> matchmaking::getGuestName(SocketType serv_fd)
 {
     std::string guestName = "";
     bool disconnected = false;
@@ -142,7 +142,7 @@ std::tuple<std::string, bool> matchmaking::getGuestName(int serv_fd)
     return std::make_tuple(guestName, disconnected);
 }
 
-std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking::getOpenLobbies(int serv_fd)
+std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking::getOpenLobbies(SocketType serv_fd)
 {
     std::vector<std::tuple<std::string, std::uint8_t>> openLobbies;
     bool disconnected = false;
@@ -212,7 +212,7 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
     return std::make_tuple(openLobbies, disconnected);
 }
 
-bool matchmaking::sendLobbyChoice(int serv_fd, std::uint8_t hostID)
+bool matchmaking::sendLobbyChoice(SocketType serv_fd, std::uint8_t hostID)
 {
     std::string msg = std::format("{:3}", hostID);
     msg.push_back('\0');
@@ -221,7 +221,7 @@ bool matchmaking::sendLobbyChoice(int serv_fd, std::uint8_t hostID)
     return bytesSent == static_cast<int>(msg.size());
 }
 
-std::tuple<bool, bool> matchmaking::getLobbyConnectionSuccessConfirmation(int serv_fd)
+std::tuple<bool, bool> matchmaking::getLobbyConnectionSuccessConfirmation(SocketType serv_fd)
 {
     bool connectionSuccess = false;
     bool disconnected = false;
@@ -247,7 +247,7 @@ std::tuple<bool, bool> matchmaking::getLobbyConnectionSuccessConfirmation(int se
     return std::make_tuple(connectionSuccess, disconnected);
 }
 
-bool matchmaking::sendColorChoice(int serv_fd, bool choseRed)
+bool matchmaking::sendColorChoice(SocketType serv_fd, bool choseRed)
 {
     const int bufferLen = 2;
     char buffer[bufferLen] = "";
@@ -257,7 +257,7 @@ bool matchmaking::sendColorChoice(int serv_fd, bool choseRed)
     return bytesSent == bufferLen;
 }
 
-bool matchmaking::blockAndPing(int serv_fd)
+bool matchmaking::blockAndPing(SocketType serv_fd)
 {
     /*
      * Block but receive pings from the server
@@ -275,7 +275,7 @@ bool matchmaking::blockAndPing(int serv_fd)
     return disconnected;
 }
 
-std::tuple<bool, bool, bool> matchmaking::getHostColor(int serv_fd)
+std::tuple<bool, bool, bool> matchmaking::getHostColor(SocketType serv_fd)
 {
     bool hostPickedRed = false;
     bool hostDisconnected = false;
@@ -303,7 +303,7 @@ std::tuple<bool, bool, bool> matchmaking::getHostColor(int serv_fd)
     return std::make_tuple(hostPickedRed, hostDisconnected, disconnected);
 }
 
-std::tuple<bool, util::Winner, bool, bool> matchmaking::getGameStatus(int serv_fd)
+std::tuple<bool, util::Winner, bool, bool> matchmaking::getGameStatus(SocketType serv_fd)
 {
     /*
      * Returns [continue?, winner, oppDisconnected, youDisconnected]
@@ -368,7 +368,7 @@ bool isGoodSpace(char c)
     return c == 'X' || c == 'O' || (util::isDigit(c) && c != '0');
 }
 
-std::tuple<Board, bool> matchmaking::getBoardState(int serv_fd)
+std::tuple<Board, bool> matchmaking::getBoardState(SocketType serv_fd)
 {
     Board board;
     bool disconnected = false;
@@ -397,7 +397,7 @@ std::tuple<Board, bool> matchmaking::getBoardState(int serv_fd)
     return std::make_tuple(board, disconnected);
 }
 
-bool matchmaking::sendMove(int serv_fd, std::uint8_t move)
+bool matchmaking::sendMove(SocketType serv_fd, std::uint8_t move)
 {
     assert(move == 'q' || (move > 0 && move < 10 && "Move should be between 1 and 9 or q.\n"));
     const int bufferLen = 2;
@@ -415,7 +415,7 @@ bool matchmaking::sendMove(int serv_fd, std::uint8_t move)
     return bytesSent == bufferLen;
 }
 
-bool matchmaking::sendPlayAgain(int serv_fd, bool playAgain)
+bool matchmaking::sendPlayAgain(SocketType serv_fd, bool playAgain)
 {
     const int bufferLen = 2;
     char buffer[bufferLen] = "";
@@ -425,7 +425,7 @@ bool matchmaking::sendPlayAgain(int serv_fd, bool playAgain)
     return bytesSent == bufferLen;
 }
 
-std::tuple<bool, bool> matchmaking::getOppPlayAgain(int serv_fd)
+std::tuple<bool, bool> matchmaking::getOppPlayAgain(SocketType serv_fd)
 {
     bool oppPlayAgain = false;
     bool disconnected = false;

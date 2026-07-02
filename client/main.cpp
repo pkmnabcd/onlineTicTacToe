@@ -26,10 +26,11 @@ void doMultiplayer()
     // TODO: Possibly change the game display/interface code to clear the screen.
     std::string username = interface::getUsername();
     bool hostGame = interface::selectHostLobby();
-    int serv_fd = networking::initClient();
-    if (serv_fd == -1)
+    SocketType serv_fd = networking::initClient();
+    if (serv_fd == INVALID_SOCK_VAL)
     {
         std::print("Failed to connect to server.\n");
+        networking::cleanup();
         return;
     }
     std::print("Successful connection to server\n");
@@ -40,6 +41,7 @@ void doMultiplayer()
     {
         std::print("Disconnected from server.\n");
         networking::closeFd(serv_fd);
+        networking::cleanup();
         return;
     }
 
@@ -52,6 +54,7 @@ void doMultiplayer()
         {
             std::print("Disconnected from server. Didn't receive your ID.\n");
             networking::closeFd(serv_fd);
+            networking::cleanup();
             return;
         }
 
@@ -66,6 +69,7 @@ void doMultiplayer()
             {
                 std::print("Disconnected from server while waiting for guest.\n");
                 networking::closeFd(serv_fd);
+                networking::cleanup();
                 return;
             }
 
@@ -75,6 +79,7 @@ void doMultiplayer()
             {
                 std::print("Disconnected from server while getting guest name.\n");
                 networking::closeFd(serv_fd);
+                networking::cleanup();
                 return;
             }
             std::print("You have connected with guest: {}\n", guestName);
@@ -86,6 +91,7 @@ void doMultiplayer()
                 if (wantsQuit)
                 {
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
                 message_sent_success = matchmaking::sendColorChoice(serv_fd, choseRed);
@@ -93,6 +99,7 @@ void doMultiplayer()
                 {
                     std::print("Disconnected from server while sending color choice.\n");
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
 
@@ -102,6 +109,7 @@ void doMultiplayer()
                 if (disconnected || !wantsToPlay)
                 {
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
 
@@ -114,6 +122,7 @@ void doMultiplayer()
                 {
                     std::print("Disconnected while waiting for opponent to send whether they want to replay.\n");
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
                 if (!oppWantsPlay)
@@ -138,12 +147,14 @@ void doMultiplayer()
             {
                 std::print("Disconnected from server while trying to get the open lobbies.\n");
                 networking::closeFd(serv_fd);
+                networking::cleanup();
                 return;
             }
             if (lobbies.size() == 0)
             {
                 std::print("No open lobbies. Host a lobby or try again later.\n");
                 networking::closeFd(serv_fd);
+                networking::cleanup();
                 return;
             }
 
@@ -154,6 +165,7 @@ void doMultiplayer()
             {
                 std::print("Disconnected from server while sending lobby choice.\n");
                 networking::closeFd(serv_fd);
+                networking::cleanup();
                 return;
             }
 
@@ -163,6 +175,7 @@ void doMultiplayer()
             {
                 std::print("Disconnected from server while confirming lobby selection or the lobby host disconnected.\n");
                 networking::closeFd(serv_fd);
+                networking::cleanup();
                 return;
             }
             if (!connectionSuccess)
@@ -181,6 +194,7 @@ void doMultiplayer()
                 {
                     std::print("Disconnected from server while waiting for the host to pick color.\n");
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
                 auto [hostChoseRed, hostDisconnected, disconnectedTmp2] = matchmaking::getHostColor(serv_fd);
@@ -189,6 +203,7 @@ void doMultiplayer()
                 {
                     std::print("Disconnected from server while getting the host's color choice.\n");
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
                 if (hostDisconnected)
@@ -204,6 +219,7 @@ void doMultiplayer()
                 if (disconnected || !wantsToPlay)
                 {
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
 
@@ -216,6 +232,7 @@ void doMultiplayer()
                 {
                     std::print("Disconnected while waiting for opponent to send whether they want to replay.\n");
                     networking::closeFd(serv_fd);
+                    networking::cleanup();
                     return;
                 }
                 if (!oppWantsPlay)
