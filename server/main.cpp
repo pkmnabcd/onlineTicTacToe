@@ -155,7 +155,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
                 if (client_disconnected || !hostWantsToPlay)
                 {
-                    // TODO: either make sure you don't have the lock or you free it here
                     lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::No;
                     critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
                     critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
@@ -360,7 +359,6 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         }     // end guest wants to play loop
     }
 
-    // TODO: evaluate if this is needed
     critical::addIDToQueue(freeIDs, client_id, dataMutex);
     networking::closeFd(client_fd);
 }

@@ -16,11 +16,10 @@ As of now, I have the server designed such that connecting to a client creates a
 I am aware that this design does not scale well, but I am having fun attempting to think through all the logic that goes along with this design.
 
 # Soon TODOs
-* Clean up the user experience and debugging print statements
 * Add the simple code to make this work on windows
 * Change the board design to use `char` instead of `std::string` since I treat the cells like `char`s anyway
-* Make more helpful server logs
 * Use a config/env file to let you set whatever IP address/DNS you want the server to be at
+* Make more helpful server logs
 
 # Future Ideas
 Once I mostly finish this project, I hope to rewrite it using a more scalable design.
@@ -28,7 +27,7 @@ I also don't currently have any tests, or even a way to monitor the server's sta
 
 # Building
 Here are the steps for building this project.
-As of now, the `Client` program builds on Windows, but the `Server` program doesn't since it relies on unix libraries.
+As of now, this project doesn't compile on windows since it relies on unix libraries.
 I believe that it may be a simple fix to add Windows functionality, but I haven't tested it yet.
 Both programs work on Linux (I use Linux Mint, so your mileage may vary, depending on your distribution).
 

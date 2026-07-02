@@ -12,20 +12,6 @@
 #include <thread>
 #include <tuple>
 
-// TODO: fix an error where the following board gives a red win
-// X | O | X
-//---+---+---
-// O | O | X
-//---+---+---
-// X | X | O
-// even this is a red win
-// X | O | X
-//---+---+---
-// O | O | X
-//---+---+---
-// X | 8 | 9
-
-
 
 std::uint8_t horizontalWinner(StraightBoard board)
 {
