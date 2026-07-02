@@ -260,9 +260,10 @@ bool interface::selectHostLobby()
     {
         std::uint8_t choice;
         std::string input;
-        std::print("0) {}\n1) {}\n", interface::green("Host"), interface::magenta("Join"));
+        std::print("\n0) {}\n1) {}\n", interface::green("Host"), interface::magenta("Join"));
         std::print("Do you want to host a lobby or join an existing lobby?> ");
         std::cin >> input;
+        std::print("\n");
 
         if (input.size() != 1)
         {
@@ -299,6 +300,8 @@ std::tuple<std::uint8_t, std::string> interface::chooseLobby(std::vector<std::tu
 {
     std::uint8_t id = 0;
     std::string oppName = "";
+
+    std::print("\nOpen lobbies:\nID: name\n");
     for (auto& lobby : lobbies)
     {
         std::string hostName = std::get<0>(lobby);
@@ -364,13 +367,14 @@ std::tuple<bool, bool> interface::chooseRedOrBlue()
     bool choosingRed = false;
     bool quitting = false;
 
-    std::print("0) {}\n1) {}\n", interface::red("Red Player (X)"), interface::cyan("Blue Player (O)"));
+    std::print("\n0) {}\n1) {}\n", interface::red("Red Player (X)"), interface::cyan("Blue Player (O)"));
     bool notValidChoice = true;
     while (notValidChoice)
     {
         std::print("Pick whether you want to go {} or {}> ", interface::red("first"), interface::cyan("second"));
         std::string input;
         std::cin >> input;
+        std::print("\n");
         if (input.size() != 1)
         {
             std::print("\nInvalid selection! (Input one char)\n\n");
@@ -403,11 +407,11 @@ void interface::printOppTurnMessage(std::uint8_t movePos, bool isRed, std::strin
     std::string msg;
     if (isRed)
     {
-        msg = interface::red(std::format("{} X took their turn... played on {}", name, movePos));
+        msg = interface::red(std::format("{} (X) took their turn... played on {}\n", name, movePos));
     }
     else
     {
-        msg = interface::cyan(std::format("{} O took their turn... played on {}", name, movePos));
+        msg = interface::cyan(std::format("{} (O) took their turn... played on {}\n", name, movePos));
     }
     std::print("{}\n", msg);
 }
@@ -440,6 +444,7 @@ bool interface::playAgain(std::string oppName)
     {
         std::string input;
         std::cin >> input;
+        std::print("\n");
         if (input.size() != 1)
         {
             std::print("\nInvalid selection! (Input one char)\n\n");

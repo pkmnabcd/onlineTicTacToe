@@ -76,7 +76,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
         const bool lobbyAdded = critical::addLobbyToLobbies(lobbies, client_lobby, dataMutex);
         if (!lobbyAdded)
         {
-            std::print(stderr, "Error: lobby attempted to be added to lobbies while valid lobby was still there\n");
+            std::print(stderr, "Error: lobby attempted to be added to lobbies while valid lobby was still there or the host disconnected.\n");
             critical::invalidatePlayer(players, client_id, dataMutex);
             critical::addIDToQueue(freeIDs, client_id, dataMutex);
             networking::closeFd(client_fd);
@@ -101,7 +101,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
             client_disconnected = matchmaking::blockUntilCondition(client_fd, guestJoinedCondition);
             if (client_disconnected)
             {
-                std::print(stderr, "Error: guest disconnected while waiting for a guest.\n");
+                std::print(stderr, "Error: host disconnected while waiting for a guest.\n");
                 critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
                 critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
@@ -241,6 +241,7 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 
             // Check to make sure the lobby is still available.
             bool guestAdded = critical::addGuestToLobby(lobbies, hostID, client_player, dataMutex);
+            std::print("Guest added: {}\n", guestAdded);
             message_sent_success = matchmaking::sendClientSuccessfulConnectionToLobby(client_fd, guestAdded);
             if (!message_sent_success)
             {

@@ -27,6 +27,12 @@ void doMultiplayer()
     std::string username = interface::getUsername();
     bool hostGame = interface::selectHostLobby();
     int serv_fd = networking::initClient();
+    if (serv_fd == -1)
+    {
+        std::print("Failed to connect to server.\n");
+        return;
+    }
+    std::print("Successful connection to server\n");
 
     bool message_sent_success;
     message_sent_success = matchmaking::sendPlayerInfo(serv_fd, hostGame, username);
@@ -36,12 +42,10 @@ void doMultiplayer()
         networking::closeFd(serv_fd);
         return;
     }
-    std::print("Sent player info\n");
 
     bool disconnected;
     if (hostGame)
     {
-        std::print("Trying to get confirmation\n");
         auto [yourID, disconnectedTmp0] = matchmaking::getYourID(serv_fd);
         disconnected = disconnectedTmp0;
         if (disconnected)
@@ -54,7 +58,7 @@ void doMultiplayer()
         bool wantsToPlay = true;
         while (wantsToPlay)
         {
-            std::print("Your Online ID for this session is: {}\n", yourID);
+            std::print("Waiting for a guest. Your Online ID for this session is: {}\n", yourID);
 
             // Wait for a guest to join lobby and hear from server
             disconnected = matchmaking::blockAndPing(serv_fd);
@@ -64,7 +68,6 @@ void doMultiplayer()
                 networking::closeFd(serv_fd);
                 return;
             }
-            std::print("No longer waiting for guest!\n");
 
             auto [guestName, disconnectedTmp2] = matchmaking::getGuestName(serv_fd);
             disconnected = disconnectedTmp2;
@@ -157,10 +160,16 @@ void doMultiplayer()
             disconnected = disconnectedTmp1;
             if (disconnected)
             {
-                std::print("Disconnected from server while confirming lobby selection.\n");
+                std::print("Disconnected from server while confirming lobby selection or the lobby host disconnected.\n");
                 networking::closeFd(serv_fd);
                 return;
             }
+            if (!connectionSuccess)
+            {
+                std::print("Lobby host disconnected. Searching again for open lobbies.\n");
+                continue;
+            }
+            std::print("\nConnected to the lobby. Waiting for the host to choose red or blue.\n");
 
             bool oppWantsPlay = true;
             while (oppWantsPlay)

@@ -163,7 +163,9 @@ std::vector<Lobby> critical::getOpenLobbies(std::array<Lobby, arraySize>& lobbie
 bool critical::addGuestToLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, Player guest, std::mutex& mut)
 {
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
-    bool canAddGuest = !lobbies[hostID].m_guest.m_isValid;
+    // TODO: somehow address the risk of a guest selecting a lobby after the
+    // original host leaves and another takes their place.
+    bool canAddGuest = !lobbies[hostID].m_guest.m_isValid && lobbies[hostID].m_isValid && !lobbies[hostID].m_someoneDisconnected;
     if (canAddGuest)
     {
         lobbies[hostID].m_guest = guest;

@@ -32,8 +32,11 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
             interface::show(previousBoard);
         }
 
+        if (!firstTurn || !isRed)
+        {
+            std::print("Waiting for opponent to move.\n\n");
+        }
         // Get existing state
-        std::print("Waiting for the status update!\n");
         auto [continuePlay, winner, oppDisconnectedTmp0, disconnectedTmp0] = matchmaking::getGameStatus(serv_fd);
         oppDisconnected = oppDisconnectedTmp0;
         disconnected = disconnectedTmp0;
@@ -49,7 +52,6 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
         }
 
         // Get existing board
-        std::print("Waiting for the board state!\n");
         auto [currentBoardTmp0, disconnectedTmp1] = matchmaking::getBoardState(serv_fd);
         currentBoard = currentBoardTmp0;
         disconnected = disconnectedTmp1;
@@ -58,7 +60,6 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
             std::print("Got disconnected while waiting for board update.\n");
             return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
         }
-        std::print("Got the board state!\n");
         bool skipOppPrint = isRed && firstTurn; // Print opponent move unless you're first move
         if (!skipOppPrint)
         {
@@ -96,10 +97,8 @@ std::tuple<bool, bool, bool> play::playGame(int serv_fd, bool isRed, std::string
             std::print("Got disconnected while sending your move.\n");
             return std::make_tuple(wantsToPlayAgain, disconnected, oppDisconnected);
         }
-        std::print("Sent move!\n");
 
         // Get back whether to expect another turn or not.
-        std::print("Waiting for the status update!\n");
         auto [continuePlayTmp0, winnerTmp0, oppDisconnectedTmp1, disconnectedTmp2] = matchmaking::getGameStatus(serv_fd);
         continuePlay = continuePlayTmp0;
         winner = winnerTmp0;

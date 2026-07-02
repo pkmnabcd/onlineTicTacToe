@@ -362,7 +362,7 @@ bool matchmaking::blockUntilCondition(int client_fd, std::function<bool()> condi
         {
             break;
         }
-        std::this_thread::sleep_for(std::chrono::seconds(3)); // check every few seconds
+        std::this_thread::sleep_for(std::chrono::seconds(2)); // check every few seconds
     }
 
     if (!disconnected)

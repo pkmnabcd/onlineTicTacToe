@@ -52,25 +52,25 @@ int networking::initClient()
     hints.ai_socktype = SOCK_STREAM;
 
     if ((rv = getaddrinfo(SERVER_ADDRESS, SERVER_PORT, &hints, &servinfo)) != 0) {
-        std::print(stderr, "getaddrinfo: {}\n", gai_strerror(rv));
-        exit(1);
+        //std::print(stderr, "getaddrinfo: {}\n", gai_strerror(rv));
+        return -1;
     }
 
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
-            perror("client: socket");
+            //perror("client: socket");
             continue;
         }
 
         inet_ntop(p->ai_family,
             get_in_addr((struct sockaddr *)p->ai_addr),
             s, sizeof s);
-        std::print("client: attempting connection to {}\n", s);
+        std::print("Attempting connection to the server: {}\n", s);
 
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            perror("client: connect");
+            //perror("client: connect");
             close(sockfd);
             continue;
         }
@@ -79,14 +79,12 @@ int networking::initClient()
     }
 
     if (p == NULL) {
-        std::print(stderr, "client: failed to connect\n");
-        exit(1);
+        return -1;
     }
 
     inet_ntop(p->ai_family,
             get_in_addr((struct sockaddr *)p->ai_addr),
             s, sizeof s);
-    std::print("client: connected to {}\n", s);
 
     freeaddrinfo(servinfo); // all done with this structure
     return sockfd;
@@ -102,13 +100,12 @@ int networking::receiveAll(int fd, char buffer[], int len)
         const int newBytes = recv(fd, buffer+bytesReceived, len-bytesReceived, 0);
         if (newBytes == -1)
         {
-            perror("recv");
+            //perror("recv");
             bytesReceived = newBytes;
             break;
         }
         if (newBytes == 0)
         {
-            std::print("Client: The server disconnected.\n");
             bytesReceived = newBytes;
             break;
         }
@@ -127,13 +124,12 @@ int networking::sendAll(int fd, const char buffer[], int len)
         const int newBytes = send(fd, buffer+bytesSent, len-bytesSent, MSG_NOSIGNAL);
         if (newBytes == -1)
         {
-            perror("send");
+            //perror("send");
             bytesSent = newBytes;
             break;
         }
         if (newBytes == 0)
         {
-            std::print("Client: Connection closed or unable to send.\n");
             bytesSent = newBytes;
             break;
         }
