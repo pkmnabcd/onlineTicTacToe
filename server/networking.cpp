@@ -121,7 +121,7 @@ SocketType networking::initServer()
             exit(1);
         }
 
-        errCode = bind(serv_fd, p->ai_addr, p->ai_addrlen);
+        errCode = bind(serv_fd, p->ai_addr, static_cast<int>(p->ai_addrlen));
         if (errCode == -1)
         {
             networking::closeFd(serv_fd);

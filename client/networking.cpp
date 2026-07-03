@@ -84,9 +84,9 @@ SocketType networking::initClient()
             s, sizeof s);
         std::print("Attempting connection to the server: {}\n", s);
 
-        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+        if (connect(sockfd, p->ai_addr, static_cast<int>(p->ai_addrlen)) == -1) {
             //perror("client: connect");
-            close(sockfd);
+            networking::closeFd(sockfd);
             continue;
         }
 
