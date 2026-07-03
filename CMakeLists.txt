@@ -94,9 +94,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(${SERVER} PRIVATE /W4 /permissive- )
     target_compile_options(${UNIT_TEST_RUNNER} PRIVATE /bigobj /W4 /permissive-)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(${CLIENT} PRIVATE -Wall -Wextra -pedantic -g)
-    target_compile_options(${SERVER} PRIVATE -Wall -Wextra -pedantic -g)
-    target_compile_options(${UNIT_TEST_RUNNER} PRIVATE -Wall -Wextra -pedantic -g)
+    target_compile_options(${CLIENT} PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${SERVER} PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${UNIT_TEST_RUNNER} PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 #
