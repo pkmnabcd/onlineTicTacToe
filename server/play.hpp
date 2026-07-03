@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameState.hpp"
+#include "networking.hpp"
 #include "settings.hpp"
 
 #include <array>
@@ -10,5 +11,5 @@
 
 namespace play
 {
-    std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, int client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes);
+    std::tuple<bool, bool, bool> playGame(bool isRed, std::uint8_t hostID, SocketType client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes);
 }

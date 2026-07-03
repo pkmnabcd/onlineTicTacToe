@@ -26,7 +26,7 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
     }
 }
 
-void manageClient(int client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex, std::array<std::mutex, arraySize>& gameMutexes)
+void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::queue<std::uint8_t>& freeIDs, std::mutex& dataMutex, std::mutex& disconnectMutex, std::array<std::mutex, arraySize>& gameMutexes)
 {
     bool client_disconnected = false;
     bool message_sent_success;
@@ -366,7 +366,13 @@ void manageClient(int client_fd, std::array<Player, arraySize>& players, std::ar
 int main()
 {
 
-    int serv_fd = networking::initServer();
+    SocketType serv_fd = networking::initServer();
+    if (serv_fd == INVALID_SOCK_VAL)
+    {
+        networking::closeFd(serv_fd);
+        networking::cleanup();
+        return 1;
+    }
     std::mutex dataMutex;
     std::mutex disconnectMutex;
 
@@ -381,8 +387,8 @@ int main()
 
     while (true)
     {
-        int client_fd = networking::acceptConnection(serv_fd);
-        if (client_fd == -1)
+        SocketType client_fd = networking::acceptConnection(serv_fd);
+        if (client_fd == INVALID_SOCK_VAL)
         {
             continue;
         }
@@ -391,6 +397,7 @@ int main()
     }
 
     networking::closeFd(serv_fd);
+    networking::cleanup();
 
     return 0;
 }

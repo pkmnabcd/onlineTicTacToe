@@ -1,14 +1,26 @@
 #include "networking.hpp"
 
-#include <arpa/inet.h>
 #include <cstring>
+#include <print>
+
+#ifdef _WIN32
+
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#define perror(msg) std::print(stderr, "{}: Error {}\n", msg, WSAGetLastError())
+#define MSG_NOSIGNAL 0
+
+#else
+
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <print>
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#endif
 
 const char* SERVER_PORT = "3490";
 const int BACKLOG = 10;
@@ -26,6 +38,7 @@ int getLocalAddrInfo(const char*& port, addrinfo*& servinfo)
     return getaddrinfo(nullptr, port, &servInfoHints, &servinfo);
 }
 
+#ifndef _WIN32
 void sigchld_handler(int s)
 {
     (void)s; // this quiets unused parameter warning.
@@ -35,6 +48,7 @@ void sigchld_handler(int s)
         ;
     errno = saved_errno;
 }
+#endif
 
 void* get_in_addr(struct sockaddr* sa)
 {
@@ -57,23 +71,37 @@ unsigned short int get_in_port(sockaddr_storage client_addr)
     }
 }
 
-void networking::closeFd(int fd)
+void networking::closeFd(SocketType fd)
 {
+    #ifdef _WIN32
+    closesocket(fd);
+    #else
     close(fd);
+    #endif
 }
 
-int networking::initServer()
+SocketType networking::initServer()
 {
     addrinfo* servinfo;
     int errCode;
 
+    #ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
+        std::print(stderr, "WSAStartup failed.\n");
+        return INVALID_SOCK_VAL;
+    }
+    #endif
+
     if ((errCode = getLocalAddrInfo(SERVER_PORT, servinfo)) != 0)
     {
         std::print(stderr, "getaddrinfo: {}\n", gai_strerror(errCode));
-        perror("Server: getaddrinfo");
+        networking::cleanup();
+        exit(1);
     }
 
-    int serv_fd;
+    SocketType serv_fd;
     int yes = 1;
     addrinfo* p;
     for (p = servinfo; p != nullptr; p = p->ai_next)
@@ -89,13 +117,14 @@ int networking::initServer()
         if (errCode == -1)
         {
             perror("setsockopt");
+            networking::cleanup();
             exit(1);
         }
 
         errCode = bind(serv_fd, p->ai_addr, p->ai_addrlen);
         if (errCode == -1)
         {
-            close(serv_fd);
+            networking::closeFd(serv_fd);
             perror("server: bind");
             continue;
         }
@@ -108,6 +137,7 @@ int networking::initServer()
     if (p == nullptr)
     {
         std::print("server: failed to bind\n");
+        networking::cleanup();
         exit(1);
     }
 
@@ -115,9 +145,11 @@ int networking::initServer()
     if (errCode == -1)
     {
         perror("listen");
+        networking::cleanup();
         exit(1);
     }
 
+    #ifndef _WIN32
     // NOTE: This code works with sigaction() and reaps zombie processes.
     struct sigaction sa;
     sa.sa_handler = sigchld_handler; // reap all dead processes
@@ -129,21 +161,22 @@ int networking::initServer()
         perror("sigaction");
         exit(1);
     }
+    #endif
 
     std::print("server: waiting for connections...\n");
     return serv_fd;
 }
 
 
-int networking::acceptConnection(int serv_fd)
+SocketType networking::acceptConnection(SocketType serv_fd)
 {
     socklen_t sin_size;
     sockaddr_storage client_addr;
-    int client_fd;
+    SocketType client_fd;
 
     sin_size = sizeof client_addr;
     client_fd = accept(serv_fd, (sockaddr*)&client_addr, &sin_size);
-    if (client_fd == -1)
+    if (client_fd == INVALID_SOCK_VAL)
     {
         perror("accept");
         return client_fd;
@@ -158,7 +191,7 @@ int networking::acceptConnection(int serv_fd)
     return client_fd;
 }
 
-int networking::receiveAll(int fd, char buffer[], int len)
+int networking::receiveAll(SocketType fd, char buffer[], int len)
 {
     int bytesReceived = 0;
     while (bytesReceived != len)
@@ -182,13 +215,12 @@ int networking::receiveAll(int fd, char buffer[], int len)
     return bytesReceived;
 }
 
-int networking::sendAll(int fd, const char buffer[], int len)
+int networking::sendAll(SocketType fd, const char buffer[], int len)
 {
     int bytesSent = 0;
     while (bytesSent != len)
     {
         // NOTE: char is 1B so 'bytesSent' is # chars sent
-        // TODO: instead of the MSG_NOSIGNAL flag, use 0 when compiling for windows.
         const int newBytes = send(fd, buffer+bytesSent, len-bytesSent, MSG_NOSIGNAL);
         if (newBytes == -1)
         {
@@ -207,3 +239,9 @@ int networking::sendAll(int fd, const char buffer[], int len)
     return bytesSent;
 }
 
+void networking::cleanup()
+{
+    #ifdef _WIN32
+    WSACleanup();
+    #endif
+}

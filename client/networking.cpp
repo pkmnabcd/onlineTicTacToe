@@ -8,6 +8,8 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+#define MSG_NOSIGNAL 0
+
 #else
 
 #include <arpa/inet.h>
