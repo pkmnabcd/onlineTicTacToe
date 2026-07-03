@@ -102,7 +102,11 @@ SocketType networking::initServer()
     }
 
     SocketType serv_fd;
+    #ifdef _WIN32
+    char yes = 1;
+    #else
     int yes = 1;
+    #endif
     addrinfo* p;
     for (p = servinfo; p != nullptr; p = p->ai_next)
     {
