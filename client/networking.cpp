@@ -57,7 +57,7 @@ SocketType networking::initClient()
     }
     #endif
 
-    SocketType sockfd;
+    SocketType sockfd = INVALID_SOCK_VAL;
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
