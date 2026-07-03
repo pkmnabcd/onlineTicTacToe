@@ -101,7 +101,7 @@ SocketType networking::initServer()
         exit(1);
     }
 
-    SocketType serv_fd;
+    SocketType serv_fd = INVALID_SOCK_VAL;
     #ifdef _WIN32
     char yes = 1;
     #else

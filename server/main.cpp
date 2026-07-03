@@ -21,7 +21,7 @@ void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCou
 {
     for (std::size_t i = 0; i < IDCount; i++)
     {
-        freeIDsQueue.push(i);
+        freeIDsQueue.push(static_cast<std::uint8_t>(i));
     }
 }
 
