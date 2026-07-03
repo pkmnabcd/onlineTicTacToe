@@ -216,7 +216,7 @@ bool matchmaking::sendLobbyChoice(SocketType serv_fd, std::uint8_t hostID)
 {
     std::string msg = std::format("{:3}", hostID);
     msg.push_back('\0');
-    int bytesSent = networking::sendAll(serv_fd, msg.data(), msg.size()); // should be 4 bytes
+    int bytesSent = networking::sendAll(serv_fd, msg.data(), static_cast<int>(msg.size())); // should be 4 bytes
 
     return bytesSent == static_cast<int>(msg.size());
 }
