@@ -2,13 +2,15 @@
 #include "util.hpp"
 
 #include <array>
+#include <memory>
 #include <print>
 #include <string>
 #include <random>
 #include <cstdint>
 #include <vector>
 
-const std::array<std::vector<std::array<std::string, 9>>, 9> MODEL = {{
+using ModelType = std::array<std::vector<std::array<std::string, 9>>, 9>;
+const std::unique_ptr<ModelType> MODEL = std::make_unique<ModelType>(ModelType{{
     {
         {"1", "X", "O", "X", "O", "X", "X", "O", "O"},
         {"1", "X", "O", "X", "O", "X", "X", "O", "9"},
@@ -4547,7 +4549,7 @@ const std::array<std::vector<std::array<std::string, 9>>, 9> MODEL = {{
         {"1", "2", "3", "4", "5", "O", "X", "X", "9"},
         {"1", "2", "O", "4", "5", "6", "7", "X", "9"}
     }
-}};
+}});
 
 bool xInBoard(std::array<std::string, 9> board)
 {
@@ -4586,15 +4588,15 @@ std::uint8_t ai::strategyOracle(ai::Board board)
     {
         return ai::strategyRandom(board);
     }
-    for (std::uint8_t i = 0; i < MODEL.size(); i++)
+    for (std::uint8_t i = 0; i < (*MODEL).size(); i++)
     {
         for (std::string& place : board1D)
         {
             if (util::isDigit(place[0]))
             {
-                for (std::uint16_t j = 0; j < MODEL[i].size(); j++)
+                for (std::uint16_t j = 0; j < (*MODEL)[i].size(); j++)
                 {
-                    if (board1D == MODEL[i][j])
+                    if (board1D == (*MODEL)[i][j])
                     {
                         return i + 1;
                     }
