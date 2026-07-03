@@ -1,5 +1,5 @@
 #include "ttt.hpp"
-#include "interface.hpp"
+#include "ui.hpp"
 #include "engine.hpp"
 #include "ai.hpp"
 
@@ -10,7 +10,7 @@ void runGame()
     bool keepPlaying = true;
     while (keepPlaying)
     {
-        std::uint8_t mode = interface::player_select();
+        std::uint8_t mode = ui::player_select();
         switch (mode)
         {
             case 0:

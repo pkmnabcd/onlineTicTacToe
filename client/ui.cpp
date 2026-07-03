@@ -1,4 +1,4 @@
-#include "interface.hpp"
+#include "ui.hpp"
 #include "util.hpp"
 #include "rlutil.h"
 
@@ -11,35 +11,35 @@
 #include <tuple>
 #include <vector>
 
-std::string interface::black(std::string input)
+std::string ui::black(std::string input)
 {
     return std::format("\033[1;30m{}\033[0m", input);
 }
-std::string interface::red(std::string input)
+std::string ui::red(std::string input)
 {
     return std::format("\033[1;31m{}\033[0m", input);
 }
-std::string interface::green(std::string input)
+std::string ui::green(std::string input)
 {
     return std::format("\033[1;32m{}\033[0m", input);
 }
-std::string interface::yellow(std::string input)
+std::string ui::yellow(std::string input)
 {
     return std::format("\033[1;33m{}\033[0m", input);
 }
-std::string interface::blue(std::string input)
+std::string ui::blue(std::string input)
 {
     return std::format("\033[1;34m{}\033[0m", input);
 }
-std::string interface::magenta(std::string input)
+std::string ui::magenta(std::string input)
 {
     return std::format("\033[1;35m{}\033[0m", input);
 }
-std::string interface::cyan(std::string input)
+std::string ui::cyan(std::string input)
 {
     return std::format("\033[1;36m{}\033[0m", input);
 }
-std::string interface::white(std::string input)
+std::string ui::white(std::string input)
 {
     return std::format("\033[1;37m{}\033[0m", input);
 }
@@ -48,37 +48,37 @@ std::string color(std::string s)
 {
     if (s == "X")
     {
-        return interface::red(s);
+        return ui::red(s);
     }
     else if (s == "O")
     {
-        return interface::cyan(s);
+        return ui::cyan(s);
     }
     else
     {
-        return interface::white(s);
+        return ui::white(s);
     }
 }
 
-bool boardEmpty(interface::Board board)
+bool boardEmpty(ui::Board board)
 {
     return board[0].empty() && board[1].empty() && board[2].empty();
 }
 
-void interface::logo()
+void ui::logo()
 {
     std::print("\n");
-    std::print("{} {} {}\n", interface::red("888888888               "), interface::white("888888888                "), interface::cyan("888888888                 "));
-    std::print("{} {} {}\n", interface::red("\"8888888\" ooooo  ooooo  "), interface::white("\"8888888\" ooo     ooooo  "), interface::cyan("\"8888888\"  ooo    ooooo   "));
-    std::print("{} {} {}\n", interface::red("   888     888  88   8  "), interface::white("   888    888    88   8  "), interface::cyan("   888   88   88  8       "));
-    std::print("{} {} {}\n", interface::red("   888     888  88      "), interface::white("   888   8ooo8   88      "), interface::cyan("   888   88   88  8ooooo  "));
-    std::print("{} {} {}\n", interface::red("   888     888  88    88"), interface::white("   888  888  888 88    88"), interface::cyan("   888   88o  88 o88      "));
-    std::print("{} {} {}\n", interface::red("   888    88888  888888\""), interface::white("   888  888  888  888888\""), interface::cyan("   888   \"888888 888888888"));
-    std::print("                                                            by {}(tm)\n", interface::yellow("DuckieCorp"));
-    std::print("{}\n", interface::green("\nWOULD YOU LIKE TO PLAY A GAME?\n"));
+    std::print("{} {} {}\n", ui::red("888888888               "), ui::white("888888888                "), ui::cyan("888888888                 "));
+    std::print("{} {} {}\n", ui::red("\"8888888\" ooooo  ooooo  "), ui::white("\"8888888\" ooo     ooooo  "), ui::cyan("\"8888888\"  ooo    ooooo   "));
+    std::print("{} {} {}\n", ui::red("   888     888  88   8  "), ui::white("   888    888    88   8  "), ui::cyan("   888   88   88  8       "));
+    std::print("{} {} {}\n", ui::red("   888     888  88      "), ui::white("   888   8ooo8   88      "), ui::cyan("   888   88   88  8ooooo  "));
+    std::print("{} {} {}\n", ui::red("   888     888  88    88"), ui::white("   888  888  888 88    88"), ui::cyan("   888   88o  88 o88      "));
+    std::print("{} {} {}\n", ui::red("   888    88888  888888\""), ui::white("   888  888  888  888888\""), ui::cyan("   888   \"888888 888888888"));
+    std::print("                                                            by {}(tm)\n", ui::yellow("DuckieCorp"));
+    std::print("{}\n", ui::green("\nWOULD YOU LIKE TO PLAY A GAME?\n"));
 }
 
-void interface::show(interface::Board board)
+void ui::show(ui::Board board)
 {
     if (!boardEmpty(board))
     {
@@ -90,12 +90,12 @@ void interface::show(interface::Board board)
     }
 }
 
-std::int8_t interface::getHumanMove(interface::Board board, std::string letter)
+std::int8_t ui::getHumanMove(ui::Board board, std::string letter)
 {
     std::array<std::string, 9> straightBoard = util::get1dFrom2dBoard(board);
     while (true)
     {
-        interface::show(board);
+        ui::show(board);
 
         std::string input;
         std::uint8_t choice;
@@ -134,14 +134,14 @@ std::int8_t interface::getHumanMove(interface::Board board, std::string letter)
     }
 }
 
-std::uint8_t interface::player_select()
+std::uint8_t ui::player_select()
 {
     while (true)
     {
-        std::print("0) {} {} vs. {} {}\n", interface::red("X"), interface::green("CPU  "), interface::cyan("O"), interface::green("CPU"));
-        std::print("1) {} {} vs. {} {}\n", interface::red("X"), interface::white("Human"), interface::cyan("O"), interface::green("CPU"));
-        std::print("2) {} {} vs. {} {}\n", interface::red("X"), interface::green("CPU  "), interface::cyan("O"), interface::white("Human"));
-        std::print("3) {} {} vs. {} {}\n", interface::red("X"), interface::white("Human"), interface::cyan("O"), interface::white("Human"));
+        std::print("0) {} {} vs. {} {}\n", ui::red("X"), ui::green("CPU  "), ui::cyan("O"), ui::green("CPU"));
+        std::print("1) {} {} vs. {} {}\n", ui::red("X"), ui::white("Human"), ui::cyan("O"), ui::green("CPU"));
+        std::print("2) {} {} vs. {} {}\n", ui::red("X"), ui::green("CPU  "), ui::cyan("O"), ui::white("Human"));
+        std::print("3) {} {} vs. {} {}\n", ui::red("X"), ui::white("Human"), ui::cyan("O"), ui::white("Human"));
         std::print("Choose game mode [0-3] or Q to quit > ");
 
         std::string input;
@@ -171,11 +171,11 @@ std::uint8_t interface::player_select()
     return 0;  // Temp
 }
 
-std::uint8_t interface::selectGameMode()
+std::uint8_t ui::selectGameMode()
 {
     while (true)
     {
-        std::print("0) {}\n1) {}\n", interface::green("Local Play"), interface::magenta("Online Play"));
+        std::print("0) {}\n1) {}\n", ui::green("Local Play"), ui::magenta("Online Play"));
         std::print("Choose game mode [0/1] or Q to quit> ");
 
         std::string input;
@@ -204,17 +204,17 @@ std::uint8_t interface::selectGameMode()
     return 0;
 }
 
-void interface::home()
+void ui::home()
 {
     rlutil::locate(1, 1);
 }
 
-void interface::clear()
+void ui::clear()
 {
     rlutil::cls();
 }
 
-std::string interface::getUsername()
+std::string ui::getUsername()
 {
     while (true)
     {
@@ -254,13 +254,13 @@ std::string interface::getUsername()
     }
 }
 
-bool interface::selectHostLobby()
+bool ui::selectHostLobby()
 {
     while (true)
     {
         std::uint8_t choice;
         std::string input;
-        std::print("\n0) {}\n1) {}\n", interface::green("Host"), interface::magenta("Join"));
+        std::print("\n0) {}\n1) {}\n", ui::green("Host"), ui::magenta("Join"));
         std::print("Do you want to host a lobby or join an existing lobby?> ");
         std::cin >> input;
         std::print("\n");
@@ -296,7 +296,7 @@ bool interface::selectHostLobby()
     }
 }
 
-std::tuple<std::uint8_t, std::string> interface::chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies)
+std::tuple<std::uint8_t, std::string> ui::chooseLobby(std::vector<std::tuple<std::string, std::uint8_t>> lobbies)
 {
     std::uint8_t id = 0;
     std::string oppName = "";
@@ -362,16 +362,16 @@ std::tuple<std::uint8_t, std::string> interface::chooseLobby(std::vector<std::tu
 }
 
 // TODO: with these interactive functions, make sure you can quit anytime
-std::tuple<bool, bool> interface::chooseRedOrBlue()
+std::tuple<bool, bool> ui::chooseRedOrBlue()
 {
     bool choosingRed = false;
     bool quitting = false;
 
-    std::print("\n0) {}\n1) {}\n", interface::red("Red Player (X)"), interface::cyan("Blue Player (O)"));
+    std::print("\n0) {}\n1) {}\n", ui::red("Red Player (X)"), ui::cyan("Blue Player (O)"));
     bool notValidChoice = true;
     while (notValidChoice)
     {
-        std::print("Pick whether you want to go {} or {}> ", interface::red("first"), interface::cyan("second"));
+        std::print("Pick whether you want to go {} or {}> ", ui::red("first"), ui::cyan("second"));
         std::string input;
         std::cin >> input;
         std::print("\n");
@@ -402,39 +402,39 @@ std::tuple<bool, bool> interface::chooseRedOrBlue()
     return std::make_tuple(choosingRed, quitting);
 }
 
-void interface::printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name)
+void ui::printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name)
 {
     std::string msg;
     if (isRed)
     {
-        msg = interface::red(std::format("{} (X) took their turn... played on {}\n", name, movePos));
+        msg = ui::red(std::format("{} (X) took their turn... played on {}\n", name, movePos));
     }
     else
     {
-        msg = interface::cyan(std::format("{} (O) took their turn... played on {}\n", name, movePos));
+        msg = ui::cyan(std::format("{} (O) took their turn... played on {}\n", name, movePos));
     }
     std::print("{}\n", msg);
 }
 
-void interface::printWinnerMessage(util::Winner winner)
+void ui::printWinnerMessage(util::Winner winner)
 {
     std::string msg;
     if (winner == util::Winner::Red)
     {
-        msg = interface::red("\nX is the winner!\n");
+        msg = ui::red("\nX is the winner!\n");
     }
     else if (winner == util::Winner::Blue)
     {
-        msg = interface::cyan("\nO is the winner!\n");
+        msg = ui::cyan("\nO is the winner!\n");
     }
     else
     {
-        msg = interface::green("\nStalemate.\n");
+        msg = ui::green("\nStalemate.\n");
     }
     std::print("{}\n", msg);
 }
 
-bool interface::playAgain(std::string oppName)
+bool ui::playAgain(std::string oppName)
 {
     std::print("0) Yes\n1) No\n");
     bool notValidChoice = true;

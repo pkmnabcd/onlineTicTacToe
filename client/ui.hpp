@@ -8,7 +8,7 @@
 #include <tuple>
 #include <vector>
 
-namespace interface
+namespace ui
 {
     using Board = std::array<std::array<std::string, 3>, 3>;
 
@@ -38,4 +38,4 @@ namespace interface
     void printOppTurnMessage(std::uint8_t movePos, bool isRed, std::string name);
     void printWinnerMessage(util::Winner winner);
     bool playAgain(std::string oppName);
-} // namespace interface
+} // namespace ui

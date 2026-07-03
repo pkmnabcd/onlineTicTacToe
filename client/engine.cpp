@@ -1,5 +1,5 @@
 #include "engine.hpp"
-#include "interface.hpp"
+#include "ui.hpp"
 #include "util.hpp"
 
 #include <cstdint>
@@ -15,7 +15,7 @@ std::optional<engine::Board> engine::humanTurn(Board board, std::string letter)
 {
     while (true)
     {
-        std::int8_t choice = interface::getHumanMove(board, letter);
+        std::int8_t choice = ui::getHumanMove(board, letter);
         if (choice == -1)
         {
             return {};
@@ -26,11 +26,11 @@ std::optional<engine::Board> engine::humanTurn(Board board, std::string letter)
             std::string msg;
             if (letter == "X")
             {
-                msg = interface::red(std::format("You can't play at {}!", choice));
+                msg = ui::red(std::format("You can't play at {}!", choice));
             }
             else
             {
-                msg = interface::cyan(std::format("You can't play at {}!", choice));
+                msg = ui::cyan(std::format("You can't play at {}!", choice));
             }
             std::print("{}\n", msg);
         }
@@ -46,11 +46,11 @@ engine::Board engine::cpuTurn(engine::Board board, std::string letter, std::func
     std::function<std::string(std::string)> color;
     if (letter == "X")
     {
-        color = interface::red;
+        color = ui::red;
     }
     else
     {
-        color = interface::cyan;
+        color = ui::cyan;
     }
     std::string msg = color(std::format("CPU {} is taking its turn...", letter));
     std::print("{} ", msg);
@@ -70,19 +70,19 @@ bool engine::keepPlaying(engine::Board board)
 
     if (winner == 'X')
     {
-        std::string msg = interface::red(std::format("\n{} is the winner!\n", static_cast<char>(winner)));
+        std::string msg = ui::red(std::format("\n{} is the winner!\n", static_cast<char>(winner)));
         std::print("{}\n", msg);
         return false;
     }
     else if (winner == 'O')
     {
-        std::string msg = interface::cyan(std::format("\n{} is the winner!\n", static_cast<char>(winner)));
+        std::string msg = ui::cyan(std::format("\n{} is the winner!\n", static_cast<char>(winner)));
         std::print("{}\n", msg);
         return false;
     }
     else if (util::full(board))
     {
-        std::string msg = interface::green("\nStalemate.\n");
+        std::string msg = ui::green("\nStalemate.\n");
         std::print("{}\n", msg);
         return false;
     }
@@ -97,20 +97,20 @@ void engine::cpuVsCpu(std::function<std::uint8_t(Board)> strategyX, std::functio
     Board board = util::makeBoard();
     while (true)
     {
-        interface::show(board);
+        ui::show(board);
         board = engine::cpuTurn(board, "X", strategyX);
         if (!engine::keepPlaying(board))
         {
             break;
         }
-        interface::show(board);
+        ui::show(board);
         board = engine::cpuTurn(board, "O", strategyO);
         if (!engine::keepPlaying(board))
         {
             break;
         }
     }
-    interface::show(board);
+    ui::show(board);
 }
 
 void engine::cpuVsHuman(std::function<std::uint8_t(Board)> strategy)
@@ -118,7 +118,7 @@ void engine::cpuVsHuman(std::function<std::uint8_t(Board)> strategy)
     Board board = util::makeBoard();
     while (true)
     {
-        interface::show(board);
+        ui::show(board);
         board = engine::cpuTurn(board, "X", strategy);
         if (!engine::keepPlaying(board))
         {
@@ -135,7 +135,7 @@ void engine::cpuVsHuman(std::function<std::uint8_t(Board)> strategy)
             break;
         }
     }
-    interface::show(board);
+    ui::show(board);
 }
 
 void engine::humanVsHuman()
@@ -164,7 +164,7 @@ void engine::humanVsHuman()
             break;
         }
     }
-    interface::show(board);
+    ui::show(board);
 }
 
 void engine::humanVsCpu(std::function<std::uint8_t(Board)> strategy)
@@ -182,12 +182,12 @@ void engine::humanVsCpu(std::function<std::uint8_t(Board)> strategy)
         {
             break;
         }
-        interface::show(board);
+        ui::show(board);
         board = engine::cpuTurn(board, "O", strategy);
         if (!engine::keepPlaying(board))
         {
             break;
         }
     }
-    interface::show(board);
+    ui::show(board);
 }

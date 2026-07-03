@@ -1,8 +1,8 @@
-#include "interface.hpp"
 #include "matchmaking.hpp"
 #include "networking.hpp"
 #include "play.hpp"
 #include "ttt.hpp"
+#include "ui.hpp"
 
 #include <print>
 #include <string>
@@ -23,9 +23,9 @@ std::string getCleanedName(std::string& name)
 
 void doMultiplayer()
 {
-    // TODO: Possibly change the game display/interface code to clear the screen.
-    std::string username = interface::getUsername();
-    bool hostGame = interface::selectHostLobby();
+    // TODO: Possibly change the game display/ui code to clear the screen.
+    std::string username = ui::getUsername();
+    bool hostGame = ui::selectHostLobby();
     SocketType serv_fd = networking::initClient();
     if (serv_fd == INVALID_SOCK_VAL)
     {
@@ -87,7 +87,7 @@ void doMultiplayer()
             bool oppWantsPlay = true;
             while (oppWantsPlay)
             {
-                auto [choseRed, wantsQuit] = interface::chooseRedOrBlue();
+                auto [choseRed, wantsQuit] = ui::chooseRedOrBlue();
                 if (wantsQuit)
                 {
                     networking::closeFd(serv_fd);
@@ -158,7 +158,7 @@ void doMultiplayer()
                 return;
             }
 
-            auto [lobbyHostID, hostName] = interface::chooseLobby(lobbies);
+            auto [lobbyHostID, hostName] = ui::chooseLobby(lobbies);
             hostName = getCleanedName(hostName);
             message_sent_success = matchmaking::sendLobbyChoice(serv_fd, lobbyHostID);
             if (!message_sent_success)
@@ -251,8 +251,8 @@ int main()
     bool keepPlaying = true;
     while (keepPlaying)
     {
-        interface::logo();
-        std::uint8_t mode = interface::selectGameMode();
+        ui::logo();
+        std::uint8_t mode = ui::selectGameMode();
         switch (mode)
         {
             case 0:

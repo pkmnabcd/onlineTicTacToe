@@ -1,6 +1,6 @@
 #include "play.hpp"
 
-#include "interface.hpp"
+#include "ui.hpp"
 #include "matchmaking.hpp"
 #include "networking.hpp"
 #include "util.hpp"
@@ -30,7 +30,7 @@ std::tuple<bool, bool, bool> play::playGame(SocketType serv_fd, bool isRed, std:
         // Print the initial board if you're blue while you're waiting
         if (!isRed && firstTurn)
         {
-            interface::show(previousBoard);
+            ui::show(previousBoard);
         }
 
         if (!firstTurn || !isRed)
@@ -65,19 +65,19 @@ std::tuple<bool, bool, bool> play::playGame(SocketType serv_fd, bool isRed, std:
         if (!skipOppPrint)
         {
             std::uint8_t pos = util::getMovePosition(previousBoard, currentBoard);
-            interface::printOppTurnMessage(pos, !isRed, oppName);
+            ui::printOppTurnMessage(pos, !isRed, oppName);
         }
 
         // If the game is over, show the final move and break out of game loop
         if (!continuePlay)
         {
-            interface::printWinnerMessage(winner);
-            interface::show(currentBoard);
+            ui::printWinnerMessage(winner);
+            ui::show(currentBoard);
             break; // Go to code that asks whether to play again.
         }
 
         // Get move from user
-        std::int8_t yourMove = interface::getHumanMove(currentBoard, yourLetter);
+        std::int8_t yourMove = ui::getHumanMove(currentBoard, yourLetter);
         if (yourMove == -1) // quit
         {
             wantsToPlayAgain = false;
@@ -88,7 +88,7 @@ std::tuple<bool, bool, bool> play::playGame(SocketType serv_fd, bool isRed, std:
         StraightBoard tmpBoard = util::get1dFrom2dBoard(currentBoard);
         tmpBoard[yourMove - 1] = yourLetter;
         currentBoard = matchmaking::getBoardFromStraightBoard(tmpBoard);
-        interface::show(currentBoard);
+        ui::show(currentBoard);
 
         // Send move to server
         bool sentMove = matchmaking::sendMove(serv_fd, yourMove);
@@ -114,8 +114,8 @@ std::tuple<bool, bool, bool> play::playGame(SocketType serv_fd, bool isRed, std:
         // If the game is over, show the final move and break out of game loop
         if (!continuePlay)
         {
-            interface::printWinnerMessage(winner);
-            interface::show(currentBoard);
+            ui::printWinnerMessage(winner);
+            ui::show(currentBoard);
             break; // Go to code that asks whether to play again.
         }
 
@@ -125,7 +125,7 @@ std::tuple<bool, bool, bool> play::playGame(SocketType serv_fd, bool isRed, std:
     // Decide if play again
     if (!oppDisconnected)
     {
-        wantsToPlayAgain = interface::playAgain(oppName);
+        wantsToPlayAgain = ui::playAgain(oppName);
     }
     else
     {
