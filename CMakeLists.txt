@@ -21,7 +21,7 @@ include_directories(
 set(CLIENT_HEADER_FILES
     client/ai.hpp
     client/engine.hpp
-    client/interface.hpp
+    client/ui.hpp
     client/matchmaking.hpp
     client/networking.hpp
     client/play.hpp
@@ -49,7 +49,7 @@ set(ALL_HEADER_FILES
 set(CLIENT_SOURCE_FILES
     client/ai.cpp
     client/engine.cpp
-    client/interface.cpp
+    client/ui.cpp
     client/matchmaking.cpp
     client/networking.cpp
     client/play.cpp
