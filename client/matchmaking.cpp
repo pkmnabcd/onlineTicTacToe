@@ -66,11 +66,11 @@ std::tuple<std::uint8_t, bool> matchmaking::getYourID(SocketType serv_fd)
             const unsigned long int idInt = std::stoul(idStr);
             id = static_cast<std::uint8_t>(idInt);
         }
-        catch (std::invalid_argument const& ex)
+        catch (std::invalid_argument const&)
         {
             disconnected = true;
         }
-        catch (std::out_of_range const& ex)
+        catch (std::out_of_range const&)
         {
             disconnected = true;
         }
@@ -186,12 +186,12 @@ std::tuple<std::vector<std::tuple<std::string, std::uint8_t>>, bool> matchmaking
                 const unsigned long int idInt = std::stoul(idStr);
                 id = static_cast<std::uint8_t>(idInt);
             }
-            catch (std::invalid_argument const& ex)
+            catch (std::invalid_argument const&)
             {
                 disconnected = true;
                 break;
             }
-            catch (std::out_of_range const& ex)
+            catch (std::out_of_range const&)
             {
                 disconnected = true;
                 break;

@@ -331,12 +331,12 @@ std::tuple<std::uint8_t, std::string> ui::chooseLobby(std::vector<std::tuple<std
             }
             id = static_cast<std::uint8_t>(idInt);
         }
-        catch (std::invalid_argument const& ex)
+        catch (std::invalid_argument const&)
         {
             std::print("Please enter a valid ID.\n");
             continue;
         }
-        catch (std::out_of_range const& ex)
+        catch (std::out_of_range const&)
         {
             std::print("Please enter a valid ID.\n");
             continue;
