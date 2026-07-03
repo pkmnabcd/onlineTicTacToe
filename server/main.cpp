@@ -15,7 +15,6 @@
 #include <queue>
 #include <thread>
 #include <tuple>
-#include <unistd.h>
 #include <vector>
 
 void initializeFreeIDs(std::queue<std::uint8_t>& freeIDsQueue, std::size_t IDCount)
