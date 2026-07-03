@@ -86,7 +86,7 @@ bool matchmaking::sendClientID(SocketType client_fd, std::uint8_t client_id)
     std::string msg = "";
     msg.append(std::format("{:3}", client_id));
     msg.push_back('\0');
-    int bytesSent = networking::sendAll(client_fd, msg.data(), msg.size()); // should be 4 bytes
+    int bytesSent = networking::sendAll(client_fd, msg.data(), static_cast<int>(msg.size())); // should be 4 bytes
 
     return bytesSent == static_cast<int>(msg.size());
 }
@@ -260,7 +260,7 @@ bool matchmaking::sendClientOpenLobbies(SocketType client_fd, std::vector<Lobby>
     }
     msg.push_back('\x02'); // sign to stop expecting lobbies
 
-    const int bufferLen = msg.size();
+    const int bufferLen = static_cast<int>(msg.size());
     int bytesSent = networking::sendAll(client_fd, msg.data(), bufferLen);
     return bytesSent == bufferLen;
 }
