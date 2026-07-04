@@ -1,2 +1,4 @@
 build/*
 */python_code
+client_config.txt
+server_config.txt
