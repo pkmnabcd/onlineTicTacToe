@@ -3,25 +3,26 @@ This is a personal project of mine that is based on a python tic tac toe game ma
 I have translated it to C++, and will be using this project to help me learn how to use socket/network programming by making a server and client to add online multiplayer to the basic game.
 
 # Progress
-This project is in the middle of development still.
+This project is nearing the end of development.
 The server and client are largely finished.
-If you run the server and some clients, you can get basic multiplayer going.
-The server and client are currently coded to work only on localhost, but that can be easily fixed.
-Right now, you can play the tic tac toe game by yourself by building the project and running the `Client` program.
-This currently works only on Linux.
-I have yet to test anything on Windows, and I need to include the right header files for socket programming in Windows.
+There are a couple big bugs to fix, but this system seems to work very well.
+This project currently works on Linux and windows (the server and the client).
 
 # Some Design Notes
 As of now, I have the server designed such that connecting to a client creates a thread that handles all the interaction with that user.
 I am aware that this design does not scale well, but I am having fun attempting to think through all the logic that goes along with this design.
+There are also ways that I could improve the networking logic by making it so the program doesn't rely on the order of packages.
+This could be done by having tags on the packages, but this design would be a part of an overhaul of the whole design to make it scale better.
 
 # Soon TODOs
-* Use a config/env file to let you set whatever IP address/DNS you want the server to be at
 * Make more helpful server logs
 
 # Future Ideas
-Once I mostly finish this project, I hope to rewrite it using a more scalable design.
-I also don't currently have any tests, or even a way to monitor the server's state, so I will change that.
+The following are some ideas that I might implement in the future.
+* Rewrite in a more scalable design
+    * Change the system so that instead of having one thread per user, have a networking thread that gives work to a small number of threads that do the matchmaking/gamestate work.
+* Add a way to monitor the server state
+    * Currently no way to do so. This would probably require another thread (in current design) added to the server and a basic client to send requests to it.
 
 # Building
 Here are the steps for building this project.
@@ -39,16 +40,14 @@ mkdir build & cmake -B build -S . && cmake --build build
 Run the `Server` or `Client` by doing `build/Server` or `build/Client`, respectively.
 
 ## Windows
-TODO: Verify this
-
 Open a windows command prompt in the project's root directory.
 In the project's root directory, run the following.
 ```
 mkdir build
 cmake -B build -S .
-cmake --build build
 ```
 
 This will create the MSVC project files that you can open and then compile using MSVC.
+I usually open the `build/OnlineTicTacToe.sln` file and use visual studio 17 to build it.
 
-TODO: finish these instructions for windows
+If you compile in `Release` mode, you can run the program executables by doing `.\build\Release\Server.exe` and `.\build\Release\Client.exe`.
