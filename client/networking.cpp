@@ -24,7 +24,7 @@
 
 
 const char* SERVER_PORT = "3490";
-const char* SERVER_ADDRESS = "127.0.0.1";
+const char* SERVER_ADDRESS = "localhost";
 
 
 void* get_in_addr(struct sockaddr* sa)
