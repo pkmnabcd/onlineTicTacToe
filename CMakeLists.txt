@@ -20,7 +20,7 @@ include_directories(
 #
 set(CLIENT_HEADER_FILES
     client/ai.hpp
-    client/Config.hpp
+    client/config.hpp
     client/ConfigData.hpp
     client/engine.hpp
     client/ui.hpp
@@ -50,7 +50,7 @@ set(ALL_HEADER_FILES
 
 set(CLIENT_SOURCE_FILES
     client/ai.cpp
-    client/Config.cpp
+    client/config.cpp
     client/ConfigData.cpp
     client/engine.cpp
     client/ui.cpp
