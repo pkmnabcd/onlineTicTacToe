@@ -33,10 +33,12 @@ set(CLIENT_HEADER_FILES
     client/rlutil.h
 )
 set(SERVER_HEADER_FILES
+    server/ConfigData.hpp
     server/GameState.hpp
     server/Lobby.hpp
     server/Player.hpp
 
+    server/config.hpp
     server/critical.hpp
     server/matchmaking.hpp
     server/networking.hpp
@@ -61,10 +63,12 @@ set(CLIENT_SOURCE_FILES
     client/util.cpp
 )
 set(SERVER_SOURCE_FILES
+    server/ConfigData.cpp
     server/GameState.cpp
     server/Lobby.cpp
     server/Player.cpp
 
+    server/config.cpp
     server/critical.cpp
     server/matchmaking.cpp
     server/networking.cpp

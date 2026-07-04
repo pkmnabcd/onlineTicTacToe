@@ -1,5 +1,8 @@
 #include "networking.hpp"
 
+#include "config.hpp"
+#include "ConfigData.hpp"
+
 #include <cstring>
 #include <print>
 
@@ -22,7 +25,6 @@
 
 #endif
 
-const char* SERVER_PORT = "4642";
 const int BACKLOG = 10;
 
 
@@ -93,6 +95,9 @@ SocketType networking::initServer()
         return INVALID_SOCK_VAL;
     }
     #endif
+
+    ConfigData config = readConfig();
+    const char* SERVER_PORT = config.m_serv_port.data();
 
     if ((errCode = getLocalAddrInfo(SERVER_PORT, servinfo)) != 0)
     {
@@ -167,7 +172,7 @@ SocketType networking::initServer()
     }
     #endif
 
-    std::print("server: waiting for connections...\n");
+    std::print("server: waiting for connections on port {}...\n", SERVER_PORT);
     return serv_fd;
 }
 

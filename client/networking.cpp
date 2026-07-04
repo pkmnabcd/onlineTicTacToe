@@ -49,7 +49,6 @@ void networking::closeFd(SocketType fd)
 SocketType networking::initClient()
 {
     ConfigData config = readConfig();
-    // TODO: make sure these have \0 at the end
     const char* SERVER_PORT = config.m_serv_port.data();
     const char* SERVER_ADDRESS = config.m_serv_addr.data();
 
@@ -87,7 +86,7 @@ SocketType networking::initClient()
         inet_ntop(p->ai_family,
             get_in_addr((struct sockaddr *)p->ai_addr),
             s, sizeof s);
-        std::print("Attempting connection to the server: {}\n", s);
+        std::print("Attempting connection to the server: {}:{}\n", s, SERVER_PORT);
 
         if (connect(sockfd, p->ai_addr, static_cast<int>(p->ai_addrlen)) == -1) {
             //perror("client: connect");
