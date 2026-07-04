@@ -4,9 +4,8 @@
 
 #include <array>
 #include <cstdint>
-#include <string>
 
-using StraightBoard = std::array<std::string, 9>;
+using StraightBoard = std::array<char, 9>;
 class GameState
 {
   public:

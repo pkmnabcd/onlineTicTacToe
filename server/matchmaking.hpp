@@ -10,7 +10,7 @@
 #include <tuple>
 #include <vector>
 
-using StraightBoard = std::array<std::string, 9>;
+using StraightBoard = std::array<char, 9>;
 
 namespace matchmaking
 {

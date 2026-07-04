@@ -15,7 +15,7 @@
 #include <tuple>
 #include <vector>
 
-using StraightBoard = std::array<std::string, 9>;
+using StraightBoard = std::array<char, 9>;
 const std::uint8_t NAME_LEN = 15; // NOTE: this includes terminating byte /0.
 
 // TODO: change the paradigm so that I don't just rely on the order of
@@ -145,8 +145,7 @@ bool matchmaking::sendBoardState(SocketType client_fd, StraightBoard board)
 
     for (std::uint8_t i = 0; i < board.size(); i++)
     {
-        assert(board[i].length() == 1 && "Each board string has one char");
-        buffer[i] = board[i].at(0);
+        buffer[i] = board[i];
     }
     int bytesSent;
     bytesSent = networking::sendAll(client_fd, buffer, bufferLen);

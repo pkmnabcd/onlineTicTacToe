@@ -23,15 +23,15 @@ std::uint8_t horizontalWinner(StraightBoard board)
     // Check first row
     if (board[0] == board[1] && board[0] == board[2])
     {
-        return board[0][0];  // Assume cell has single char, X or O
+        return board[0];  // Assume cell has single char, X or O
     }
     else if (board[3] == board[4] && board[3] == board[5])
     {
-        return board[3][0];
+        return board[3];
     }
     else if (board[6] == board[7] && board[6] == board[8])
     {
-        return board[6][0];
+        return board[6];
     }
     else
     {
@@ -48,15 +48,15 @@ std::uint8_t verticalWinner(StraightBoard board)
     // Check first col
     if (board[0] == board[3] && board[0] == board[6])
     {
-        return board[0][0];  // Assume cell has single char, X or O
+        return board[0];  // Assume cell has single char, X or O
     }
     else if (board[1] == board[4] && board[1] == board[7])
     {
-        return board[1][0];
+        return board[1];
     }
     else if (board[2] == board[5] && board[2] == board[8])
     {
-        return board[2][0];
+        return board[2];
     }
     else
     {
@@ -73,11 +73,11 @@ std::uint8_t diagonalWinner(StraightBoard board)
     // Check first col
     if (board[0] == board[4] && board[0] == board[8])
     {
-        return board[4][0];  // Assume cell has single char, X or O
+        return board[4];  // Assume cell has single char, X or O
     }
     else if (board[2] == board[4] && board[2] == board[6])
     {
-        return board[4][0];
+        return board[4];
     }
     else
     {
@@ -89,7 +89,7 @@ bool boardFull(StraightBoard board)
 {
     for (std::uint8_t i = 0; i < 9; i++)
     {
-        if (board[i].at(0) != 'X' && board[i].at(0) != 'O')
+        if (board[i] != 'X' && board[i] != 'O')
         {
             return false;
         }
@@ -133,17 +133,16 @@ std::tuple<GameState, bool> updateGamestate(bool redMove, std::uint8_t location,
      * Returns [updatedGamestate: GameState, invalid: bool]
      */
 
-    using StraightBoard = std::array<std::string, 9>;
+    using StraightBoard = std::array<char, 9>;
     char newChar = (redMove) ? 'X' : 'O'; // X is red, O is blue
 
     GameState gamestate = previousState;
     StraightBoard board = gamestate.m_board;
-    std::string str = board[location - 1]; // location is 1-indexed while arrays are 0-indexed
-    char val = str[0];
+    char val = board[location - 1]; // location is 1-indexed while arrays are 0-indexed
 
     if (val - 48 == location) // What's supposed to happen
     {
-        board[location - 1] = std::string(1, newChar);
+        board[location - 1] = newChar;
         gamestate.m_board = board;
         return std::make_tuple(gamestate, false);
     }
