@@ -4573,10 +4573,10 @@ std::uint8_t ai::strategyRandom(ai::Board board)
 
     std::random_device rd;
     std::default_random_engine engine(rd());
-    std::uniform_real_distribution<double> dist(0.0, static_cast<double>(openCells.size()));
+    std::uniform_int_distribution<> dist(0, openCells.size() - 1);
 
-    std::uint8_t choice = static_cast<std::uint8_t>(dist(engine));
-    return choice;
+    std::uint8_t choice = dist(engine);
+    return openCells[choice];
 }
 
 std::uint8_t ai::strategyOracle(ai::Board board)
