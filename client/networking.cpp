@@ -1,6 +1,6 @@
 #include "networking.hpp"
 
-#include "Config.hpp"
+#include "config.hpp"
 #include "ConfigData.hpp"
 
 #include <cstring>
