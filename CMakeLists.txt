@@ -155,12 +155,12 @@ target_link_libraries(${UNIT_TEST_RUNNER} gtest_main)
 
 # Automatically put configs in build folder
 add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
+    TARGET ${CLIENT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_CURRENT_SOURCE_DIR}/client_config.txt client_config.txt
 )
 add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
+    TARGET ${SERVER} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_CURRENT_SOURCE_DIR}/server_config.txt server_config.txt
 )

@@ -44,5 +44,5 @@ ConfigData readConfig()
             std::print("Warning: invalid config file parameter: '{}'\n", line.substr(0, 9));
         }
     }
-    return ConfigData();
+    return config;
 }

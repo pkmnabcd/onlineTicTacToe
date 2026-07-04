@@ -22,7 +22,7 @@
 
 #endif
 
-const char* SERVER_PORT = "3490";
+const char* SERVER_PORT = "4642";
 const int BACKLOG = 10;
 
 
