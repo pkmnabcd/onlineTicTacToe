@@ -9,8 +9,8 @@
 #include <tuple>
 #include <vector>
 
-using StraightBoard = std::array<std::string, 9>;
-using Board = std::array<std::array<std::string, 3>, 3>;
+using StraightBoard = std::array<char, 9>;
+using Board = std::array<std::array<char, 3>, 3>;
 
 namespace matchmaking
 {

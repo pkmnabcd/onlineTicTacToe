@@ -10,11 +10,11 @@
 
 namespace ui
 {
-    using Board = std::array<std::array<std::string, 3>, 3>;
+    using Board = std::array<std::array<char, 3>, 3>;
 
     void logo();
     void show(Board board);
-    std::int8_t getHumanMove(Board board, std::string letter);
+    std::int8_t getHumanMove(Board board, char letter);
     std::uint8_t player_select();
     std::uint8_t selectGameMode();
     std::string getUsername();

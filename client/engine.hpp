@@ -8,10 +8,10 @@
 
 namespace engine
 {
-    using Board = std::array<std::array<std::string, 3>, 3>;
+    using Board = std::array<std::array<char, 3>, 3>;
 
-    std::optional<Board> humanTurn(Board board, std::string letter);
-    Board cpuTurn(Board board, std::string letter, std::function<std::uint8_t(Board)> strategy);
+    std::optional<Board> humanTurn(Board board, char letter);
+    Board cpuTurn(Board board, char letter, std::function<std::uint8_t(Board)> strategy);
 
     bool keepPlaying(Board board);
     void cpuVsCpu(std::function<std::uint8_t(Board)> strategyX, std::function<std::uint8_t(Board)> strategyO);

@@ -44,19 +44,19 @@ std::string ui::white(std::string input)
     return std::format("\033[1;37m{}\033[0m", input);
 }
 
-std::string color(std::string s)
+std::string color(char s)
 {
-    if (s == "X")
+    if (s == 'X')
     {
-        return ui::red(s);
+        return ui::red("X");
     }
-    else if (s == "O")
+    else if (s == 'O')
     {
-        return ui::cyan(s);
+        return ui::cyan("O");
     }
     else
     {
-        return ui::white(s);
+        return ui::white(std::format("{}", s));
     }
 }
 
@@ -90,9 +90,9 @@ void ui::show(ui::Board board)
     }
 }
 
-std::int8_t ui::getHumanMove(ui::Board board, std::string letter)
+std::int8_t ui::getHumanMove(ui::Board board, char letter)
 {
-    std::array<std::string, 9> straightBoard = util::get1dFrom2dBoard(board);
+    std::array<char, 9> straightBoard = util::get1dFrom2dBoard(board);
     while (true)
     {
         ui::show(board);
@@ -123,7 +123,7 @@ std::int8_t ui::getHumanMove(ui::Board board, std::string letter)
             else
             {
                 choice = util::toIntVal(choice);
-                bool isValidMove = choice != 0 && util::isDigit(straightBoard[choice - 1].at(0));
+                bool isValidMove = choice != 0 && util::isDigit(straightBoard[choice - 1]);
                 if (isValidMove)
                 {
                     return choice;

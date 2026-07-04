@@ -21,7 +21,7 @@ std::tuple<bool, bool, bool> play::playGame(SocketType serv_fd, bool isRed, std:
     bool disconnected = false;
     bool oppDisconnected = false;
 
-    std::string yourLetter = (isRed) ? "X" : "O";
+    char yourLetter = (isRed) ? 'X' : 'O';
     bool firstTurn = true;
     Board previousBoard = util::makeBoard();
     Board currentBoard;

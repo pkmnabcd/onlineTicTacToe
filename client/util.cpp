@@ -4,16 +4,15 @@
 #include <cassert>
 #include <cstdint>
 #include <optional>
-#include <string>
 #include <tuple>
 #include <vector>
 
 util::Board util::makeBoard()
 {
     return {{
-        {"1", "2", "3"},
-        {"4", "5", "6"},
-        {"7", "8", "9"}
+        {'1', '2', '3'},
+        {'4', '5', '6'},
+        {'7', '8', '9'}
     }};
 }
 
@@ -21,7 +20,7 @@ auto posToRowCol(std::uint8_t position)
 {
     assert((position != 0 && position < 10) && "No out of bounds position");
     // The tuple has the values (row, col) positions on the board
-    std::uint8_t cell = position -1;
+    std::uint8_t cell = position - 1;
     return std::make_tuple<std::uint8_t, std::uint8_t>(cell / 3, cell % 3);
 }
 
@@ -31,14 +30,14 @@ std::uint8_t rowColToPos(std::uint8_t row, std::uint8_t col)
     return pos + 1;
 }
 
-std::optional<util::Board> util::place(util::Board board, std::uint8_t position, std::string player)
+std::optional<util::Board> util::place(util::Board board, std::uint8_t position, char player)
 {
     assert((position != 0 && position < 10) && "No out of bounds position");
-    assert((player == "X" || player == "O") && "Correct player characters");
+    assert((player == 'X' || player == 'O') && "Correct player characters");
 
     auto [row, col] = posToRowCol(position);
 
-    if (board[row][col] != "X" && board[row][col] != "O")
+    if (board[row][col] != 'X' && board[row][col] != 'O')
     {
         Board newBoard;
         for (std::uint8_t r = 0; r < 3; r++)
@@ -66,15 +65,15 @@ std::uint8_t horizontalWinner(util::Board board)
     // Check first row
     if (board[0][0] == board[0][1] && board[0][0] == board[0][2])
     {
-        return board[0][0][0];  // Assume cell has single char, X or O
+        return board[0][0];  // Assume cell has single char, X or O
     }
     else if (board[1][0] == board[1][1] && board[1][0] == board[1][2])
     {
-        return board[1][0][0];
+        return board[1][0];
     }
     else if (board[2][0] == board[2][1] && board[2][0] == board[2][2])
     {
-        return board[2][0][0];
+        return board[2][0];
     }
     else
     {
@@ -91,15 +90,15 @@ std::uint8_t verticalWinner(util::Board board)
     // Check first col
     if (board[0][0] == board[1][0] && board[0][0] == board[2][0])
     {
-        return board[0][0][0];  // Assume cell has single char, X or O
+        return board[0][0];  // Assume cell has single char, X or O
     }
     else if (board[0][1] == board[1][1] && board[0][1] == board[2][1])
     {
-        return board[0][1][0];
+        return board[0][1];
     }
     else if (board[0][2] == board[1][2] && board[0][2] == board[2][2])
     {
-        return board[0][2][0];
+        return board[0][2];
     }
     else
     {
@@ -116,11 +115,11 @@ std::uint8_t diagonalWinner(util::Board board)
     // Check first col
     if (board[0][0] == board[1][1] && board[0][0] == board[2][2])
     {
-        return board[1][1][0];  // Assume cell has single char, X or O
+        return board[1][1];  // Assume cell has single char, X or O
     }
     else if (board[2][0] == board[1][1] && board[2][0] == board[0][2])
     {
-        return board[1][1][0];
+        return board[1][1];
     }
     else
     {
@@ -160,7 +159,7 @@ std::vector<std::uint8_t> util::openCells(util::Board board)
     {
         for (std::uint8_t col = 0; col < 3; col++)
         {
-            if (board[row][col] != "X" && board[row][col] != "O")
+            if (board[row][col] != 'X' && board[row][col] != 'O')
             {
                 output.push_back(rowColToPos(row, col));
             }
@@ -191,9 +190,9 @@ bool util::full(util::Board board)
     return util::openCells(board).empty();
 }
 
-std::array<std::string, 9> util::get1dFrom2dBoard(util::Board board)
+std::array<char, 9> util::get1dFrom2dBoard(util::Board board)
 {
-    std::array<std::string, 9> output;
+    std::array<char, 9> output;
     for (std::uint8_t row = 0; row < 3; row++)
     {
         for (std::uint8_t col = 0; col < 3; col++)
@@ -254,13 +253,13 @@ std::uint8_t util::getMovePosition(Board prevBoard, Board currBoard)
      * Returns 0 for no difference, 1-9 for the position of a difference, and 10 for multiple differences (bad)
     */
 
-    std::array<std::string, 9> prevBoardStraight = util::get1dFrom2dBoard(prevBoard);
-    std::array<std::string, 9> currBoardStraight = util::get1dFrom2dBoard(currBoard);
+    std::array<char, 9> prevBoardStraight = util::get1dFrom2dBoard(prevBoard);
+    std::array<char, 9> currBoardStraight = util::get1dFrom2dBoard(currBoard);
 
     std::uint8_t pos = 0;
     for (std::uint8_t i = 0; i < 9; i++)
     {
-        if (prevBoard[i].at(0) != currBoard[i].at(0))
+        if (prevBoardStraight[i] != currBoardStraight[i])
         {
             if (pos != 0)
             {

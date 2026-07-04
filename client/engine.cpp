@@ -11,7 +11,7 @@
 #include <format>
 #include <print>
 
-std::optional<engine::Board> engine::humanTurn(Board board, std::string letter)
+std::optional<engine::Board> engine::humanTurn(Board board, char letter)
 {
     while (true)
     {
@@ -24,7 +24,7 @@ std::optional<engine::Board> engine::humanTurn(Board board, std::string letter)
         if (!newBoard)
         {
             std::string msg;
-            if (letter == "X")
+            if (letter == 'X')
             {
                 msg = ui::red(std::format("You can't play at {}!", choice));
             }
@@ -41,10 +41,10 @@ std::optional<engine::Board> engine::humanTurn(Board board, std::string letter)
     }
 }
 
-engine::Board engine::cpuTurn(engine::Board board, std::string letter, std::function<std::uint8_t(Board)> strategy)
+engine::Board engine::cpuTurn(engine::Board board, char letter, std::function<std::uint8_t(Board)> strategy)
 {
     std::function<std::string(std::string)> color;
-    if (letter == "X")
+    if (letter == 'X')
     {
         color = ui::red;
     }
@@ -98,13 +98,13 @@ void engine::cpuVsCpu(std::function<std::uint8_t(Board)> strategyX, std::functio
     while (true)
     {
         ui::show(board);
-        board = engine::cpuTurn(board, "X", strategyX);
+        board = engine::cpuTurn(board, 'X', strategyX);
         if (!engine::keepPlaying(board))
         {
             break;
         }
         ui::show(board);
-        board = engine::cpuTurn(board, "O", strategyO);
+        board = engine::cpuTurn(board, 'O', strategyO);
         if (!engine::keepPlaying(board))
         {
             break;
@@ -119,12 +119,12 @@ void engine::cpuVsHuman(std::function<std::uint8_t(Board)> strategy)
     while (true)
     {
         ui::show(board);
-        board = engine::cpuTurn(board, "X", strategy);
+        board = engine::cpuTurn(board, 'X', strategy);
         if (!engine::keepPlaying(board))
         {
             break;
         }
-        std::optional<Board> optBoard = engine::humanTurn(board, "O");
+        std::optional<Board> optBoard = engine::humanTurn(board, 'O');
         if (!optBoard)
         {
             break;
@@ -143,7 +143,7 @@ void engine::humanVsHuman()
     Board board = util::makeBoard();
     while (true)
     {
-        std::optional<Board> optBoard = engine::humanTurn(board, "X");
+        std::optional<Board> optBoard = engine::humanTurn(board, 'X');
         if (!optBoard)
         {
             break;
@@ -153,7 +153,7 @@ void engine::humanVsHuman()
         {
             break;
         }
-        optBoard = engine::humanTurn(board, "O");
+        optBoard = engine::humanTurn(board, 'O');
         if (!optBoard)
         {
             break;
@@ -172,7 +172,7 @@ void engine::humanVsCpu(std::function<std::uint8_t(Board)> strategy)
     Board board = util::makeBoard();
     while (true)
     {
-        std::optional<Board> optBoard = engine::humanTurn(board, "X");
+        std::optional<Board> optBoard = engine::humanTurn(board, 'X');
         if (!optBoard)
         {
             break;
@@ -183,7 +183,7 @@ void engine::humanVsCpu(std::function<std::uint8_t(Board)> strategy)
             break;
         }
         ui::show(board);
-        board = engine::cpuTurn(board, "O", strategy);
+        board = engine::cpuTurn(board, 'O', strategy);
         if (!engine::keepPlaying(board))
         {
             break;

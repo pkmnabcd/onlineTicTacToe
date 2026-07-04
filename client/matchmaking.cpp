@@ -382,7 +382,7 @@ std::tuple<Board, bool> matchmaking::getBoardState(SocketType serv_fd)
     }
     else
     {
-        StraightBoard sBoard = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        StraightBoard sBoard = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
         for (std::uint8_t i = 0; i < bufferLen-1; i++)
         {
             if (!isGoodSpace(buffer[i]))
@@ -390,7 +390,7 @@ std::tuple<Board, bool> matchmaking::getBoardState(SocketType serv_fd)
                 disconnected = true;
                 break;
             }
-            sBoard[i].at(0) = buffer[i];
+            sBoard[i] = buffer[i];
         }
         board = matchmaking::getBoardFromStraightBoard(sBoard);
     }
