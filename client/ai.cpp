@@ -4573,9 +4573,9 @@ std::uint8_t ai::strategyRandom(ai::Board board)
 
     std::random_device rd;
     std::default_random_engine engine(rd());
-    std::uniform_int_distribution<> dist(0, openCells.size() - 1);
+    std::uniform_int_distribution<> dist(0, static_cast<int>(openCells.size()) - 1);
 
-    std::uint8_t choice = dist(engine);
+    int choice = dist(engine);
     return openCells[choice];
 }
 
