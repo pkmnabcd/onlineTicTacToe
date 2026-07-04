@@ -1,6 +1,10 @@
 #include "networking.hpp"
 
+#include "Config.hpp"
+#include "ConfigData.hpp"
+
 #include <cstring>
+#include <string>
 #include <print>
 
 #ifdef _WIN32
@@ -21,10 +25,6 @@
 #include <sys/wait.h>
 
 #endif
-
-
-const char* SERVER_PORT = "3490";
-const char* SERVER_ADDRESS = "localhost";
 
 
 void* get_in_addr(struct sockaddr* sa)
@@ -48,6 +48,11 @@ void networking::closeFd(SocketType fd)
 // NOTE: this is only slightly modified from the Beej networking guide.
 SocketType networking::initClient()
 {
+    ConfigData config = readConfig();
+    // TODO: make sure these have \0 at the end
+    const char* SERVER_PORT = config.m_serv_port.data();
+    const char* SERVER_ADDRESS = config.m_serv_addr.data();
+
     #ifdef _WIN32
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
