@@ -16,8 +16,6 @@ As of now, I have the server designed such that connecting to a client creates a
 I am aware that this design does not scale well, but I am having fun attempting to think through all the logic that goes along with this design.
 
 # Soon TODOs
-* Add the simple code to make this work on windows
-* Change the board design to use `char` instead of `std::string` since I treat the cells like `char`s anyway
 * Use a config/env file to let you set whatever IP address/DNS you want the server to be at
 * Make more helpful server logs
 
