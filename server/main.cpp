@@ -104,7 +104,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
             if (client_disconnected)
             {
                 logging("Error: host disconnected while waiting for a guest.", client_id);
-                critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, client_id, dataMutex, disconnectMutex);
                 critical::invalidatePlayer(players, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
                 networking::closeFd(client_fd);
@@ -115,7 +115,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
             if (!message_sent_success)
             {
                 logging("Error: Failed to send host the guest name.", client_id);
-                critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, client_id, dataMutex, disconnectMutex);
                 critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                 critical::addIDToQueue(freeIDs, client_id, dataMutex);
                 networking::closeFd(client_fd);
@@ -130,7 +130,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 if (client_disconnected)
                 {
                     logging("Error: The host disconnected while choosing between red and blue.", client_id);
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, client_id, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
@@ -143,7 +143,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 if (!gamestateAdded)
                 {
                     logging("Error: Gamestate attempted to be added to gamestates while valid gamestate was still there.", client_id);
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, client_id, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
@@ -151,7 +151,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 }
 
                 logging("Host going into game.", client_id);
-                auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, gameMutexes);
+                auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(hostPickedRed, client_id, client_fd, gamestates, lobbies, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 hostWantsToPlay = wantToContinue;
 
@@ -159,8 +159,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 {
                     logging("Client disconnected or client doesn't want to play.", client_id);
                     lobbies[client_id].m_hostPlayAgain = Lobby::PlayAgain::No;
-                    critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, client_id, dataMutex, disconnectMutex);
                     critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
@@ -198,12 +197,12 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                     {
                         lobbies[client_id].m_guestPlayAgain = Lobby::PlayAgain::Undecided;
                     }
+                    gamestates[client_id].m_isValid = false;
                     message_sent_success = matchmaking::sendClientOppPlayAgain(client_fd, oppWantsToPlay);
                     if (!message_sent_success)
                     {
                         logging("Error: Failed to send oppPlayAgain.", client_id);
-                        critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, client_id, dataMutex, disconnectMutex);
-                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, client_id, dataMutex, disconnectMutex);
+                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, client_id, dataMutex, disconnectMutex);
                         critical::invalidatePlayerOnceLobbyIsInvalid(players, lobbies, client_id, dataMutex);
                         critical::addIDToQueue(freeIDs, client_id, dataMutex);
                         networking::closeFd(client_fd);
@@ -249,7 +248,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 logging("Error: Failed to send successful lobby connection.", client_id);
                 if (guestAdded)
                 {
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, hostID, dataMutex, disconnectMutex);
                 }
                 logging("Error: Guest disconnected while selecting a lobby.", client_id);
                 critical::invalidatePlayer(players, client_id, dataMutex);
@@ -277,7 +276,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 if (client_disconnected)
                 {
                     logging("Error: Guest disconnected while waiting for host color.", client_id);
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, hostID, dataMutex, disconnectMutex);
                     // NOTE: for now, I don't believe that I need to account for invalidating a player only when a lobby they were in closes.
                     // So we can just invalidate the player since they don't own the lobby.
                     critical::invalidatePlayer(players, client_id, dataMutex);
@@ -293,7 +292,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 if (!message_sent_success)
                 {
                     logging("Error: Failed to send the host's color.", client_id);
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, hostID, dataMutex, disconnectMutex);
                     // NOTE: for now, I don't believe that I need to account for invalidating a player only when a lobby they were in closes.
                     // So we can just invalidate the player since they don't own the lobby.
                     critical::invalidatePlayer(players, client_id, dataMutex);
@@ -303,12 +302,12 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 }
                 if (hostDisconnected)
                 {
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, hostID, dataMutex, disconnectMutex);
                     break; // go back to searching for a lobby
                 }
 
                 logging("Guest going into game.", client_id);
-                auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(!hostPickedRed, hostID, client_fd, gamestates, gameMutexes);
+                auto [wantToContinue, disconnectedTmp2, oppDisconnected] = play::playGame(!hostPickedRed, hostID, client_fd, gamestates, lobbies, gameMutexes);
                 client_disconnected = disconnectedTmp2;
                 guestWantsToPlay = wantToContinue;
 
@@ -316,8 +315,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                 {
                     logging("Client disconnected or client doesn't want to play.", client_id);
                     lobbies[hostID].m_guestPlayAgain = Lobby::PlayAgain::No;
-                    critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, hostID, dataMutex, disconnectMutex);
-                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                    critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, hostID, dataMutex, disconnectMutex);
                     critical::invalidatePlayer(players, client_id, dataMutex);
                     critical::addIDToQueue(freeIDs, client_id, dataMutex);
                     networking::closeFd(client_fd);
@@ -351,8 +349,7 @@ void manageClient(SocketType client_fd, std::array<Player, arraySize>& players, 
                     if (!message_sent_success)
                     {
                         logging("Failed to send oppPlayAgain.", client_id);
-                        critical::invalidateGamestateIfOtherPlayerDisconnected(gamestates, hostID, dataMutex, disconnectMutex);
-                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, hostID, dataMutex, disconnectMutex);
+                        critical::invalidateLobbyIfOtherPlayerDisconnected(lobbies, gamestates, hostID, dataMutex, disconnectMutex);
                         critical::invalidatePlayer(players, client_id, dataMutex);
                         critical::addIDToQueue(freeIDs, client_id, dataMutex);
                         networking::closeFd(client_fd);

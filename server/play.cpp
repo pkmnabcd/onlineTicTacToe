@@ -1,6 +1,7 @@
 #include "play.hpp"
 
 #include "GameState.hpp"
+#include "Lobby.hpp"
 #include "matchmaking.hpp"
 #include "networking.hpp"
 
@@ -152,7 +153,7 @@ std::tuple<GameState, bool> updateGamestate(bool redMove, std::uint8_t location,
     }
 }
 
-std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRed, std::uint8_t hostID, SocketType client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
+std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRed, std::uint8_t hostID, SocketType client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
      * This function waits until your opponent moves or disconnects
@@ -186,7 +187,7 @@ std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRe
         gameMutexes[hostID].unlock();
         std::this_thread::yield();
         gameMutexes[hostID].lock();
-        if (gamestates[hostID].m_someoneDisconnected)
+        if (lobbies[hostID].m_someoneDisconnected)
         {
             message_sent_success = matchmaking::sendClientGameStatus(client_fd, 'D');
             if (!message_sent_success)
@@ -201,7 +202,7 @@ std::tuple<bool, bool> waitTurn(bool isFirstTurn, GameState gamestate, bool isRe
     return std::make_tuple(false, oppDisconnected);
 }
 
-std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, SocketType client_fd, std::array<GameState, arraySize>& gamestates, std::array<std::mutex, arraySize>& gameMutexes)
+std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, SocketType client_fd, std::array<GameState, arraySize>& gamestates, std::array<Lobby, arraySize>& lobbies, std::array<std::mutex, arraySize>& gameMutexes)
 {
     /*
      * Returns [wantsToPlayAgain: bool, disconnected: bool, oppDisconnected: bool]
@@ -221,7 +222,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, Soc
     {
         // Wait for your turn to move
         std::print("{} player waiting...\n", (isRed) ? "Red" : "Blue");
-        auto [client_disconnectedTmp0, oppDisconnectedTmp] = waitTurn(isFirstTurn, gamestate, isRed, hostID, client_fd, gamestates, gameMutexes);
+        auto [client_disconnectedTmp0, oppDisconnectedTmp] = waitTurn(isFirstTurn, gamestate, isRed, hostID, client_fd, gamestates, lobbies, gameMutexes);
         std::print("{} player DONE waiting...\n", (isRed) ? "Red" : "Blue");
         oppDisconnected = oppDisconnectedTmp;
         client_disconnected = client_disconnectedTmp0;

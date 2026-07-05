@@ -74,19 +74,20 @@ bool critical::addLobbyToLobbies(std::array<Lobby, arraySize>& lobbies, Lobby lo
     }
 }
 
-void critical::invalidateLobby(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& mut)
+void critical::invalidateLobby(std::array<Lobby, arraySize>& lobbies, std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& mut)
 {
     const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
     lobbies[hostID].m_isValid = false;
+    gamestates[hostID].m_isValid = false;
 }
 
-void critical::invalidateLobbyIfOtherPlayerDisconnected(std::array<Lobby, arraySize>& lobbies, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut)
+void critical::invalidateLobbyIfOtherPlayerDisconnected(std::array<Lobby, arraySize>& lobbies, std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut)
 {
     const std::lock_guard<std::mutex> lock(disconnectMut); // gets released when function returns
     // check if guest disconnected or if there was never a guest
     if (lobbies[hostID].m_someoneDisconnected || !lobbies[hostID].m_guest.m_isValid)
     {
-        critical::invalidateLobby(lobbies, hostID, dataMut);
+        critical::invalidateLobby(lobbies, gamestates, hostID, dataMut);
     }
     else
     {
@@ -111,25 +112,6 @@ bool critical::addGameStateToGameStates(std::array<GameState, arraySize>& gamest
     {
         gamestates[hostID] = gamestate;
         return true;
-    }
-}
-
-void critical::invalidateGamestate(std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& mut)
-{
-    const std::lock_guard<std::mutex> lock(mut); // gets released when function returns
-    gamestates[hostID].m_isValid = false;
-}
-
-void critical::invalidateGamestateIfOtherPlayerDisconnected(std::array<GameState, arraySize>& gamestates, std::uint8_t hostID, std::mutex& dataMut, std::mutex& disconnectMut)
-{
-    const std::lock_guard<std::mutex> lock(disconnectMut); // gets released when function returns
-    if (gamestates[hostID].m_someoneDisconnected)
-    {
-        critical::invalidateGamestate(gamestates, hostID, dataMut);
-    }
-    else
-    {
-        gamestates[hostID].m_someoneDisconnected = true;
     }
 }
 

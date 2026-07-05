@@ -20,6 +20,5 @@ class GameState
     Player m_redPlayer;
     Player m_bluePlayer;
     bool m_isValid;
-    bool m_someoneDisconnected;
     bool m_gameFinished;
 };
