@@ -193,9 +193,8 @@ SocketType networking::acceptConnection(SocketType serv_fd)
 
     char s[INET6_ADDRSTRLEN];
     inet_ntop(client_addr.ss_family, get_in_addr((sockaddr*)&client_addr), s, sizeof s);
-    std::print("server: got connection from {}\n", s);
     unsigned short int clientPort = get_in_port(client_addr);
-    std::print("server: client port number: {}\n", clientPort);
+    std::print("Got connection from {}:{}\n", s, clientPort);
 
     return client_fd;
 }
