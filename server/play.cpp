@@ -119,7 +119,6 @@ std::uint8_t winner(StraightBoard board)
     }
     else if (boardFull(board))
     {
-        std::print("Full board detected\n");
         return 'S';
     }
     else
@@ -208,9 +207,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, Soc
      * Returns [wantsToPlayAgain: bool, disconnected: bool, oppDisconnected: bool]
      */
 
-    std::print("{} player waiting for lock...\n", (isRed) ? "Red" : "Blue");
     gameMutexes[hostID].lock();
-    std::print("{} player has lock...\n", (isRed) ? "Red" : "Blue");
 
     bool isFirstTurn = true;
     bool message_sent_success = false;
@@ -221,9 +218,7 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, Soc
     while (true)
     {
         // Wait for your turn to move
-        std::print("{} player waiting...\n", (isRed) ? "Red" : "Blue");
         auto [client_disconnectedTmp0, oppDisconnectedTmp] = waitTurn(isFirstTurn, gamestate, isRed, hostID, client_fd, gamestates, lobbies, gameMutexes);
-        std::print("{} player DONE waiting...\n", (isRed) ? "Red" : "Blue");
         oppDisconnected = oppDisconnectedTmp;
         client_disconnected = client_disconnectedTmp0;
         if (client_disconnected)
@@ -281,7 +276,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, Soc
         }
 
         // Get your move
-        std::print("Waiting for {} move.\n", (isRed) ? "Red" : "Blue");
         auto [move, clientQuit, disconnectedTmp0] = matchmaking::getClientMove(client_fd);
         client_disconnected = disconnectedTmp0;
         if (client_disconnected)
@@ -293,7 +287,6 @@ std::tuple<bool, bool, bool> play::playGame(bool isRed, std::uint8_t hostID, Soc
         {
             return std::make_tuple(false, false, false);
         }
-        std::print("{} move: {}\n", (isRed) ? "Red" : "Blue", move);
 
         // Update gamestate and see if you win/stalemate
         auto [newGamestate, invalidMove] = updateGamestate(isRed, move, gamestate);
