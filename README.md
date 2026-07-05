@@ -14,9 +14,6 @@ I am aware that this design does not scale well, but I am having fun attempting 
 There are also ways that I could improve the networking logic by making it so the program doesn't rely on the order of packages.
 This could be done by having tags on the packages, but this design would be a part of an overhaul of the whole design to make it scale better.
 
-# Soon TODOs
-* Make more helpful server logs
-
 # Future Ideas
 The following are some ideas that I might implement in the future.
 * Rewrite in a more scalable design
@@ -51,3 +48,7 @@ This will create the MSVC project files that you can open and then compile using
 I usually open the `build/OnlineTicTacToe.sln` file and use visual studio 17 to build it.
 
 If you compile in `Release` mode, you can run the program executables by doing `.\build\Release\Server.exe` and `.\build\Release\Client.exe`.
+
+# Config
+Copy the included `client_config.txt.example` to `client_config.txt` and `server_config.txt.example` to `server_config.txt`.
+You can then edit the `serv_port` value to a different port (make sure to make it the same for the server and client config files), and edit the `serv_addr` value with the domain or ip address or localhost of your server.
