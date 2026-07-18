@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
 
 set(PROJECT_NAME OnlineTicTacToe)
 set(CLIENT Client)
@@ -6,6 +6,10 @@ set(SERVER Server)
 set(UNIT_TEST_RUNNER UnitTestRunner)
 
 project(${PROJECT_NAME})
+
+# Force static linking so a windows binary can be run
+# on machines without the MSVC runtime library installed.
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 #
 # Adding the relevant directories
@@ -151,7 +155,7 @@ FetchContent_Declare(
     GIT_REPOSITORY    https://github.com/google/googletest.git
     GIT_TAG           v1.15.0
 )
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+set(gtest_force_shared_crt OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googleTest)
 
 # Now simply link against gtest or gtest_main as needed.
